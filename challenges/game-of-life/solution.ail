@@ -5,9 +5,9 @@
 -- All Game of Life logic runs in AILANG, not JavaScript.
 --
 -- Usage:
---   ailang run --caps IO,FS --entry main examples/game_of_life.ail
+--   ailang run --relax-modules --caps IO,FS --entry main examples/game_of_life_real.ail
 
-module game_of_life
+module game_of_life_real
 
 import std/array (make as arrayMake, get as arrayGet, set as arraySet)
 import std/io (println)
