@@ -1,251 +1,205 @@
 ---
 name: AILANG Development
-description: Write, run, and develop with AILANG - a pure functional language for AI agents. Use when user asks about AILANG, wants to write AILANG code, run programs, use dev tools, or needs help with AILANG syntax. Includes installation, CLI commands, and development workflows.
+description: Use AILANG for deterministic code synthesis and AI reasoning. Invoke when writing functional code, running programs, or communicating with other AI agents. Start by loading the teaching prompt with 'ailang prompt'.
 ---
 
-# AILANG Development
+# AILANG for AI Agents
 
 AILANG is a deterministic programming language designed for AI code synthesis and reasoning.
 
-## Quick Start
+## Session Start Routine
 
-### Check Installation
+**At the start of every session:**
 
+1. **Check for messages from other agents:**
 ```bash
-# Check if ailang is installed
-ailang --version
-
-# If not installed, run the install script
-./skills/ailang/scripts/install.sh
+ailang messages list --unread
 ```
 
-### Run Your First Program
+2. **Load the teaching prompt** (essential for writing correct code):
+```bash
+ailang prompt
+```
+
+3. **Check AILANG is installed:**
+```bash
+ailang --version
+```
+
+## Writing AILANG Code
+
+### Step 1: Load the Teaching Prompt
+
+**CRITICAL:** Before writing any AILANG code, always load the current syntax:
 
 ```bash
-# Create a hello world program
-cat > hello.ail << 'EOF'
-module hello
+ailang prompt
+```
 
-import std/io (println)
+This provides:
+- Current syntax rules
+- Mandatory program structure
+- Working examples
+- Common pitfalls to avoid
+
+### Step 2: Write Code Following the Template
+
+**Every AILANG program MUST follow this structure:**
+
+```ailang
+module benchmark/solution
 
 export func main() -> () ! {IO} {
-  println("Hello, AILANG!")
+  -- YOUR CODE HERE
 }
-EOF
-
-# Run it
-ailang run --caps IO --entry main hello.ail
 ```
 
-## When to Use This Skill
-
-Invoke this skill when:
-- User asks to write AILANG code
-- User needs help with AILANG syntax errors
-- User wants to run AILANG programs
-- User asks about AILANG CLI tools
-- User wants to use AILANG dev tools (eval, benchmarks)
-- User mentions installing or setting up AILANG
-
-## Available Scripts
-
-### `scripts/install.sh`
-Install AILANG binary from GitHub releases.
+### Step 3: Run and Iterate
 
 ```bash
-./skills/ailang/scripts/install.sh
-```
+# Type-check first (fast feedback)
+ailang check program.ail
 
-### `scripts/check_version.sh`
-Check installed AILANG version.
+# Run with required capabilities
+ailang run --caps IO --entry main program.ail
 
-```bash
-./skills/ailang/scripts/check_version.sh
-```
-
-### `scripts/validate_code.sh <file.ail>`
-Validate AILANG code syntax.
-
-```bash
-./skills/ailang/scripts/validate_code.sh program.ail
-```
-
-## Key Resources
-
-### Syntax Quick Reference
-See [`resources/syntax_quick_ref.md`](resources/syntax_quick_ref.md) for:
-- Basic syntax rules
-- Function declarations
-- Pattern matching
-- Effects and capabilities
-
-### CLI Reference
-See [`resources/cli_reference.md`](resources/cli_reference.md) for:
-- All CLI commands
-- Run flags and options
-- REPL commands
-- Development tools
-
-### Common Patterns
-See [`resources/common_patterns.md`](resources/common_patterns.md) for:
-- Recursion patterns
-- Effect handling
-- Record updates
-- Common mistakes
-
-## AILANG CLI Commands
-
-### Core Commands
-
-```bash
-# Run a program (flags BEFORE filename!)
-ailang run --caps IO,FS --entry main file.ail
-
-# Interactive REPL
+# Interactive development
 ailang repl
-
-# Type-check without running
-ailang check file.ail
-
-# Show syntax teaching prompt
-ailang prompt
-
-# Watch for changes
-ailang watch file.ail
 ```
 
-### Development Tools
+## CLI Quick Reference
 
-```bash
-# List all builtin functions
-ailang builtins list --by-module
-
-# Validate builtins
-ailang doctor builtins
-
-# Run tests
-ailang test
-
-# Export training data
-ailang export-training
-```
-
-### Run Flags
+| Command | Purpose |
+|---------|---------|
+| `ailang prompt` | **Load syntax teaching prompt (DO THIS FIRST!)** |
+| `ailang run --caps IO --entry main file.ail` | Run a program |
+| `ailang repl` | Interactive REPL |
+| `ailang check file.ail` | Type-check without running |
+| `ailang watch file.ail` | Watch for changes |
+| `ailang builtins list --by-module` | List all builtins |
 
 **IMPORTANT:** Flags must come BEFORE the filename!
-
 ```bash
 # Correct
-ailang run --caps IO,FS --entry main file.ail
+ailang run --caps IO --entry main file.ail
 
-# Wrong - flags ignored!
+# Wrong - flags are ignored!
 ailang run file.ail --caps IO
 ```
 
-| Flag | Description |
-|------|-------------|
-| `--caps <list>` | Enable capabilities (IO, FS, Net, Clock) |
-| `--entry <name>` | Entrypoint function (default: main) |
-| `--trace` | Enable execution tracing |
-| `--no-print` | Suppress output |
+## Agent Messaging
 
-## Language Overview
+AILANG includes a cross-agent messaging system for autonomous workflows.
 
-### What AILANG Is
-- Pure functional (no mutation, no loops)
-- Hindley-Milner type inference
-- Algebraic effects with capability security
-- Pattern matching with exhaustiveness checking
-- Expression-based (everything returns a value)
+### Check Messages
 
-### What AILANG Is NOT
-- No classes or objects
-- No imperative constructs (for, while, var)
-- No mutable state
-- No exceptions (use Result types)
+```bash
+# List all messages
+ailang messages list
 
-## Basic Syntax
+# Only unread messages
+ailang messages list --unread
 
-### Functions
+# Full content (no truncation)
+ailang messages list --unread --full
+```
+
+### Send Messages
+
+```bash
+# Send to user inbox
+ailang messages send user "Task completed" --title "Status Update" --from "my-agent"
+
+# Send to another agent
+ailang messages send sprint-executor '{"status": "ready"}' --from "planner"
+```
+
+### Acknowledge Messages
+
+```bash
+# Mark as read
+ailang messages ack MSG_ID
+
+# Mark all as read
+ailang messages ack --all
+```
+
+## Capabilities
+
+AILANG uses capability-based security. Programs must declare required effects:
+
+| Capability | Purpose | Example |
+|------------|---------|---------|
+| `IO` | Console I/O | `println`, `readLine` |
+| `FS` | File system | `readFile`, `writeFile` |
+| `Net` | Network | `httpGet`, `httpPost` |
+| `Clock` | Time | `now`, `sleep` |
+| `AI` | AI oracle | `AI.call(prompt)` |
+
+```bash
+# Enable multiple capabilities
+ailang run --caps IO,FS,Net --entry main server.ail
+```
+
+## Key Syntax Rules
+
+1. **Use `func` not `fn` or `function` or `def`**
+2. **Semicolons between statements in blocks**
+3. **Pattern matching uses `=>`** (not `:` or `->`)
+4. **No loops** - Use recursion instead
+5. **Everything is immutable**
+
+### Quick Examples
+
+**Print a value:**
 ```ailang
-export func add(x: int, y: int) -> int {
-  x + y
-}
+print(show(42))  -- Use show() to convert to string
+```
 
--- With effects
-export func greet(name: string) -> () ! {IO} {
-  println("Hello, " ++ name)
+**Pattern match on list:**
+```ailang
+match xs {
+  [] => 0,
+  hd :: tl => hd + sum(tl)
 }
 ```
 
-### Pattern Matching
+**Record update:**
 ```ailang
-type Option[a] = Some(a) | None
-
-export func getOr[a](opt: Option[a], default: a) -> a {
-  match opt {
-    Some(x) => x,
-    None => default
-  }
-}
+{person | age: person.age + 1}
 ```
 
-### Lists (Recursion)
-```ailang
-export func sum(xs: [int]) -> int {
-  match xs {
-    [] => 0,
-    hd :: tl => hd + sum(tl)
-  }
-}
+## Available Resources
+
+- [`resources/syntax_quick_ref.md`](resources/syntax_quick_ref.md) - Syntax reference
+- [`resources/cli_reference.md`](resources/cli_reference.md) - Full CLI documentation
+- [`resources/common_patterns.md`](resources/common_patterns.md) - Patterns and mistakes
+
+## Workflow Summary
+
+```
+1. Check messages     → ailang messages list --unread
+2. Load prompt        → ailang prompt
+3. Write code         → Follow template from prompt
+4. Type-check         → ailang check file.ail
+5. Run                → ailang run --caps IO --entry main file.ail
+6. Iterate            → Fix errors, re-run
+7. Send completion    → ailang messages send user "Done" --from "agent"
 ```
 
-### Records
-```ailang
-type Person = {name: string, age: int}
+## Installation
 
-export func birthday(p: Person) -> Person {
-  {p | age: p.age + 1}
-}
+If AILANG is not installed:
+
+```bash
+# Run install script
+./skills/ailang/scripts/install.sh
+
+# Or download from GitHub releases
+# https://github.com/sunholo-data/ailang/releases
 ```
 
-## Standard Library
-
-**Auto-imported (std/prelude):**
-- Comparisons: `<`, `>`, `==`, `!=`, `<=`, `>=`
-
-**Available imports:**
-- `std/io` - `println`, `readLine`, `readInt`
-- `std/fs` - `readFile`, `writeFile`, `listDir`
-- `std/json` - `json.decode`, `json.encode`
-- `std/clock` - `now`, `sleep`
-- `std/net` - `httpGet`, `httpPost`
-
-## Workflow
-
-When user asks for AILANG help:
-
-1. **Check installation** (if needed):
-   ```bash
-   ./skills/ailang/scripts/check_version.sh
-   ```
-
-2. **Load syntax reference** (if needed):
-   Read `resources/syntax_quick_ref.md`
-
-3. **Write/fix code** following AILANG syntax
-
-4. **Validate** (optional):
-   ```bash
-   ./skills/ailang/scripts/validate_code.sh file.ail
-   ```
-
-5. **Run** with correct flags:
-   ```bash
-   ailang run --caps IO --entry main file.ail
-   ```
-
-## Documentation Links
+## Documentation
 
 - Website: https://sunholo-data.github.io/ailang/
 - GitHub: https://github.com/sunholo-data/ailang

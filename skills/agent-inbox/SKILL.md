@@ -1,148 +1,264 @@
 ---
-name: Agent Inbox
-description: Check and process messages from autonomous AILANG agents. Use when starting a session, after agent handoffs, or when checking for completion notifications from AI agents.
+name: Agent Messaging
+description: Cross-agent communication system for AI workflows. Check messages at session start, send notifications to other agents, and track multi-agent handoffs with correlation IDs.
 ---
 
-# Agent Inbox
+# Agent Messaging
 
-Check for messages from autonomous agents at session start and process completion notifications.
+AILANG's messaging system enables AI agents to communicate asynchronously across sessions and projects.
 
-## Quick Start
+## Session Start Routine
 
-```bash
-# Check for messages in user inbox
-ailang agent inbox user
-
-# Show only unread messages (flags BEFORE agent ID!)
-ailang agent inbox --unread-only user
-
-# Show full message content (no truncation)
-ailang agent inbox --full user
-
-# Archive messages after processing
-ailang agent inbox --archive user
-```
-
-## When to Use This Skill
-
-Invoke this skill when:
-- **Session starts** - Check for agent messages
-- **After handoffs** - When you've sent work to autonomous agents
-- **Periodic checks** - User asks "any updates from agents?"
-- **Debugging** - To see agent communication history
-
-## Commands
-
-### Check Inbox
+**At the start of EVERY session, check for messages:**
 
 ```bash
-# View all messages (auto-marks as read)
-ailang agent inbox user
+# Check for unread messages
+ailang messages list --unread
 
-# Show only unread messages
-ailang agent inbox --unread-only user
-
-# Show full message content (no truncation)
-ailang agent inbox --full user
-
-# Full content, limited to 5 messages
-ailang agent inbox --full --limit 5 user
-
-# Show archived messages
-ailang agent inbox --archived user
-
-# Archive messages after viewing
-ailang agent inbox --archive user
+# Or check specific inbox
+ailang messages list --inbox user --unread
 ```
 
-### Send Messages
+## Quick Reference
+
+| Command | Purpose |
+|---------|---------|
+| `ailang messages list --unread` | Check for new messages |
+| `ailang messages list --inbox user` | Check user inbox |
+| `ailang messages send user "msg" --from agent` | Send to user |
+| `ailang messages ack MSG_ID` | Mark as read |
+| `ailang messages ack --all` | Mark all as read |
+| `ailang messages read MSG_ID` | View full message |
+
+## Checking Messages
+
+### List Messages
 
 ```bash
-# Send to user inbox (for agent → user communication)
-ailang agent send --to-user --from "agent-name" '{"message": "Task complete"}'
+# All messages
+ailang messages list
 
-# Send to specific agent
-ailang agent send agent-name '{"task": "do_something"}'
+# Only unread
+ailang messages list --unread
+
+# Specific inbox
+ailang messages list --inbox user
+
+# Filter by sender
+ailang messages list --from sprint-executor
+
+# Limit results
+ailang messages list --limit 5
+
+# JSON output (for parsing)
+ailang messages list --json
 ```
 
-## Workflow
+### Read Full Message
+
+```bash
+# View complete message content
+ailang messages read MSG_ID
+```
+
+### Acknowledge Messages
+
+```bash
+# Mark single message as read
+ailang messages ack MSG_ID
+
+# Mark all unread as read
+ailang messages ack --all
+
+# Mark all in specific inbox
+ailang messages ack --all --inbox user
+
+# Mark as unread again (for retry)
+ailang messages unack MSG_ID
+```
+
+## Sending Messages
+
+### To User
+
+```bash
+# Simple text message
+ailang messages send user "Task completed successfully" --from my-agent --title "Status Update"
+
+# With JSON payload
+ailang messages send user --json '{"status":"done","result":"All tests passing"}' --from my-agent
+```
+
+### To Another Agent
+
+```bash
+# Send to specific agent inbox
+ailang messages send sprint-executor "Ready for handoff" --from planner
+
+# With correlation ID (for tracking workflows)
+ailang messages send sprint-executor --json '{"task":"execute"}' --from planner --correlation workflow_123
+```
+
+## Workflow Patterns
 
 ### 1. Session Start Check
 
-At the start of each session:
 ```bash
-ailang agent inbox user
+# 1. Check for messages
+ailang messages list --unread
+
+# 2. If messages exist:
+#    - Summarize to user
+#    - Ask what action to take
+
+# 3. After handling:
+ailang messages ack --all
 ```
 
-If messages exist:
-1. Read and summarize each message
-2. Identify message type (completion, error, handoff)
-3. Ask user if they want action taken
-4. Archive after handling: `ailang agent inbox --archive user`
-
-### 2. Process Completion Notifications
+### 2. Agent Handoff
 
 ```bash
-# 1. Check messages with full payload
-ailang agent inbox --full --unread-only user
-
-# 2. Review results based on payload
-# 3. Report to user
-# 4. Archive after processing
-ailang agent inbox --archive user
+# Agent A completes work and hands off to Agent B
+ailang messages send agent-b --json '{
+  "type": "handoff",
+  "task": "continue_implementation",
+  "artifacts": ["path/to/results/"],
+  "context": "Previous work completed"
+}' --from agent-a --correlation project_xyz
 ```
 
-### 3. Handle Errors
+### 3. Completion Notification
 
 ```bash
-# 1. Check messages for error details
-ailang agent inbox --full --unread-only user
-
-# 2. Review logs if specified in payload
-# 3. Diagnose and report to user
+# Notify user that autonomous work is done
+ailang messages send user --json '{
+  "type": "completion",
+  "status": "success",
+  "summary": "All 5 milestones completed",
+  "artifacts": ["results/v1.0/"]
+}' --from sprint-executor --title "Sprint Complete"
 ```
+
+### 4. Error Reporting
+
+```bash
+# Report error to user
+ailang messages send user --json '{
+  "type": "error",
+  "error": "Tests failing at milestone 3",
+  "details": "logs/error.log",
+  "needs_help": true
+}' --from executor --title "Error Encountered"
+```
+
+## Correlation IDs
+
+Track related messages across agent handoffs:
+
+```json
+{
+  "message_id": "msg_20251208_103045_abc123",
+  "correlation_id": "workflow_project_x",
+  "from": "planner",
+  "to": "executor",
+  "payload": { ... }
+}
+```
+
+**Benefits:**
+- Track entire workflow chains
+- Filter messages by workflow
+- Debug multi-agent interactions
+- Resume work from where you left off
 
 ## Message Types
 
-### Completion Notification
+### Completion
 ```json
 {
-  "type": "sprint_complete",
-  "from": "sprint-executor",
-  "payload": {
-    "result": "All tests passing",
-    "artifacts": ["results/"]
-  }
+  "type": "completion",
+  "status": "success",
+  "result": "All tests passing",
+  "artifacts": ["path/to/output/"]
 }
 ```
 
-### Error Report
+### Handoff
+```json
+{
+  "type": "handoff",
+  "task": "next_phase",
+  "context": "Previous work summary",
+  "dependencies": ["file1.ail", "file2.ail"]
+}
+```
+
+### Error
 ```json
 {
   "type": "error",
-  "from": "agent-name",
-  "payload": {
-    "error": "Tests failing",
-    "details": "path/to/logs"
-  }
+  "error": "Description of failure",
+  "details": "path/to/logs",
+  "needs_help": true
 }
 ```
 
-## CLI Flags
+### Request
+```json
+{
+  "type": "request",
+  "action": "review_code",
+  "files": ["src/module.ail"],
+  "priority": "high"
+}
+```
 
-**IMPORTANT: Flags must come BEFORE the agent ID!**
+## Watch for Messages
 
-| Flag | Description |
-|------|-------------|
-| `--full` | Show full message content without truncation |
-| `--unread-only` | Show only unread messages |
-| `--read-only` | Show only already-read messages |
-| `--archived` | Show archived messages |
-| `--archive` | Move messages to archive after viewing |
-| `--limit N` | Maximum number of messages (default: 10) |
+Monitor for new messages in real-time:
 
-## Notes
+```bash
+# Watch all inboxes
+ailang messages watch
 
-- **Inbox location**: `~/.ailang/state/messages/inbox/user/`
-- **Auto-marking**: Messages automatically marked as read when viewed
-- **Message lifecycle**: Unread → Read → Archived
+# Watch specific inbox
+ailang messages watch --inbox user
+```
+
+## Cleanup
+
+Remove old messages:
+
+```bash
+# Remove messages older than 7 days
+ailang messages cleanup --older-than 7d
+
+# Remove expired messages
+ailang messages cleanup --expired
+
+# Preview without deleting
+ailang messages cleanup --dry-run
+```
+
+## Storage
+
+- **Database**: `~/.ailang/state/collaboration.db` (SQLite)
+- **Shared with**: Collaboration Hub dashboard
+- **Message statuses**: `unread`, `read`, `archived`, `deleted`
+
+## Integration with Collaboration Hub
+
+Messages are visible in the web dashboard:
+
+```bash
+# Start the Collaboration Hub server
+ailang serve
+
+# Access at http://localhost:1957
+```
+
+The dashboard provides:
+- Real-time message view
+- Agent activity timeline
+- Workflow visualization
+- Message filtering and search

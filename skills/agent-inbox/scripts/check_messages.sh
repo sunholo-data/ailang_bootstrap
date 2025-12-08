@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Check for messages in AILANG agent inbox
+# Check for unread messages in AILANG messaging system
 
 set -euo pipefail
 
-INBOX="${1:-user}"
+INBOX="${1:-}"
 
 if ! command -v ailang &> /dev/null; then
     echo "AILANG is not installed" >&2
@@ -11,5 +11,10 @@ if ! command -v ailang &> /dev/null; then
     exit 1
 fi
 
-echo "Checking inbox: $INBOX"
-ailang agent inbox --unread-only "$INBOX"
+if [[ -n "$INBOX" ]]; then
+    echo "Checking inbox: $INBOX"
+    ailang messages list --inbox "$INBOX" --unread
+else
+    echo "Checking all unread messages"
+    ailang messages list --unread
+fi
