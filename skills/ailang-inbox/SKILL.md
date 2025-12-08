@@ -1,9 +1,9 @@
 ---
-name: Agent Messaging
+name: AILANG Inbox
 description: Cross-agent communication system for AI workflows. Check messages at session start, send notifications to other agents, and track multi-agent handoffs with correlation IDs.
 ---
 
-# Agent Messaging
+# AILANG Inbox
 
 AILANG's messaging system enables AI agents to communicate asynchronously across sessions and projects.
 
