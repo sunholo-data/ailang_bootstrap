@@ -22,19 +22,19 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Only platforms available in AILANG releases
+          # Uses Gemini CLI naming convention from AILANG releases
           - platform: darwin
             arch: arm64
-            ailang_asset: ailang-darwin-arm64.tar.gz
+            ailang_asset: darwin.arm64.ailang.tar.gz
           - platform: darwin
             arch: x64
-            ailang_asset: ailang-darwin-amd64.tar.gz
+            ailang_asset: darwin.x64.ailang.tar.gz
           - platform: linux
             arch: x64
-            ailang_asset: ailang-linux-amd64.tar.gz
+            ailang_asset: linux.x64.ailang.tar.gz
           - platform: win32
             arch: x64
-            ailang_asset: ailang-windows-amd64.zip
+            ailang_asset: win32.x64.ailang.zip
 
     steps:
       - name: Checkout
