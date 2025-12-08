@@ -19,8 +19,10 @@ jobs:
     name: Build ${{ matrix.platform }}-${{ matrix.arch }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         include:
+          # Only platforms available in AILANG releases
           - platform: darwin
             arch: arm64
             ailang_asset: ailang-darwin-arm64.tar.gz
@@ -30,9 +32,6 @@ jobs:
           - platform: linux
             arch: x64
             ailang_asset: ailang-linux-amd64.tar.gz
-          - platform: linux
-            arch: arm64
-            ailang_asset: ailang-linux-arm64.tar.gz
           - platform: win32
             arch: x64
             ailang_asset: ailang-windows-amd64.zip
