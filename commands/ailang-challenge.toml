@@ -1,0 +1,26 @@
+# Load an AILANG coding challenge
+# Usage: /ailang:challenge <name>
+
+description = "Load a coding challenge (ask-ai, summarize-file, ai-debate, game-of-life)"
+
+prompt = """
+Load the AILANG challenge: {{args}}
+
+Available challenges:
+| ID | Name | Difficulty | What You'll Learn |
+|----|------|------------|-------------------|
+| ask-ai | Ask AI | Beginner | AI integration basics |
+| summarize-file | File Summarizer | Intermediate | File I/O + AI |
+| ai-debate | AI Debate | Intermediate | Multi-call AI orchestration |
+| game-of-life | Game of Life | Intermediate | Pure computation, arrays, visual output |
+
+Suggested order: ask-ai -> summarize-file -> ai-debate -> game-of-life
+
+Rules:
+1. Don't peek at solutions in challenges/{{args}}/solution.ail
+2. Run `/ailang:prompt` to load syntax reference
+3. Use `ailang builtins list --verbose --by-module` for stdlib discovery
+4. Check hints at challenges/{{args}}/hints.md if stuck
+
+Now read challenges/{{args}}/challenge.md and follow the guided discovery steps.
+"""

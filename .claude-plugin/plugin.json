@@ -6,7 +6,8 @@
   "mcpServers": {
     "ailang-tools": {
       "command": "bash",
-      "args": ["mcp-server/ailang-mcp.sh"]
+      "args": ["mcp-server/start.sh"],
+      "cwd": "mcp-server"
     }
   }
 }

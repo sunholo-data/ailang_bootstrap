@@ -1,0 +1,24 @@
+# Run an AILANG program
+# Usage: /ailang:run <file.ail>
+
+description = "Run an AILANG program with appropriate capabilities"
+
+prompt = """
+Run the AILANG file: {{args}}
+
+First, analyze the file to determine required capabilities:
+- IO: print, println, readLine
+- FS: readFile, writeFile
+- Net: httpGet, httpPost
+- Clock: now, sleep
+- AI: call (LLM integration)
+
+Then run with: `ailang run --caps <CAPS> --entry main {{args}}`
+
+IMPORTANT: Flags must come BEFORE the filename!
+
+Examples:
+- `ailang run --caps IO --entry main hello.ail`
+- `ailang run --caps IO,FS --entry main fileops.ail`
+- `ailang run --caps IO,AI --ai claude-haiku-4-5 --entry main ai.ail`
+"""

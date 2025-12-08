@@ -1,0 +1,23 @@
+# List AILANG builtin functions
+# Usage: /ailang:builtins [search]
+
+description = "List available builtin functions, optionally filtered"
+
+prompt = """
+List AILANG builtins{{#if args}}, filtering for: {{args}}{{/if}}
+
+Run: `ailang builtins list --verbose --by-module{{#if args}} | grep -i "{{args}}"{{/if}}`
+
+This shows all available standard library functions grouped by module.
+
+Key modules:
+- std/io: print, println, readLine
+- std/fs: readFile, writeFile
+- std/net: httpGet, httpPost
+- std/json: encode, decode
+- std/list: map, filter, fold
+- std/array: make, get, set
+- std/clock: now, sleep
+- std/ai: call
+- std/env: getEnv
+"""

@@ -53,7 +53,30 @@ ailang run --caps IO --entry main file.ail
 | `ailang check file.ail` | Type-check without running |
 | `ailang run --caps IO --entry main file.ail` | Run program |
 | `ailang repl` | Interactive testing |
-| `ailang builtins list --by-module` | List all builtins |
+| `ailang builtins list --verbose --by-module` | **Full stdlib docs with examples** |
+
+## Exploring the Standard Library
+
+**The CLI is the source of truth.** Always use these commands for current, accurate documentation:
+
+```bash
+# SOURCE OF TRUTH: Full docs with examples and signatures
+ailang builtins list --verbose --by-module
+
+# Search for specific module (e.g., array functions)
+ailang builtins list --verbose --by-module | grep -A 30 "std/array"
+
+# Search for specific function
+ailang builtins list --verbose | grep -A 10 "httpGet"
+```
+
+The CLI output shows authoritative documentation:
+- **Usage:** Exact import statement to use the function
+- **Parameters:** What each argument expects
+- **Returns:** What the function returns
+- **Examples:** Working code snippets
+
+**Note:** This file provides guidance, but `ailang prompt` and `ailang builtins list --verbose` are always more up-to-date.
 
 ## Capabilities
 
@@ -64,6 +87,9 @@ ailang run --caps IO --entry main file.ail
 | `Net` | HTTP | `httpGet`, `httpPost` |
 | `Clock` | Time | `now`, `sleep` |
 | `AI` | LLM calls | `AI.call(prompt)` |
+| `Rand` | Random numbers | `rand_int`, `rand_float` |
+| `Env` | Environment vars | `getEnv`, `hasEnv` |
+| `Debug` | Debug logging | `Debug.log`, `Debug.check` |
 
 ```bash
 # Multiple capabilities
@@ -149,13 +175,20 @@ export func main() -> () ! {IO, AI} {
 
 ```ailang
 import std/io (print, println, readLine)
-import std/fs (readFile, writeFile)
-import std/net (httpGet, httpPost)
+import std/fs (readFile, writeFile, exists)
+import std/net (httpGet, httpPost, httpRequest)
 import std/json (encode, decode)
 import std/list (map, filter, fold)
+import std/array (make, get, set, length, fromList, toList)
+import std/string (len, slice, split, trim, upper, lower, find)
 import std/clock (now, sleep)
+import std/rand (int, float, bool, seed)
+import std/env (getEnv, hasEnv, getArgs)
 import std/ai (call)
+import std/debug (log, check)
 ```
+
+**Tip:** Run `ailang builtins list --verbose --by-module | grep -A 30 "std/MODULE"` for full docs.
 
 ## Practical Examples to Offer Users
 

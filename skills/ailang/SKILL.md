@@ -63,7 +63,30 @@ ailang --version
 | `ailang check file.ail` | Type-check without running |
 | `ailang run --caps IO --entry main file.ail` | Run program |
 | `ailang repl` | Interactive testing |
-| `ailang builtins list --by-module` | List all builtins |
+| `ailang builtins list --verbose --by-module` | **Full stdlib docs with examples** |
+
+## Exploring the Standard Library
+
+**The CLI is the source of truth.** Always use `ailang builtins list --verbose` for current, accurate documentation:
+
+```bash
+# SOURCE OF TRUTH: Full docs with examples and signatures
+ailang builtins list --verbose --by-module
+
+# Search for specific module (e.g., array functions)
+ailang builtins list --verbose --by-module | grep -A 30 "std/array"
+
+# Search for specific function
+ailang builtins list --verbose | grep -A 10 "httpGet"
+```
+
+The CLI output shows the authoritative documentation:
+- **Usage:** Exact import statement (`import std/fs (readFile)`)
+- **Parameters:** What each argument expects
+- **Returns:** What the function returns
+- **Examples:** Working code snippets
+
+**Note:** This skill provides guidance, but `ailang prompt` and `ailang builtins list --verbose` are always more up-to-date.
 
 **Flags MUST come before filename:**
 ```bash
@@ -73,13 +96,16 @@ ailang run file.ail --caps IO                # WRONG
 
 ## Capabilities
 
-| Cap | Purpose |
-|-----|---------|
-| `IO` | Console I/O |
-| `FS` | File system |
-| `Net` | HTTP requests |
-| `Clock` | Time functions |
-| `AI` | AI oracle |
+| Cap | Purpose | Example Functions |
+|-----|---------|-------------------|
+| `IO` | Console I/O | `print`, `println`, `readLine` |
+| `FS` | File system | `readFile`, `writeFile`, `exists` |
+| `Net` | HTTP requests | `httpGet`, `httpPost`, `httpRequest` |
+| `Clock` | Time functions | `now`, `sleep` |
+| `AI` | AI oracle | `AI.call(prompt)` |
+| `Rand` | Random numbers | `rand_int`, `rand_float`, `rand_bool` |
+| `Env` | Environment vars | `getEnv`, `hasEnv`, `getArgs` |
+| `Debug` | Debug logging | `Debug.log`, `Debug.check` |
 
 ## Practical Examples
 

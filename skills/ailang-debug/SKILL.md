@@ -129,12 +129,20 @@ export func myMap[a,b](f: func(a) -> b, xs: [a]) -> [b] {
    > :type \x. x * 2
    ```
 
-5. **List builtins** to find imports:
+5. **List builtins** to find imports (**CLI is source of truth**):
    ```bash
-   ailang builtins list --by-module
-   ailang builtins list | grep map
+   # SOURCE OF TRUTH: Full documentation with examples
+   ailang builtins list --verbose --by-module
+
+   # Search for specific function with full docs
+   ailang builtins list --verbose | grep -A 10 "map"
+
+   # See a specific module's functions
+   ailang builtins list --verbose --by-module | grep -A 30 "std/list"
    ```
 
 ## Resources
 
-See [resources/error_catalog.md](resources/error_catalog.md) for full error message catalog.
+**Always prefer CLI commands** (`ailang prompt`, `ailang builtins list --verbose`) over static docs - they're always up-to-date.
+
+See [resources/error_catalog.md](resources/error_catalog.md) for additional error patterns.

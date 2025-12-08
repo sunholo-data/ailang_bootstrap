@@ -1,0 +1,15 @@
+# Load the AILANG syntax reference
+# Usage: /ailang:prompt
+
+description = "Load the AILANG teaching prompt (CRITICAL before writing code)"
+
+prompt = """
+Run `ailang prompt` and read the output carefully. This contains the current syntax rules and templates you MUST follow when writing AILANG code.
+
+After loading, confirm you understand:
+1. Use `func` not `fn` or `function`
+2. Semicolons between statements
+3. Pattern matching uses `=>`
+4. No loops - use recursion
+5. Everything is immutable
+"""

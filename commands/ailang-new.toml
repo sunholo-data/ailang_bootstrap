@@ -1,0 +1,24 @@
+# Create a new AILANG file from template
+# Usage: /ailang:new <template>
+
+description = "Create a new AILANG file (templates: hello, http, json, ai)"
+
+prompt = """
+Create a new AILANG file based on the template: {{args}}
+
+Templates available:
+- hello: Basic hello world with IO
+- http: HTTP request example with Net capability
+- json: JSON parsing example
+- ai: AI integration example
+
+If no template specified, use 'hello'.
+
+First run `ailang prompt` to get current syntax, then create the appropriate file.
+
+Remember:
+- Module name should match the file path
+- Entry function must be exported
+- Add proper effect annotations (! {IO}, ! {IO, Net}, etc.)
+- Flags come BEFORE the filename when running
+"""

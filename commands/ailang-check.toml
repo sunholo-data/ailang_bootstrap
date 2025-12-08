@@ -1,0 +1,19 @@
+# Type-check an AILANG file
+# Usage: /ailang:check <file.ail>
+
+description = "Type-check an AILANG file without running it"
+
+prompt = """
+Type-check the AILANG file: {{args}}
+
+Run: `ailang check {{args}}`
+
+If there are errors:
+1. Read the error message carefully
+2. Common fixes:
+   - "undefined variable: print" -> Use entry module or add `import std/io (print)`
+   - "No instance for Num[string]" -> Use `print(show(42))` not `print(42)`
+   - "expected }, got let" -> Add `;` between statements
+   - "unexpected token: for" -> No loops! Use recursion
+3. Fix the issue and re-run check
+"""

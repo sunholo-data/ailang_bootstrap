@@ -3,6 +3,32 @@
   "version": "0.5.6",
   "description": "AILANG - A deterministic programming language designed for AI code synthesis and reasoning",
   "contextFileName": "GEMINI.md",
-  "mcpServers": {},
-  "settings": {}
+  "mcpServers": {
+    "ailang-tools": {
+      "command": "bash",
+      "args": ["${extensionPath}${/}mcp-server${/}start.sh"],
+      "cwd": "${extensionPath}${/}mcp-server"
+    }
+  },
+  "settings": [
+    {
+      "name": "ANTHROPIC_API_KEY",
+      "description": "API key for Claude models when using AI effect",
+      "envVar": "ANTHROPIC_API_KEY",
+      "sensitive": true
+    },
+    {
+      "name": "OPENAI_API_KEY",
+      "description": "API key for OpenAI models when using AI effect",
+      "envVar": "OPENAI_API_KEY",
+      "sensitive": true
+    },
+    {
+      "name": "GOOGLE_API_KEY",
+      "description": "API key for Gemini models when using AI effect",
+      "envVar": "GOOGLE_API_KEY",
+      "sensitive": true
+    }
+  ],
+  "excludeTools": []
 }

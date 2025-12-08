@@ -25,3 +25,7 @@ bin/
 # Temporary files
 *.tmp
 *.log
+
+# Node.js (MCP server)
+node_modules/
+package-lock.json
