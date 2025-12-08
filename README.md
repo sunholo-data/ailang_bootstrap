@@ -17,14 +17,18 @@ The extension automatically downloads the correct AILANG binary for your platfor
 ### Claude Code
 
 ```bash
-# Add as a plugin
-claude plugin install sunholo-data/ailang_bootstrap
+# Step 1: Add the marketplace
+/plugin marketplace add sunholo-data/ailang_bootstrap
+
+# Step 2: Install the plugin
+/plugin install ailang@sunholo-data/ailang_bootstrap
 ```
 
 Or clone and add locally:
 ```bash
 git clone https://github.com/sunholo-data/ailang_bootstrap
-claude plugin add ./ailang_bootstrap
+/plugin marketplace add ./ailang_bootstrap
+/plugin install ailang@ailang_bootstrap
 ```
 
 ### Manual Installation
@@ -36,7 +40,6 @@ Download a platform-specific release from [GitHub Releases](https://github.com/s
 | macOS | Apple Silicon | `darwin.arm64.ailang-bootstrap.tar.gz` |
 | macOS | Intel | `darwin.x64.ailang-bootstrap.tar.gz` |
 | Linux | x64 | `linux.x64.ailang-bootstrap.tar.gz` |
-| Linux | ARM64 | `linux.arm64.ailang-bootstrap.tar.gz` |
 | Windows | x64 | `win32.x64.ailang-bootstrap.zip` |
 
 Each release includes the AILANG binary pre-bundled.
