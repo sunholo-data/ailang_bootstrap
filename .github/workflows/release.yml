@@ -114,9 +114,37 @@ jobs:
     name: Create Release
     needs: build
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version
+        id: version
+        run: |
+          if [ "${{ github.event.inputs.ailang_version }}" = "latest" ] || [ -z "${{ github.event.inputs.ailang_version }}" ]; then
+            VERSION=$(curl -sL https://api.github.com/repos/sunholo-data/ailang/releases/latest | jq -r '.tag_name')
+          else
+            VERSION="${{ github.event.inputs.ailang_version }}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Release version: $VERSION"
+
+      - name: Create tag if needed
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          if git rev-parse "$VERSION" >/dev/null 2>&1; then
+            echo "Tag $VERSION already exists"
+          else
+            echo "Creating tag $VERSION"
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git tag "$VERSION"
+            git push origin "$VERSION"
+          fi
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -132,6 +160,8 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: AILANG Bootstrap ${{ steps.version.outputs.version }}
           files: release/*
           generate_release_notes: true
           draft: false
