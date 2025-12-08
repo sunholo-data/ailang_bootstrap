@@ -1,0 +1,85 @@
+{
+  "name": "ailang",
+  "version": "0.5.6",
+  "description": "AILANG tools for AI code synthesis",
+  "tools": [
+    {
+      "name": "ailang_check",
+      "description": "Type-check an AILANG file without running it. Returns any type errors found.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "description": "Path to the .ail file to check"
+          }
+        },
+        "required": ["file"]
+      }
+    },
+    {
+      "name": "ailang_run",
+      "description": "Run an AILANG program with specified capabilities.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "description": "Path to the .ail file to run"
+          },
+          "caps": {
+            "type": "string",
+            "description": "Comma-separated capabilities: IO,FS,Net,Clock,AI",
+            "default": "IO"
+          },
+          "entry": {
+            "type": "string",
+            "description": "Entry point function name",
+            "default": "main"
+          }
+        },
+        "required": ["file"]
+      }
+    },
+    {
+      "name": "ailang_prompt",
+      "description": "Get the AILANG teaching prompt with current syntax rules and templates. ALWAYS call this before writing AILANG code.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "ailang_builtins",
+      "description": "List AILANG builtin functions, optionally filtered by search term.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "search": {
+            "type": "string",
+            "description": "Optional search term to filter builtins"
+          },
+          "byModule": {
+            "type": "boolean",
+            "description": "Group by module",
+            "default": false
+          }
+        }
+      }
+    },
+    {
+      "name": "ailang_repl_eval",
+      "description": "Evaluate a single expression in the AILANG REPL context.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "expression": {
+            "type": "string",
+            "description": "AILANG expression to evaluate"
+          }
+        },
+        "required": ["expression"]
+      }
+    }
+  ]
+}
