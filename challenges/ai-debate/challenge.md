@@ -30,11 +30,13 @@ Each call to the AI is independent - you control the context through your prompt
 
 ```bash
 # Environment variables
-cat /Users/mark/dev/sunholo/ailang/std/env.ail
+ailang builtins list --verbose --by-module | grep -A 20 "std/env"
 
 # AI integration
-cat /Users/mark/dev/sunholo/ailang/std/ai.ail
+ailang builtins list --verbose --by-module | grep -A 20 "std/ai"
 ```
+
+Or view the stdlib on GitHub: https://github.com/sunholo-data/ailang/tree/main/std
 
 ### Step 2: Understand Records
 

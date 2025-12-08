@@ -27,8 +27,10 @@ This is a genuinely useful tool! You could use it to:
 ### Step 1: Explore File System Module
 
 ```bash
-cat /Users/mark/dev/sunholo/ailang/std/fs.ail
+ailang builtins list --verbose --by-module | grep -A 30 "std/fs"
 ```
+
+Or view the source on GitHub: https://github.com/sunholo-data/ailang/blob/main/std/fs.ail
 
 Key function: `readFile(path: string) -> string`
 

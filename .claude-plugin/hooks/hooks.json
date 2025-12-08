@@ -1,0 +1,17 @@
+{
+  "description": "AILANG messaging hooks - checks for unread messages on session start",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/session_start.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

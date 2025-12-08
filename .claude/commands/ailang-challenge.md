@@ -35,8 +35,9 @@ Then follow the instructions in the challenge.
 
 1. **Don't peek at the solution** at `challenges/$ARGUMENTS/solution.ail`
 2. **Use `/ailang-prompt`** to load syntax reference when needed
-3. **Explore stdlib** with `cat /Users/mark/dev/sunholo/ailang/std/*.ail`
-4. **Check hints** at `challenges/$ARGUMENTS/hints.md` if stuck (not all challenges have hints)
+3. **Explore stdlib** with `ailang builtins list --verbose --by-module`
+4. **View stdlib source** at https://github.com/sunholo-data/ailang/tree/main/std
+5. **Check hints** at `challenges/$ARGUMENTS/hints.md` if stuck (not all challenges have hints)
 
 ---
 

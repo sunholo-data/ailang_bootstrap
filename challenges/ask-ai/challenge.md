@@ -22,8 +22,10 @@ That's it! The simplest AI integration possible.
 
 ```bash
 # What AI functions are available?
-cat /Users/mark/dev/sunholo/ailang/std/ai.ail
+ailang builtins list --verbose --by-module | grep -A 20 "std/ai"
 ```
+
+Or view the source on GitHub: https://github.com/sunholo-data/ailang/blob/main/std/ai.ail
 
 ### Step 2: Load the Syntax Reference
 

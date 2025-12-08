@@ -43,7 +43,8 @@ Some also have `hints.md` for progressive hints.
 1. **Don't peek at the solution** - Try to solve it yourself first
 2. **Use hints progressively** - Check `hints.md` one hint at a time if stuck
 3. **Run `/ailang-prompt`** - Load the syntax reference when needed
-4. **Explore the stdlib** - Use `cat /Users/mark/dev/sunholo/ailang/std/*.ail`
+4. **Explore the stdlib** - Use `ailang builtins list --verbose --by-module`
+5. **View stdlib source** - https://github.com/sunholo-data/ailang/tree/main/std
 
 ## Adding New Challenges
 

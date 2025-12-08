@@ -29,11 +29,13 @@ Create an AILANG program that:
 
 ```bash
 # What's available?
-ailang builtins list | head -30
+ailang builtins list --verbose --by-module | head -80
 
 # Check array operations
-cat /Users/mark/dev/sunholo/ailang/std/array.ail
+ailang builtins list --verbose --by-module | grep -A 50 "std/array"
 ```
+
+Or view the stdlib on GitHub: https://github.com/sunholo-data/ailang/tree/main/std
 
 ### Step 2: Load the Syntax Reference
 
