@@ -1,0 +1,16 @@
+-- Test: Recursion (no loops!)
+-- Expected output: 15
+
+module tests/programs/recursion
+
+export func sum(xs: [int]) -> int {
+  match xs {
+    [] => 0,
+    hd :: tl => hd + sum(tl)
+  }
+}
+
+export func main() -> () ! {IO} {
+  let nums = [1, 2, 3, 4, 5];
+  print(show(sum(nums)))
+}

@@ -1,0 +1,19 @@
+-- Test: Pattern matching with ADTs
+-- Expected output: found: 42
+
+module tests/programs/pattern_match
+
+type Option[a] = Some(a) | None
+
+export func getOr[a](opt: Option[a], default: a) -> a {
+  match opt {
+    Some(x) => x,
+    None => default
+  }
+}
+
+export func main() -> () ! {IO} {
+  let value = Some(42);
+  let result = getOr(value, 0);
+  print("found: " ++ show(result))
+}

@@ -1,0 +1,8 @@
+-- Test: Basic Hello World
+-- Expected output: Hello, AILANG!
+
+module tests/programs/hello
+
+export func main() -> () ! {IO} {
+  print("Hello, AILANG!")
+}

@@ -1,0 +1,10 @@
+-- Test: Basic arithmetic and show()
+-- Expected output: 42
+
+module tests/programs/math
+
+export func main() -> () ! {IO} {
+  let x = 20;
+  let y = 22;
+  print(show(x + y))
+}

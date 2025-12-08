@@ -1,0 +1,33 @@
+-- Test: FizzBuzz (modulo, conditionals)
+-- Expected output:
+-- 1
+-- Fizz
+-- Buzz
+-- FizzBuzz
+
+module tests/programs/fizzbuzz
+
+export func fb(n: int) -> () ! {IO} {
+  let m3 = n % 3 == 0;
+  let m5 = n % 5 == 0;
+  if m3 && m5 then {
+    print("FizzBuzz")
+  } else {
+    if m3 then {
+      print("Fizz")
+    } else {
+      if m5 then {
+        print("Buzz")
+      } else {
+        print(show(n))
+      }
+    }
+  }
+}
+
+export func main() -> () ! {IO} {
+  fb(1);
+  fb(3);
+  fb(5);
+  fb(15)
+}
