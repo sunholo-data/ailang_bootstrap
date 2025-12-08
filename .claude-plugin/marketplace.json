@@ -5,7 +5,17 @@
     {
       "name": "ailang",
       "source": "./",
-      "description": "Write, run, and develop with AILANG - a pure functional language for AI agents"
+      "description": "Write, run, and develop with AILANG - includes MCP tools, slash commands, and teaching prompts"
+    },
+    {
+      "name": "ailang-debug",
+      "source": "./skills/ailang-debug",
+      "description": "Debug AILANG errors quickly - error patterns, fixes, and debugging workflows"
+    },
+    {
+      "name": "ailang-inbox",
+      "source": "./skills/ailang-inbox",
+      "description": "Cross-agent messaging - check messages, send notifications, track workflows"
     }
   ]
 }
