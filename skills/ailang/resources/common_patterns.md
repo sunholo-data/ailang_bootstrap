@@ -1,5 +1,8 @@
 # Common AILANG Patterns
 
+> **Note:** Run `ailang prompt` first for the most current syntax and examples.
+> This reference shows common patterns - the CLI prompt is the source of truth.
+
 ## Recursion (No Loops!)
 
 AILANG has no `for` or `while`. Use recursion instead.

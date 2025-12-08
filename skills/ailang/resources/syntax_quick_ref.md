@@ -1,5 +1,8 @@
 # AILANG Syntax Quick Reference
 
+> **Note:** For the most current syntax, always run `ailang prompt` first.
+> This reference is supplementary - the CLI prompt is the source of truth.
+
 ## Basic Syntax Rules
 - Use `func` NOT `fn`, `function`, or `def`
 - Semicolons REQUIRED between statements in blocks
