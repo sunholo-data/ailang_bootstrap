@@ -1,0 +1,27 @@
+# Generated output from demos
+*_computed.html
+game_of_life.html
+
+# Test solutions created during challenges
+examples/my_*.ail
+examples/test_*.ail
+examples/test_*.txt
+examples/empty_file.txt
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Binary downloads (populated during releases)
+bin/
+
+# Temporary files
+*.tmp
+*.log
