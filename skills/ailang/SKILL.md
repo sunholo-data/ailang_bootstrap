@@ -81,11 +81,53 @@ ailang run file.ail --caps IO                # WRONG
 | `Clock` | Time functions |
 | `AI` | AI oracle |
 
+## Practical Examples
+
+Offer to create these working examples for users:
+
+| Example | What It Does | Run Command |
+|---------|--------------|-------------|
+| **AI Debate** | AI models debate a topic | `ailang run --caps IO,Env,AI --ai claude-haiku-4-5 --entry main ai_debate.ail` |
+| **Ask AI** | Simple CLI Q&A tool | `ailang run --caps IO,AI --ai claude-haiku-4-5 --entry demo ask_ai.ail` |
+| **File Summarizer** | Summarize files with AI | `ailang run --caps IO,FS,AI --ai gpt5-mini --entry demo summarize_file.ail` |
+| **Game of Life** | Conway's simulation | `ailang run --caps IO --entry main game_of_life.ail` |
+
+### AI Debate Example
+```ailang
+module my_debate
+import std/ai (call)
+import std/env (hasEnv)
+import std/io (println)
+
+export func main() -> () ! {IO, Env, AI} {
+  println("=== AI Debate ===");
+  let optimist = call("Argue FOR AI benefits in 2 sentences");
+  println("Optimist: " ++ optimist);
+  let skeptic = call("Argue AGAINST AI risks in 2 sentences");
+  println("Skeptic: " ++ skeptic)
+}
+```
+
+### File Summarizer Example
+```ailang
+module summarizer
+import std/ai (call)
+import std/fs (readFile)
+import std/io (println)
+
+export func main(path: string) -> () ! {IO, FS, AI} {
+  let content = readFile(path);
+  let summary = call("Summarize in 3 bullets: " ++ content);
+  println(summary)
+}
+```
+
 ## When Stuck
 
 - Run `ailang repl` for interactive testing
 - See [common_patterns.md](resources/common_patterns.md) for patterns
 - See [cli_reference.md](resources/cli_reference.md) for full CLI docs
+- See [editor_support.md](resources/editor_support.md) for VS Code, Vim, Neovim setup
 - Check the [ailang-debug](../ailang-debug/SKILL.md) skill for error fixes
 
 ## Done? Notify

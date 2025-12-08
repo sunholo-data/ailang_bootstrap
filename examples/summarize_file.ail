@@ -1,0 +1,61 @@
+-- File Summarizer: Use AI to summarize any text file
+--
+-- A practical tool that reads a file and generates a summary using AI.
+--
+-- Usage:
+--   ailang run --caps IO,FS,AI --ai claude-haiku-4-5 --args-json '{"path":"README.md"}' --entry main examples/summarize_file.ail
+--
+-- Examples:
+--   # Summarize a README
+--   ailang run --caps IO,FS,AI --ai claude-haiku-4-5 --args-json '{"path":"README.md"}' --entry main summarize_file.ail
+--
+--   # Summarize code
+--   ailang run --caps IO,FS,AI --ai gpt5-mini --args-json '{"path":"src/main.py"}' --entry main summarize_file.ail
+
+module examples/summarize_file
+
+import std/ai (call)
+import std/fs (readFile)
+import std/io (println)
+
+-- Summarize file contents using AI
+func summarize(content: string) -> string ! {AI} {
+  let prompt = "Summarize the following text in 3-5 bullet points. Be concise:\n\n" ++ content;
+  call(prompt)
+}
+
+-- Main entry point - takes file path as argument
+export func main(path: string) -> () ! {IO, FS, AI} {
+  println("========================================");
+  println("  AILANG File Summarizer");
+  println("========================================");
+  println("");
+  println("Reading: " ++ path);
+  println("");
+
+  -- Read the file
+  let content = readFile(path);
+
+  -- Check if file was read (simple length check)
+  let contentLen = _str_len(content);
+
+  if contentLen == 0 then {
+    println("Error: File is empty or could not be read")
+  } else {
+    println("File size: " ++ show(contentLen) ++ " characters");
+    println("");
+    println("Generating summary...");
+    println("");
+
+    -- Get AI summary
+    let summary = summarize(content);
+
+    println("=== Summary ===");
+    println(summary)
+  }
+}
+
+-- Alternative entry point that summarizes a default file
+export func demo() -> () ! {IO, FS, AI} {
+  main("README.md")
+}

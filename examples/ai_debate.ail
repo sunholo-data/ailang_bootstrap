@@ -1,0 +1,110 @@
+-- AI Debate: Have AI models debate a topic
+--
+-- This tool checks for available API keys and creates a debate:
+-- - No keys: Explains how to get them
+-- - One key: Same model debates itself with different personas
+-- - Multiple keys: Different models debate each other
+--
+-- Usage:
+--   ailang run --caps IO,Env,AI --ai claude-haiku-4-5 --entry main examples/ai_debate.ail
+--
+-- With environment variables:
+--   export ANTHROPIC_API_KEY="sk-ant-..."
+--   export OPENAI_API_KEY="sk-..."
+--   export GOOGLE_API_KEY="..."
+
+module examples/ai_debate
+
+import std/ai (call)
+import std/env (hasEnv, getEnvOr)
+import std/io (println)
+
+-- Check which API keys are available
+func checkKeys() -> {anthropic: bool, openai: bool, google: bool} ! {Env} {
+  {
+    anthropic: hasEnv("ANTHROPIC_API_KEY"),
+    openai: hasEnv("OPENAI_API_KEY"),
+    google: hasEnv("GOOGLE_API_KEY")
+  }
+}
+
+-- Count available keys
+pure func countKeys(keys: {anthropic: bool, openai: bool, google: bool}) -> int {
+  let a = if keys.anthropic then 1 else 0;
+  let b = if keys.openai then 1 else 0;
+  let c = if keys.google then 1 else 0;
+  a + b + c
+}
+
+-- Print setup instructions when no keys found
+func printSetupInstructions() -> () ! {IO} {
+  println("No API keys found! Set up at least one:");
+  println("");
+  println("  Claude (Anthropic):");
+  println("    export ANTHROPIC_API_KEY='sk-ant-...'");
+  println("    Get key: https://console.anthropic.com/");
+  println("");
+  println("  GPT (OpenAI):");
+  println("    export OPENAI_API_KEY='sk-...'");
+  println("    Get key: https://platform.openai.com/api-keys");
+  println("");
+  println("  Gemini (Google):");
+  println("    export GOOGLE_API_KEY='...'");
+  println("    Get key: https://makersuite.google.com/app/apikey");
+  println("");
+  println("Then run with: ailang run --caps IO,Env,AI --ai <model> --entry main examples/ai_debate.ail")
+}
+
+-- Single model debate with different personas
+func singleModelDebate(topic: string) -> () ! {IO, AI} {
+  println("=== AI Debate: Single Model, Two Personas ===");
+  println("");
+  println("Topic: " ++ topic);
+  println("");
+
+  -- First persona: Optimist
+  println("--- OPTIMIST ---");
+  let optimistPrompt = "You are an optimist. In 2-3 sentences, argue FOR this topic: " ++ topic;
+  let optimistResponse = call(optimistPrompt);
+  println(optimistResponse);
+  println("");
+
+  -- Second persona: Skeptic
+  println("--- SKEPTIC ---");
+  let skepticPrompt = "You are a skeptic. In 2-3 sentences, argue AGAINST this topic: " ++ topic;
+  let skepticResponse = call(skepticPrompt);
+  println(skepticResponse);
+  println("");
+
+  -- Synthesis
+  println("--- MODERATOR ---");
+  let moderatorPrompt = "Summarize both viewpoints in one sentence. Optimist said: " ++ optimistResponse ++ " Skeptic said: " ++ skepticResponse;
+  let summary = call(moderatorPrompt);
+  println(summary)
+}
+
+-- Main entry point
+export func main() -> () ! {IO, Env, AI} {
+  println("========================================");
+  println("  AILANG AI Debate Tool");
+  println("========================================");
+  println("");
+
+  let keys = checkKeys();
+  let keyCount = countKeys(keys);
+
+  if keyCount == 0 then {
+    printSetupInstructions()
+  } else {
+    -- Show which keys are available
+    println("Available API keys:");
+    let _ = if keys.anthropic then println("  - Anthropic (Claude)") else ();
+    let _ = if keys.openai then println("  - OpenAI (GPT)") else ();
+    let _ = if keys.google then println("  - Google (Gemini)") else ();
+    println("");
+
+    -- Run the debate
+    let topic = "AI will be beneficial for humanity";
+    singleModelDebate(topic)
+  }
+}

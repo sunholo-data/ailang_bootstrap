@@ -1,15 +1,15 @@
 ---
-description: Type-check an AILANG file without running it
+description: "Type-check AILANG code: /ailang-check <file.ail>"
 arguments:
   - name: file
-    description: The .ail file to check
+    description: Path to .ail file
     required: true
 ---
 
-Type-check the AILANG file at `$ARGUMENTS.file`:
+Type-check the AILANG file at `$1`:
 
 ```bash
-ailang check $ARGUMENTS.file
+ailang check $1
 ```
 
 If there are type errors, explain what they mean and suggest fixes using the ailang-debug skill patterns.

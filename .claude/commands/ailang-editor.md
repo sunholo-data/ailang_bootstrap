@@ -1,15 +1,15 @@
 ---
-description: Install AILANG syntax highlighting for your editor
+description: "Install syntax highlighting: /ailang-editor <vscode|vim|neovim>"
 arguments:
   - name: editor
-    description: Editor to install for (vscode, vim, neovim)
+    description: Target editor
     required: true
 ---
 
-Install AILANG syntax highlighting for `$ARGUMENTS.editor`:
+Install AILANG syntax highlighting for `$1`:
 
 ```bash
-ailang editor install $ARGUMENTS.editor
+ailang editor install $1
 ```
 
 ## Supported Editors

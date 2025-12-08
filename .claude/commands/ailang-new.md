@@ -1,36 +1,40 @@
 ---
-description: Create a new AILANG program from a template
+description: "Create new AILANG file: /ailang-new <name> [hello|http|json|ai]"
 arguments:
   - name: name
-    description: Name for the new program (without .ail)
+    description: Program name (without .ail extension)
     required: true
   - name: template
-    description: Template type (hello, http, json, ai)
+    description: "Template: hello (default), http, json, or ai"
     required: false
 ---
 
-Create a new AILANG program named `$ARGUMENTS.name.ail`.
+Create a new AILANG file named `$1.ail` using the specified template.
 
-Templates available:
-- **hello** (default): Simple hello world with IO
-- **http**: HTTP GET request example
-- **json**: JSON parsing example
-- **ai**: AI effect example
+**Arguments:** `$1` = filename, `$2` = template (default: hello)
 
-## Templates
+## ACTION REQUIRED
 
-### hello (default)
+You MUST create the file `$1.ail` with the appropriate template content below.
+
+### If template is "hello" or not specified:
+
+Write this to `$1.ail`:
 ```ailang
-module $ARGUMENTS.name
+module $1
 
 export func main() -> () ! {IO} {
   print("Hello from AILANG!")
 }
 ```
 
-### http
+Then run: `ailang check $1.ail && ailang run --caps IO --entry main $1.ail`
+
+### If template is "http":
+
+Write this to `$1.ail`:
 ```ailang
-module $ARGUMENTS.name
+module $1
 import std/net (httpGet)
 
 export func main() -> () ! {IO, Net} {
@@ -39,23 +43,29 @@ export func main() -> () ! {IO, Net} {
 }
 ```
 
-### json
-```ailang
-module $ARGUMENTS.name
-import std/json (decode, encode)
+Then run: `ailang check $1.ail && ailang run --caps IO,Net --entry main $1.ail`
 
-type Person = {name: string, age: int}
+### If template is "json":
+
+Write this to `$1.ail`:
+```ailang
+module $1
+import std/json (decode)
 
 export func main() -> () ! {IO} {
   let json = "{\"name\":\"Alice\",\"age\":30}";
-  let person = decode[Person](json);
-  print(show(person))
+  let data = decode(json);
+  print(show(data))
 }
 ```
 
-### ai
+Then run: `ailang check $1.ail && ailang run --caps IO --entry main $1.ail`
+
+### If template is "ai":
+
+Write this to `$1.ail`:
 ```ailang
-module $ARGUMENTS.name
+module $1
 import std/ai (call)
 
 export func main() -> () ! {IO, AI} {
@@ -64,4 +74,10 @@ export func main() -> () ! {IO, AI} {
 }
 ```
 
-After creating the file, run `ailang check $ARGUMENTS.name.ail` to verify it compiles.
+Then run: `ailang check $1.ail && ailang run --caps IO,AI --entry main $1.ail`
+
+## After Creating
+
+1. Confirm the file was created
+2. Run the check command to verify it compiles
+3. Run the program to show it works

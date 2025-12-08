@@ -1,8 +1,8 @@
 ---
-description: List AILANG builtin functions and find imports
+description: "List/search builtins: /ailang-builtins [function-name]"
 arguments:
   - name: search
-    description: Optional function name to search for
+    description: Function to find (optional)
     required: false
 ---
 

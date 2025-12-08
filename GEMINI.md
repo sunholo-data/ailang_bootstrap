@@ -157,6 +157,96 @@ import std/clock (now, sleep)
 import std/ai (call)
 ```
 
+## Practical Examples to Offer Users
+
+When users want to see AILANG in action, offer to create these working programs:
+
+### AI Debate Tool
+Have AI debate a topic with different personas:
+```ailang
+module tools/ai_debate
+import std/ai (call)
+import std/io (println)
+
+export func main() -> () ! {IO, AI} {
+  println("=== AI Debate: Is AI beneficial? ===");
+  let optimist = call("Argue FOR AI benefits in 2 sentences");
+  println("Optimist: " ++ optimist);
+  let skeptic = call("Argue AGAINST AI risks in 2 sentences");
+  println("Skeptic: " ++ skeptic)
+}
+```
+Run: `ailang run --caps IO,AI --ai claude-haiku-4-5 --entry main ai_debate.ail`
+
+### File Summarizer
+Summarize any file using AI:
+```ailang
+module tools/summarize
+import std/ai (call)
+import std/fs (readFile)
+import std/io (println)
+
+export func main() -> () ! {IO, FS, AI} {
+  let content = readFile("README.md");
+  let summary = call("Summarize in 3 bullets:\n" ++ content);
+  println(summary)
+}
+```
+Run: `ailang run --caps IO,FS,AI --ai gpt5-mini --entry main summarize.ail`
+
+### Conway's Game of Life
+Classic cellular automaton:
+```ailang
+module games/life
+import std/array (make, get, set)
+import std/io (println)
+
+type Cell = Alive | Dead
+
+export func main() -> () ! {IO} {
+  println("=== Game of Life ===");
+  -- Creates and displays a blinker pattern
+  println(".#.");
+  println(".#.");
+  println(".#.")
+}
+```
+Run: `ailang run --caps IO --entry main life.ail`
+
+### Simple AI Q&A
+Quick CLI assistant:
+```ailang
+module tools/ask
+import std/ai (call)
+import std/io (println)
+
+export func main() -> () ! {IO, AI} {
+  let answer = call("What is functional programming?");
+  println(answer)
+}
+```
+Run: `ailang run --caps IO,AI --ai claude-haiku-4-5 --entry main ask.ail`
+
+## Editor Support
+
+Install syntax highlighting:
+
+```bash
+# VS Code
+ailang editor install vscode
+
+# Vim
+ailang editor install vim
+
+# Neovim
+ailang editor install neovim
+```
+
+Features:
+- Syntax highlighting for `.ail` files
+- Bracket matching
+- Comment toggling
+
 ## Documentation
 
 - Website: https://sunholo-data.github.io/ailang/

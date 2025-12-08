@@ -1,0 +1,31 @@
+-- Ask AI: Simple command-line AI assistant
+--
+-- The simplest way to ask AI a question from your terminal.
+--
+-- Usage:
+--   ailang run --caps IO,AI --ai claude-haiku-4-5 --args-json '{"question":"What is Kubernetes?"}' --entry main examples/ask_ai.ail
+--
+-- Or with different models:
+--   ailang run --caps IO,AI --ai gpt5-mini --args-json '{"question":"Explain Docker"}' --entry main ask_ai.ail
+--   ailang run --caps IO,AI --ai gemini-2-5-flash --args-json '{"question":"What is AILANG?"}' --entry main ask_ai.ail
+--
+-- For testing (no API key needed):
+--   ailang run --caps IO,AI --ai-stub --args-json '{"question":"test"}' --entry main ask_ai.ail
+
+module examples/ask_ai
+
+import std/ai (call)
+import std/io (println)
+
+-- Ask AI and print the response
+export func main(question: string) -> () ! {IO, AI} {
+  println("Q: " ++ question);
+  println("");
+  let answer = call(question);
+  println("A: " ++ answer)
+}
+
+-- Interactive version with a default question
+export func demo() -> () ! {IO, AI} {
+  main("What are the three most important things to know about functional programming?")
+}
