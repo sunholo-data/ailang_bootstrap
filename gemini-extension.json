@@ -1,0 +1,8 @@
+{
+  "name": "ailang",
+  "version": "0.5.6",
+  "description": "AILANG - A deterministic programming language designed for AI code synthesis and reasoning",
+  "contextFileName": "GEMINI.md",
+  "mcpServers": {},
+  "settings": {}
+}

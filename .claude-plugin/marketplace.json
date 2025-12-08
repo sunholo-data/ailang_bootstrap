@@ -1,0 +1,11 @@
+{
+  "name": "ailang-marketplace",
+  "owner": "Sunholo Data",
+  "plugins": [
+    {
+      "name": "ailang",
+      "source": "./",
+      "description": "Write, run, and develop with AILANG - a pure functional language for AI agents"
+    }
+  ]
+}

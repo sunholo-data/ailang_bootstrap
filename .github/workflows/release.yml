@@ -1,0 +1,140 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      ailang_version:
+        description: 'AILANG version to bundle (e.g., v0.5.6)'
+        required: true
+        default: 'latest'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.platform }}-${{ matrix.arch }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - platform: darwin
+            arch: arm64
+            ailang_asset: ailang-darwin-arm64.tar.gz
+          - platform: darwin
+            arch: x64
+            ailang_asset: ailang-darwin-amd64.tar.gz
+          - platform: linux
+            arch: x64
+            ailang_asset: ailang-linux-amd64.tar.gz
+          - platform: linux
+            arch: arm64
+            ailang_asset: ailang-linux-arm64.tar.gz
+          - platform: win32
+            arch: x64
+            ailang_asset: ailang-windows-amd64.zip
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get AILANG version
+        id: ailang_version
+        run: |
+          if [ "${{ github.event.inputs.ailang_version }}" = "latest" ] || [ -z "${{ github.event.inputs.ailang_version }}" ]; then
+            VERSION=$(curl -sL https://api.github.com/repos/sunholo-data/ailang/releases/latest | jq -r '.tag_name')
+          else
+            VERSION="${{ github.event.inputs.ailang_version }}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Using AILANG version: $VERSION"
+
+      - name: Download AILANG binary
+        run: |
+          mkdir -p bin
+          ASSET="${{ matrix.ailang_asset }}"
+          VERSION="${{ steps.ailang_version.outputs.version }}"
+          URL="https://github.com/sunholo-data/ailang/releases/download/${VERSION}/${ASSET}"
+          echo "Downloading: $URL"
+          curl -sL "$URL" -o "$ASSET"
+
+          if [[ "$ASSET" == *.zip ]]; then
+            unzip -q "$ASSET" -d bin/
+          else
+            tar xzf "$ASSET" -C bin/
+          fi
+
+          # Make binary executable
+          chmod +x bin/ailang* 2>/dev/null || true
+          ls -la bin/
+
+      - name: Create extension archive
+        run: |
+          PLATFORM="${{ matrix.platform }}"
+          ARCH="${{ matrix.arch }}"
+
+          # Create archive directory
+          mkdir -p dist
+
+          # Determine archive name and format
+          if [ "$PLATFORM" = "win32" ]; then
+            ARCHIVE="dist/${PLATFORM}.${ARCH}.ailang-bootstrap.zip"
+            zip -r "$ARCHIVE" \
+              gemini-extension.json \
+              GEMINI.md \
+              .claude-plugin/ \
+              skills/ \
+              bin/ \
+              README.md \
+              LICENSE
+          else
+            ARCHIVE="dist/${PLATFORM}.${ARCH}.ailang-bootstrap.tar.gz"
+            tar czf "$ARCHIVE" \
+              gemini-extension.json \
+              GEMINI.md \
+              .claude-plugin/ \
+              skills/ \
+              bin/ \
+              README.md \
+              LICENSE
+          fi
+
+          echo "Created: $ARCHIVE"
+          ls -lh dist/
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}-${{ matrix.arch }}
+          path: dist/
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Collect release files
+        run: |
+          mkdir -p release
+          find artifacts -type f \( -name "*.tar.gz" -o -name "*.zip" \) -exec cp {} release/ \;
+          ls -lh release/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release/*
+          generate_release_notes: true
+          draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
