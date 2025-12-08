@@ -1,58 +1,96 @@
 # AILANG Extension for Gemini CLI
 
-This extension provides AILANG, a deterministic programming language designed for AI code synthesis and reasoning.
+AILANG is a deterministic programming language designed for AI code synthesis and reasoning.
 
-## Quick Start
+## Playbook: Writing AILANG Code
+
+### Step 1: Load the Teaching Prompt (CRITICAL)
+
+**Before writing ANY AILANG code, run this:**
 
 ```bash
-# Check if AILANG is installed
-ailang --version
-
-# Run AILANG code
-ailang run --caps IO --entry main program.ail
-
-# Start interactive REPL
-ailang repl
-
-# Type-check without running
-ailang check program.ail
+ailang prompt
 ```
 
-## What is AILANG?
+This outputs the current syntax rules and templates. Do not guess at syntax.
 
-AILANG is a pure functional programming language with:
-- **Hindley-Milner type inference** - Types are inferred automatically
-- **Algebraic effects** - Side effects are tracked in the type system
-- **Pattern matching** - Exhaustive matching on ADTs
-- **Capability-based security** - Effects require explicit capability grants
+### Step 2: Write Code Following the Template
 
-## Key Syntax
+Every AILANG program needs:
+1. A `module` declaration (first line)
+2. An exported `main` function
+3. Proper effect annotations
 
-### Functions
 ```ailang
-export func add(x: int, y: int) -> int {
-  x + y
-}
+module myproject/mymodule
 
--- With effects
-export func greet(name: string) -> () ! {IO} {
-  println("Hello, " ++ name)
+export func main() -> () ! {IO} {
+  print("Hello, AILANG!")
 }
 ```
 
-### Pattern Matching
+### Step 3: Type-Check First
+
+```bash
+ailang check file.ail
+```
+
+Fix any errors before running.
+
+### Step 4: Run with Capabilities
+
+```bash
+ailang run --caps IO --entry main file.ail
+```
+
+**Flags MUST come before the filename!**
+
+## Quick Reference
+
+| Command | Purpose |
+|---------|---------|
+| `ailang prompt` | **Load syntax (DO THIS FIRST!)** |
+| `ailang check file.ail` | Type-check without running |
+| `ailang run --caps IO --entry main file.ail` | Run program |
+| `ailang repl` | Interactive testing |
+| `ailang builtins list --by-module` | List all builtins |
+
+## Capabilities
+
+| Cap | Enables | Example |
+|-----|---------|---------|
+| `IO` | Console I/O | `print`, `readLine` |
+| `FS` | File system | `readFile`, `writeFile` |
+| `Net` | HTTP | `httpGet`, `httpPost` |
+| `Clock` | Time | `now`, `sleep` |
+| `AI` | LLM calls | `AI.call(prompt)` |
+
+```bash
+# Multiple capabilities
+ailang run --caps IO,FS,Net --entry main server.ail
+```
+
+## Essential Syntax Rules
+
+1. **Use `func`** - NOT `fn`, `function`, or `def`
+2. **Semicolons between statements** - `let x = 1; let y = 2; x + y`
+3. **Pattern matching uses `=>`** - NOT `:` or `->`
+4. **No loops** - Use recursion instead
+5. **Everything is immutable**
+6. **`print` expects string** - Use `print(show(42))` for numbers
+
+## Common Patterns
+
+### Hello World
 ```ailang
-type Option[a] = Some(a) | None
+module myproject/hello
 
-export func getOr[a](opt: Option[a], default: a) -> a {
-  match opt {
-    Some(x) => x,
-    None => default
-  }
+export func main() -> () ! {IO} {
+  print("Hello, AILANG!")
 }
 ```
 
-### Lists
+### Recursion (No Loops!)
 ```ailang
 export func sum(xs: [int]) -> int {
   match xs {
@@ -62,45 +100,64 @@ export func sum(xs: [int]) -> int {
 }
 ```
 
-## CLI Commands
+### HTTP Request
+```ailang
+module myproject/http
+import std/net (httpGet)
 
-| Command | Description |
-|---------|-------------|
-| `ailang run [flags] file.ail` | Run a program |
-| `ailang repl` | Interactive REPL |
-| `ailang check file.ail` | Type-check only |
-| `ailang prompt` | Show syntax teaching prompt |
-| `ailang builtins list` | List all builtin functions |
+export func main() -> () ! {IO, Net} {
+  let body = httpGet("https://httpbin.org/get");
+  print(body)
+}
+```
 
-### Run Flags
-- `--caps IO,FS,Net,Clock` - Enable capabilities
-- `--entry main` - Entrypoint function (default: main)
-- `--trace` - Enable execution tracing
+### JSON Parsing
+```ailang
+module myproject/json
+import std/json (decode)
 
-**Important:** Flags must come BEFORE the filename!
+type Person = {name: string, age: int}
 
-## Syntax Rules
+export func main() -> () ! {IO} {
+  let json = "{\"name\":\"Alice\",\"age\":30}";
+  let person = decode[Person](json);
+  print(show(person))
+}
+```
 
-- Use `func` NOT `fn`, `function`, or `def`
-- Semicolons REQUIRED between statements in blocks
-- Pattern matching uses `=>` NOT `:` or `->`
-- NO `for`, `while`, `var`, `const` - use recursion instead
-- Everything is immutable
+### AI Effect
+```ailang
+module myproject/ai
+import std/ai (call)
 
-## Standard Library
+export func main() -> () ! {IO, AI} {
+  let response = call("Say hello!");
+  print(response)
+}
+```
 
-Auto-imported from `std/prelude`:
-- Comparisons: `<`, `>`, `==`, `!=`, `<=`, `>=`
+## Common Errors and Fixes
 
-Available imports:
-- `std/io` - `println`, `readLine`, `readInt`
-- `std/fs` - `readFile`, `writeFile`, `listDir`
-- `std/json` - `json.decode`, `json.encode`
-- `std/clock` - `now`, `sleep`
-- `std/net` - `httpGet`, `httpPost`
+| Error | Fix |
+|-------|-----|
+| `undefined variable: print` | Use entry module or `import std/io (print)` |
+| `No instance for Num[string]` | Use `print(show(42))` not `print(42)` |
+| `expected }, got let` | Add `;` between statements |
+| `unexpected token: for` | No loops! Use recursion |
+
+## Standard Library Imports
+
+```ailang
+import std/io (print, println, readLine)
+import std/fs (readFile, writeFile)
+import std/net (httpGet, httpPost)
+import std/json (encode, decode)
+import std/list (map, filter, fold)
+import std/clock (now, sleep)
+import std/ai (call)
+```
 
 ## Documentation
 
 - Website: https://sunholo-data.github.io/ailang/
 - GitHub: https://github.com/sunholo-data/ailang
-- Examples: See `examples/` in the AILANG repository

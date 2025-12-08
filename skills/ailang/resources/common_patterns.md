@@ -242,3 +242,102 @@ export func toJson(config: Config) -> string {
   encode(config)
 }
 ```
+
+## HTTP / Network
+
+### Simple GET Request
+```ailang
+module myproject/http_demo
+import std/net (httpGet)
+import std/io (println)
+
+export func main() -> () ! {IO, Net} {
+  let body = httpGet("https://httpbin.org/get");
+  println(body)
+}
+```
+
+Run with: `ailang run --caps IO,Net --entry main http_demo.ail`
+
+### POST with JSON
+```ailang
+module myproject/post_demo
+import std/net (httpPost)
+import std/json (encode)
+import std/io (println)
+
+export func main() -> () ! {IO, Net} {
+  let data = encode({message: "hello", count: 42});
+  let response = httpPost("https://httpbin.org/post", data);
+  println(response)
+}
+```
+
+## FizzBuzz (Complete Example)
+
+```ailang
+module myproject/fizzbuzz
+import std/io (println)
+
+export func fb(n: int) -> () ! {IO} {
+  let m3 = n % 3 == 0;
+  let m5 = n % 5 == 0;
+  if m3 && m5 then {
+    println("FizzBuzz")
+  } else {
+    if m3 then {
+      println("Fizz")
+    } else {
+      if m5 then {
+        println("Buzz")
+      } else {
+        println(show(n))
+      }
+    }
+  }
+}
+
+export func main() -> () ! {IO} {
+  fb(1);   -- prints: 1
+  fb(3);   -- prints: Fizz
+  fb(5);   -- prints: Buzz
+  fb(15)   -- prints: FizzBuzz
+}
+```
+
+## AI Effect (Calling LLMs)
+
+AILANG has a built-in AI effect for calling language models:
+
+```ailang
+module myproject/ai_demo
+import std/ai (call)
+import std/io (println)
+
+export func main() -> () ! {IO, AI} {
+  let response = call("What is 2+2? Reply with just the number.");
+  println("AI says: " ++ response)
+}
+```
+
+Run with: `ailang run --caps IO,AI --entry main ai_demo.ail`
+
+**Note:** Requires environment variables for the AI provider (e.g., `ANTHROPIC_API_KEY`).
+
+## Arrays (O(1) Access)
+
+For performance-critical code or game grids, use Arrays instead of Lists:
+
+```ailang
+module myproject/array_demo
+import std/array as A
+import std/io (println)
+
+export func main() -> () ! {IO} {
+  let arr = #[1, 2, 3, 4, 5];           -- Array literal
+  let val = A.get(arr, 2);               -- O(1) access, returns 3
+  let safe = A.getOpt(arr, 10);          -- Safe access, returns None
+  let updated = A.set(arr, 0, 100);      -- Returns new array
+  println(show(val))
+}
+```
