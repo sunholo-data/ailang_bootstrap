@@ -1,12 +1,14 @@
 {
   "name": "ailang",
   "description": "AILANG - A deterministic programming language designed for AI code synthesis and reasoning",
-  "version": "0.5.6",
+  "version": "0.5.7",
   "author": "Holosun ApS",
   "mcpServers": {
     "ailang-tools": {
       "command": "bash",
-      "args": ["mcp-server/start.sh"],
+      "args": [
+        "mcp-server/start.sh"
+      ],
       "cwd": "mcp-server"
     }
   }
