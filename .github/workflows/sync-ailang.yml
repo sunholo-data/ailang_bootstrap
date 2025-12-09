@@ -79,5 +79,8 @@ jobs:
 
       - name: Trigger release workflow
         if: steps.check.outputs.needs_update == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "Release workflow will be triggered by the new tag"
+          gh workflow run release.yml -f ailang_version=${{ steps.ailang.outputs.version }}
+          echo "Triggered release workflow for ${{ steps.ailang.outputs.version }}"
