@@ -15,6 +15,9 @@ ailang_bootstrap/
 │   └── marketplace.json    # Skills marketplace
 ├── gemini-extension.json   # Gemini CLI extension manifest
 ├── GEMINI.md               # Gemini CLI context file
+├── commands/               # Slash commands (DISTRIBUTED with plugin)
+│   ├── *.md                # Claude Code commands (markdown)
+│   └── *.toml              # Gemini CLI commands (TOML)
 ├── skills/
 │   ├── ailang/             # Main AILANG skill
 │   │   ├── SKILL.md        # Skill definition
@@ -24,9 +27,30 @@ ailang_bootstrap/
 │       ├── SKILL.md
 │       └── scripts/
 ├── bin/                    # AILANG binary (populated in releases)
+├── .claude/commands/       # LOCAL dev commands only (NOT distributed)
+│   ├── branch.md           # Branch status checker
+│   └── promote.md          # Promote changes between branches
 └── .github/workflows/
-    └── release.yml         # Platform-specific release builds
+    ├── release.yml         # Platform-specific release builds
+    └── sync-ailang.yml     # Auto-sync with AILANG releases
 ```
+
+## Plugin vs Local Commands
+
+**IMPORTANT:** Commands are distributed differently depending on location:
+
+| Location | Purpose | Distributed? |
+|----------|---------|--------------|
+| `commands/*.md` | User-facing slash commands | **YES** - installed with plugin |
+| `commands/*.toml` | Gemini CLI commands | **YES** - installed with extension |
+| `.claude/commands/` | Dev-only commands for this repo | **NO** - local only |
+
+When users install this plugin, they get:
+- All skills in `skills/`
+- All commands in `commands/` (both .md and .toml)
+- MCP servers defined in plugin.json
+
+They do NOT get `.claude/commands/` - those are for repo maintainers only.
 
 ## Dual Distribution
 
@@ -58,15 +82,35 @@ Main skill for writing, running, and developing AILANG code. Includes:
 ### agent-inbox
 Cross-agent messaging for autonomous agent workflows.
 
+## Branch Workflow
+
+This repo uses a three-tier branch structure for Gemini CLI distribution:
+
+| Branch | Purpose | Install Command |
+|--------|---------|-----------------|
+| `dev` | Active development | `gemini extensions install ... --ref=dev` |
+| `preview` | Testing/staging | `gemini extensions install ... --ref=preview` |
+| `stable` | **Production (default)** | `gemini extensions install ...` |
+
+**Workflow:** `dev` → `preview` → `stable`
+
+Use `/branch` to check status and `/promote` to move changes through the pipeline.
+
 ## Development Commands
 
 ```bash
 # Test skills locally (Claude Code)
 claude plugin add ./
 
-# Create a release
-git tag v0.1.0
-git push origin v0.1.0
+# Check branch status
+/branch
+
+# Promote changes to preview or stable
+/promote preview
+/promote stable
+
+# Create a release (auto-synced from AILANG releases)
+# The sync-ailang.yml workflow handles this automatically
 ```
 
 ## Related Repositories

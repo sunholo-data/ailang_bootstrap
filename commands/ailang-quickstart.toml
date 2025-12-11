@@ -1,0 +1,44 @@
+# Complete AILANG hello world tutorial
+# Usage: /ailang:quickstart
+
+description = "Complete hello world tutorial - create, check, and run"
+
+prompt = """
+# AILANG Quickstart Tutorial
+
+Complete hands-on tutorial to verify AILANG works.
+
+## Step 1: Load the Teaching Prompt
+
+```bash
+ailang prompt | head -50
+```
+
+## Step 2: Create hello.ail
+
+```ailang
+module hello
+
+export func main() -> () ! {IO} {
+  print("Hello from AILANG!")
+}
+```
+
+## Step 3: Type-Check
+
+```bash
+ailang check hello.ail
+```
+
+## Step 4: Run
+
+```bash
+ailang run --caps IO --entry main hello.ail
+```
+
+## Success Criteria
+
+Expected output: `Hello from AILANG!`
+
+Execute each step and report success or errors.
+"""

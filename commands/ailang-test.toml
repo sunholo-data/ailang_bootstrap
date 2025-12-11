@@ -1,0 +1,33 @@
+# Run AILANG plugin tests
+# Usage: /ailang:test
+
+description = "Run AILANG bootstrap plugin tests to verify everything works"
+
+prompt = """
+Run the full test suite to verify the plugin is working correctly:
+
+```bash
+./tests/run_tests.sh
+```
+
+## What Gets Tested
+
+1. **AILANG CLI** - Is ailang installed and working?
+2. **Type Checking** - Do test programs type-check?
+3. **Execution** - Do programs produce expected output?
+4. **Skills** - Are all skills properly structured?
+5. **Slash Commands** - Do all commands have proper frontmatter?
+6. **MCP Server** - Can MCP tools execute?
+
+## Manual Verification
+
+After running tests, verify these work:
+
+```bash
+ailang prompt                                    # Should output syntax rules
+ailang run --caps IO --entry main tests/programs/hello.ail  # Should output: Hello, AILANG!
+ailang builtins list | head -20                 # Should list builtin functions
+```
+
+All tests should pass. If any fail, check AILANG installation with `ailang --version`.
+"""

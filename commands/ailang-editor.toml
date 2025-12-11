@@ -1,0 +1,26 @@
+# Install syntax highlighting for editors
+# Usage: /ailang:editor <vscode|vim|neovim>
+
+description = "Install AILANG syntax highlighting for your editor"
+
+prompt = """
+Install AILANG syntax highlighting for the specified editor: {{args}}
+
+Run: `ailang editor install {{args}}`
+
+## Supported Editors
+
+- **vscode** - Visual Studio Code
+- **vim** - Vim
+- **neovim** - Neovim
+
+## What Gets Installed
+
+- VS Code: Extension in ~/.vscode/extensions/
+- Vim/Neovim: Syntax file in ~/.vim/syntax/ or ~/.config/nvim/syntax/
+
+After installation:
+1. Restart your editor
+2. Open any .ail file
+3. You should see syntax highlighting!
+"""

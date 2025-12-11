@@ -1,0 +1,35 @@
+# Start the AILANG interactive REPL
+# Usage: /ailang:repl
+
+description = "Start the AILANG interactive REPL for testing"
+
+prompt = """
+Start the AILANG REPL for interactive development:
+
+Run: `ailang repl`
+
+## REPL Commands
+
+| Command | Description |
+|---------|-------------|
+| `:help` | Show help |
+| `:type <expr>` | Show type of expression |
+| `:load <file>` | Load file into REPL |
+| `:reset` | Clear REPL state |
+| `:quit` | Exit REPL |
+
+## Quick Tests
+
+```
+> 1 + 2
+3
+
+> show(42)
+"42"
+
+> :type \\x. x * 2
+int -> int
+```
+
+The REPL is great for testing expressions, checking types, and experimenting with syntax.
+"""
