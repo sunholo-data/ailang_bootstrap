@@ -58,7 +58,13 @@ jobs:
           VERSION="${{ steps.ailang_version.outputs.version }}"
           URL="https://github.com/sunholo-data/ailang/releases/download/${VERSION}/${ASSET}"
           echo "Downloading: $URL"
-          curl -sL "$URL" -o "$ASSET"
+
+          # Use -f to fail on HTTP errors, --retry for transient failures
+          curl -fSL --retry 3 --retry-delay 5 "$URL" -o "$ASSET"
+
+          # Verify download
+          echo "Downloaded file type:"
+          file "$ASSET"
 
           if [[ "$ASSET" == *.zip ]]; then
             unzip -q "$ASSET" -d bin/
