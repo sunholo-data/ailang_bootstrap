@@ -23,9 +23,10 @@ ailang_bootstrap/
 │   │   ├── SKILL.md        # Skill definition
 │   │   ├── scripts/        # install.sh, check_version.sh, validate_code.sh
 │   │   └── resources/      # syntax_quick_ref.md, cli_reference.md, common_patterns.md
-│   └── agent-inbox/        # Agent messaging skill
-│       ├── SKILL.md
-│       └── scripts/
+│   ├── ailang-inbox/       # Agent messaging skill
+│   │   └── SKILL.md
+│   └── ailang-debug/       # Error debugging skill
+│       └── SKILL.md
 ├── bin/                    # AILANG binary (populated in releases)
 ├── .claude/commands/       # LOCAL dev commands only (NOT distributed)
 │   ├── branch.md           # Branch status checker
@@ -79,8 +80,11 @@ Main skill for writing, running, and developing AILANG code. Includes:
 - CLI command reference
 - Common patterns guide
 
-### agent-inbox
-Cross-agent messaging for autonomous agent workflows.
+### ailang-debug
+Debug AILANG code errors. Use when encountering type errors, parse errors, or runtime failures.
+
+### ailang-inbox
+Cross-agent messaging for autonomous agent workflows. Enables AI agents to communicate asynchronously across sessions.
 
 ## Branch Workflow
 
