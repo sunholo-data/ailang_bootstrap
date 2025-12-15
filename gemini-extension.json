@@ -12,25 +12,6 @@
       "cwd": "${extensionPath}${/}mcp-server"
     }
   },
-  "settings": [
-    {
-      "name": "ANTHROPIC_API_KEY",
-      "description": "API key for Claude models when using AI effect",
-      "envVar": "ANTHROPIC_API_KEY",
-      "sensitive": true
-    },
-    {
-      "name": "OPENAI_API_KEY",
-      "description": "API key for OpenAI models when using AI effect",
-      "envVar": "OPENAI_API_KEY",
-      "sensitive": true
-    },
-    {
-      "name": "GOOGLE_API_KEY",
-      "description": "API key for Gemini models when using AI effect",
-      "envVar": "GOOGLE_API_KEY",
-      "sensitive": true
-    }
-  ],
+  "settings": [],
   "excludeTools": []
 }
