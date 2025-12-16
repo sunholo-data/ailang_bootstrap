@@ -84,7 +84,12 @@ Main skill for writing, running, and developing AILANG code. Includes:
 Debug AILANG code errors. Use when encountering type errors, parse errors, or runtime failures.
 
 ### ailang-inbox
-Cross-agent messaging for autonomous agent workflows. Enables AI agents to communicate asynchronously across sessions.
+Cross-agent messaging for autonomous agent workflows. Features:
+- **Semantic search**: Find messages by meaning (`ailang messages search "query"`)
+- **Neural search**: Use Ollama embeddings (`--neural` flag)
+- **Deduplication**: Find and mark duplicate messages (`ailang messages dedupe`)
+- **GitHub sync**: Sync with GitHub Issues (`--github` flag, `import-github`)
+- **Asynchronous communication**: AI agents communicate across sessions
 
 ## Branch Workflow
 

@@ -52,7 +52,7 @@ Each release includes the AILANG binary pre-bundled.
 |-------|---------|
 | **ailang** | Write, run, and develop with AILANG |
 | **ailang-debug** | Error recovery and debugging help |
-| **ailang-inbox** | Cross-agent messaging and notifications |
+| **ailang-inbox** | Cross-agent messaging with semantic search, deduplication, and GitHub sync |
 
 ### Slash Commands (Claude Code)
 
