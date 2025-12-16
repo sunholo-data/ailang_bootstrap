@@ -1,11 +1,11 @@
 ---
 name: AILANG Inbox
-description: Cross-agent communication system for AI workflows. Check messages at session start, send notifications to other agents, and track multi-agent handoffs with correlation IDs.
+description: Cross-agent communication system with semantic search and GitHub sync. Check messages, find similar content, deduplicate, and sync with GitHub Issues for AI workflows across sessions.
 ---
 
 # AILANG Inbox
 
-AILANG's messaging system enables AI agents to communicate asynchronously across sessions and projects.
+AILANG's messaging system enables AI agents to communicate asynchronously across sessions and projects. Features semantic search (SimHash + Ollama neural), deduplication, and GitHub sync.
 
 ## Session Start Routine
 
@@ -29,6 +29,10 @@ ailang messages list --inbox user --unread
 | `ailang messages ack MSG_ID` | Mark as read |
 | `ailang messages ack --all` | Mark all as read |
 | `ailang messages read MSG_ID` | View full message |
+| `ailang messages search "query"` | Semantic search (SimHash) |
+| `ailang messages search "query" --neural` | Neural search (Ollama) |
+| `ailang messages dedupe` | Find duplicate messages |
+| `ailang messages dedupe --apply` | Mark duplicates |
 
 ## Checking Messages
 
@@ -238,6 +242,164 @@ ailang messages cleanup --expired
 
 # Preview without deleting
 ailang messages cleanup --dry-run
+```
+
+## Semantic Search (v0.5.11+)
+
+Find messages by meaning, not just exact text. AILANG uses SimHash by default for fast, zero-cost semantic search.
+
+### Search Commands
+
+```bash
+# Search by semantic content (SimHash - default, fast)
+ailang messages search "parser error handling"
+
+# Set similarity threshold (0.0-1.0)
+ailang messages search "bugs" --threshold 0.5
+
+# Find messages similar to a specific message
+ailang messages list --similar-to MSG_ID
+
+# Hide duplicate messages (collapsed view)
+ailang messages list --collapsed
+
+# Show duplicates of a specific message
+ailang messages list --duplicates-of MSG_ID
+```
+
+### Search Flags
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--threshold` | 0.70 | Minimum similarity (0.0-1.0) |
+| `--limit` | 20 | Maximum results |
+| `--max-scan` | 1000 | Maximum messages to scan |
+| `--inbox` | (all) | Filter by inbox |
+| `--neural` | false | Use Ollama embeddings |
+| `--simhash` | true | Force SimHash mode |
+| `--json` | false | Output as JSON |
+
+### How SimHash Works
+
+SimHash generates a 64-bit fingerprint based on word frequencies:
+- **Score 1.0**: Identical or near-identical
+- **Score 0.9+**: Very similar (likely duplicates)
+- **Score 0.7-0.9**: Related topics
+- **Score below 0.7**: Different content
+
+## Deduplication
+
+Find and mark duplicate messages to reduce inbox noise.
+
+```bash
+# Report duplicates (dry run - shows what would be marked)
+ailang messages dedupe
+
+# Custom similarity threshold
+ailang messages dedupe --threshold 0.90
+
+# Actually mark duplicates
+ailang messages dedupe --apply
+
+# Filter by inbox
+ailang messages dedupe --inbox user --apply
+```
+
+### How Deduplication Works
+
+1. **Find groups**: Messages with similarity ≥ threshold are grouped
+2. **Select representative**: Oldest message in each group is kept
+3. **Mark duplicates**: Newer messages get `dup_of` set to representative's ID
+4. **View behavior**: `--collapsed` hides messages with `dup_of` set
+
+## Neural Search (Ollama)
+
+For more sophisticated semantic search, use neural embeddings via local Ollama.
+
+### Prerequisites
+
+1. Install Ollama: https://ollama.ai
+2. Start Ollama server: `ollama serve`
+3. Pull an embedding model: `ollama pull nomic-embed-text`
+
+### Configuration
+
+Create `~/.ailang/config.yaml`:
+
+```yaml
+embeddings:
+  provider: ollama
+  ollama:
+    model: nomic-embed-text
+    endpoint: http://localhost:11434
+    timeout: 30s
+  search:
+    default_mode: simhash
+    simhash_threshold: 0.70
+    neural_threshold: 0.75
+```
+
+### Using Neural Search
+
+```bash
+# Use neural embeddings (requires Ollama running)
+ailang messages search "parser bugs" --neural
+
+# Force SimHash (faster, no Ollama needed)
+ailang messages search "parser bugs" --simhash
+```
+
+### Model Recommendations
+
+| Model | Speed | Quality | Notes |
+|-------|-------|---------|-------|
+| `nomic-embed-text` | Fast | Good | Best balance |
+| `mxbai-embed-large` | Medium | Better | Higher quality |
+| `embeddinggemma` | Fast | Good | Google model |
+
+## GitHub Integration (v0.5.9+)
+
+Sync messages with GitHub Issues for visibility across AILANG instances.
+
+### Sending to GitHub
+
+```bash
+# Bug report (creates GitHub issue)
+ailang messages send user "Parser crash" --type bug --github
+
+# Feature request
+ailang messages send user "Add async support" --type feature --github
+
+# Custom repo
+ailang messages send user "Bug report" --github --repo owner/repo
+```
+
+### Importing from GitHub
+
+```bash
+# Import issues from configured repo
+ailang messages import-github
+
+# Filter by labels
+ailang messages import-github --labels bug,feature
+
+# Preview without importing
+ailang messages import-github --dry-run
+```
+
+### GitHub Configuration
+
+Add to `~/.ailang/config.yaml`:
+
+```yaml
+github:
+  expected_user: YourGitHubUsername   # Must match gh auth status
+  default_repo: owner/repo             # Target repo for issues
+  create_labels:
+    - ailang-message
+  watch_labels:
+    - ailang-message
+  auto_import: true                    # Import on session start
 ```
 
 ## Storage
