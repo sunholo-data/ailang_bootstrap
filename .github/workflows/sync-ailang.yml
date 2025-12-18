@@ -75,8 +75,16 @@ jobs:
 
           git add gemini-extension.json .claude-plugin/plugin.json
           git commit -m "Sync with AILANG $VERSION"
-          git tag "$VERSION"
-          git push origin stable --tags
+
+          # Create or update tag (force if exists)
+          if git rev-parse "$VERSION" >/dev/null 2>&1; then
+            echo "Tag $VERSION already exists, updating it"
+            git tag -f "$VERSION"
+          else
+            git tag "$VERSION"
+          fi
+
+          git push origin stable --tags --force
 
       - name: Trigger release workflow
         if: steps.check.outputs.needs_update == 'true'
