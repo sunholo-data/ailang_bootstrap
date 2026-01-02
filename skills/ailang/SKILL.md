@@ -64,6 +64,8 @@ ailang --version
 | `ailang run --caps IO --entry main file.ail` | Run program |
 | `ailang repl` | Interactive testing |
 | `ailang builtins list --verbose --by-module` | **Full stdlib docs with examples** |
+| `ailang examples search "query"` | **Find working code examples (v0.6.2+)** |
+| `ailang examples show NAME` | View example with expected output |
 
 ## Exploring the Standard Library
 
@@ -87,6 +89,34 @@ The CLI output shows the authoritative documentation:
 - **Examples:** Working code snippets
 
 **Note:** This skill provides guidance, but `ailang prompt` and `ailang builtins list --verbose` are always more up-to-date.
+
+## Finding Working Examples (v0.6.2+)
+
+**Search 97 working code examples** directly from the CLI:
+
+```bash
+# Search for examples by keyword (flags BEFORE query!)
+ailang examples search "pattern matching"
+ailang examples search --limit 5 "recursion"
+
+# View a specific example with metadata and expected output
+ailang examples show adt_option
+ailang examples show fold_reduce --expected
+
+# List examples by tag
+ailang examples list --tags adt
+ailang examples list --tags recursion
+
+# See all available tags
+ailang examples tags
+```
+
+**Search scoring:** Tag match (1.0) > Description (0.95) > Content (0.80) > Partial (0.60-0.70)
+
+**When to use:**
+- Learning AILANG patterns: `ailang examples list --tags recursion`
+- Checking syntax: `ailang examples search "match"`
+- Finding working code: `ailang examples show NAME --run`
 
 **Flags MUST come before filename:**
 ```bash
