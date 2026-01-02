@@ -74,6 +74,37 @@ ailang prompt --version v0.3.24  # Specific version
 ailang prompt --list             # List all versions
 ```
 
+### `ailang examples` (v0.6.2+)
+Search and view working code examples.
+
+```bash
+# Search examples (flags BEFORE query!)
+ailang examples search "pattern matching"
+ailang examples search --limit 5 "recursion"
+ailang examples search --json "fold"
+
+# List examples
+ailang examples list                    # All 97 working examples
+ailang examples list --tags adt         # Filter by tag
+ailang examples list --status all       # Include broken
+
+# View specific example
+ailang examples show adt_option         # Show with metadata
+ailang examples show adt_option --run   # Show and execute
+ailang examples show fold --expected    # Show expected output only
+
+# List available tags
+ailang examples tags
+```
+
+**Search scoring:**
+| Match Type | Score | Description |
+|------------|-------|-------------|
+| Tag match | 1.0 | Query matches a tag exactly |
+| Description match | 0.95 | Query found in description |
+| Content match | 0.80 | Query found in .ail file |
+| Partial match | 0.60-0.70 | Some query words found |
+
 ## Development Tools
 
 ### `ailang builtins`
