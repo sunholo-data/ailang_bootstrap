@@ -84,6 +84,7 @@ Execute each step above in order:
 | `ailang check FILE` | Type-check without running |
 | `ailang run --caps X --entry main FILE` | Run with capabilities |
 | `ailang builtins list` | List available functions |
+| `ailang examples search "query"` | Find working code examples (v0.6.2+) |
 | `ailang repl` | Interactive REPL |
 
 ## Common Capabilities
