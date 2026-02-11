@@ -25,9 +25,11 @@ Every AILANG program needs:
 module myproject/mymodule
 
 export func main() -> () ! {IO} {
-  print("Hello, AILANG!")
+  println("Hello, AILANG!")
 }
 ```
+
+> **Note:** `println` is in the prelude (no import needed). Use `import std/io (print)` only for output without newline.
 
 ### Step 3: Type-Check First
 
@@ -82,11 +84,11 @@ The CLI output shows authoritative documentation:
 
 | Cap | Enables | Example |
 |-----|---------|---------|
-| `IO` | Console I/O | `print`, `readLine` |
+| `IO` | Console I/O | `println` (prelude), `print` |
 | `FS` | File system | `readFile`, `writeFile` |
 | `Net` | HTTP | `httpGet`, `httpPost` |
 | `Clock` | Time | `now`, `sleep` |
-| `AI` | LLM calls | `AI.call(prompt)` |
+| `AI` | LLM calls | `call(prompt)` |
 | `Rand` | Random numbers | `rand_int`, `rand_float` |
 | `Env` | Environment vars | `getEnv`, `hasEnv` |
 | `Debug` | Debug logging | `Debug.log`, `Debug.check` |
@@ -103,7 +105,7 @@ ailang run --caps IO,FS,Net --entry main server.ail
 3. **Pattern matching uses `=>`** - NOT `:` or `->`
 4. **No loops** - Use recursion instead
 5. **Everything is immutable**
-6. **`print` expects string** - Use `print(show(42))` for numbers
+6. **`println` is in prelude** (no import needed). Use `println(show(42))` for numbers
 
 ## Common Patterns
 
@@ -112,7 +114,7 @@ ailang run --caps IO,FS,Net --entry main server.ail
 module myproject/hello
 
 export func main() -> () ! {IO} {
-  print("Hello, AILANG!")
+  println("Hello, AILANG!")
 }
 ```
 
@@ -133,7 +135,7 @@ import std/net (httpGet)
 
 export func main() -> () ! {IO, Net} {
   let body = httpGet("https://httpbin.org/get");
-  print(body)
+  println(body)
 }
 ```
 
@@ -147,7 +149,7 @@ type Person = {name: string, age: int}
 export func main() -> () ! {IO} {
   let json = "{\"name\":\"Alice\",\"age\":30}";
   let person = decode[Person](json);
-  print(show(person))
+  println(show(person))
 }
 ```
 
@@ -158,7 +160,7 @@ import std/ai (call)
 
 export func main() -> () ! {IO, AI} {
   let response = call("Say hello!");
-  print(response)
+  println(response)
 }
 ```
 
@@ -166,26 +168,33 @@ export func main() -> () ! {IO, AI} {
 
 | Error | Fix |
 |-------|-----|
-| `undefined variable: print` | Use entry module or `import std/io (print)` |
-| `No instance for Num[string]` | Use `print(show(42))` not `print(42)` |
+| `undefined variable: print` | Use `println` (prelude) or `import std/io (print)` |
+| `No instance for Num[string]` | Use `println(show(42))` not `println(42)` |
 | `expected }, got let` | Add `;` between statements |
 | `unexpected token: for` | No loops! Use recursion |
 
 ## Standard Library Imports
 
+**Auto-imported (no import needed):** `println`, `show`, comparison operators
+
 ```ailang
-import std/io (print, println, readLine)
-import std/fs (readFile, writeFile, exists)
+import std/io (print)                -- print WITHOUT newline (println is prelude)
+import std/fs (readFile, writeFile)
 import std/net (httpGet, httpPost, httpRequest)
-import std/json (encode, decode)
-import std/list (map, filter, fold)
-import std/array (make, get, set, length, fromList, toList)
-import std/string (len, slice, split, trim, upper, lower, find)
+import std/json (encode, decode, jo, kv, js, jnum, getString, getInt)
+import std/list (map, filter, foldl, length, sortBy, nth, last)
+import std/array as A                -- A.get, A.set, A.length, A.fromList
+import std/string (split, chars, contains, stringToInt, intToStr, join)
+import std/math (floatToInt, intToFloat, floor, ceil, round, sqrt)
 import std/clock (now, sleep)
-import std/rand (int, float, bool, seed)
-import std/env (getEnv, hasEnv, getArgs)
+import std/rand (rand_int, rand_float)
+import std/env (getEnv, getEnvOr)
 import std/ai (call)
 import std/debug (log, check)
+import std/zip (listEntries, readEntry)       -- ZIP archive reading
+import std/xml (parse, findAll, getText, getAttr) -- XML parsing
+import std/option (Option, Some, None)
+import std/result (Result, Ok, Err)
 ```
 
 **Tip:** Run `ailang builtins list --verbose --by-module | grep -A 30 "std/MODULE"` for full docs.

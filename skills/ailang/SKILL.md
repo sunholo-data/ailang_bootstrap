@@ -26,6 +26,9 @@ ailang prompt
 
 # 3. Verify AILANG is installed
 ailang --version
+
+# 4. If debugging, tracing, or toolchain help needed:
+#    ailang devtools-prompt
 ```
 
 ## Development Workflow
@@ -60,6 +63,7 @@ ailang --version
 | Command | Purpose |
 |---------|---------|
 | `ailang prompt` | **Load syntax (DO THIS FIRST!)** |
+| `ailang devtools-prompt` | **Full toolchain reference (debugging, tracing, eval, chains, coordinator)** |
 | `ailang check file.ail` | Type-check without running |
 | `ailang run --caps IO --entry main file.ail` | Run program |
 | `ailang repl` | Interactive testing |
@@ -128,14 +132,14 @@ ailang run file.ail --caps IO                # WRONG
 
 | Cap | Purpose | Example Functions |
 |-----|---------|-------------------|
-| `IO` | Console I/O | `print`, `println`, `readLine` |
-| `FS` | File system | `readFile`, `writeFile`, `exists` |
+| `IO` | Console I/O | `println` (prelude), `print` (needs import) |
+| `FS` | File system | `readFile`, `writeFile` |
 | `Net` | HTTP requests | `httpGet`, `httpPost`, `httpRequest` |
 | `Clock` | Time functions | `now`, `sleep` |
-| `AI` | AI oracle | `AI.call(prompt)` |
-| `Rand` | Random numbers | `rand_int`, `rand_float`, `rand_bool` |
-| `Env` | Environment vars | `getEnv`, `hasEnv`, `getArgs` |
-| `Debug` | Debug logging | `Debug.log`, `Debug.check` |
+| `AI` | LLM calls | `call(prompt)` |
+| `Rand` | Random numbers | `rand_int`, `rand_float` |
+| `Env` | Environment vars | `getEnv`, `getEnvOr` |
+| `Debug` | Debug logging | `log`, `check` |
 
 ## Practical Examples
 
@@ -152,10 +156,9 @@ Offer to create these working examples for users:
 ```ailang
 module my_debate
 import std/ai (call)
-import std/env (hasEnv)
-import std/io (println)
+import std/ai (call)
 
-export func main() -> () ! {IO, Env, AI} {
+export func main() -> () ! {IO, AI} {
   println("=== AI Debate ===");
   let optimist = call("Argue FOR AI benefits in 2 sentences");
   println("Optimist: " ++ optimist);
@@ -169,7 +172,6 @@ export func main() -> () ! {IO, Env, AI} {
 module summarizer
 import std/ai (call)
 import std/fs (readFile)
-import std/io (println)
 
 export func main(path: string) -> () ! {IO, FS, AI} {
   let content = readFile(path);
@@ -180,6 +182,7 @@ export func main(path: string) -> () ! {IO, FS, AI} {
 
 ## When Stuck
 
+- Run `ailang devtools-prompt` for full toolchain reference (debugging, tracing, eval, chains, coordinator)
 - Run `ailang repl` for interactive testing
 - See [common_patterns.md](resources/common_patterns.md) for patterns
 - See [cli_reference.md](resources/cli_reference.md) for full CLI docs
