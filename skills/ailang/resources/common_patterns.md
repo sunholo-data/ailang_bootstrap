@@ -1,7 +1,8 @@
-# Common AILANG Patterns
+# Common AILANG Patterns (v0.7.3)
 
 > **Note:** Run `ailang prompt` first for the most current syntax and examples.
 > This reference shows common patterns - the CLI prompt is the source of truth.
+> Auto-synced from main AILANG repo on each release.
 
 ## Recursion (No Loops!)
 
@@ -19,30 +20,39 @@ export func sum(xs: [int]) -> int {
 
 ### Map over a List
 ```ailang
-export func map[a, b](f: func(a) -> b, xs: [a]) -> [b] {
+func myMap(f: int -> int, xs: [int]) -> [int] {
   match xs {
     [] => [],
-    hd :: tl => f(hd) :: map(f, tl)
+    hd :: tl => f(hd) :: myMap(f, tl)
   }
 }
 ```
+Or use stdlib: `import std/list (map)` then `map(f, xs)`
 
 ### Filter a List
 ```ailang
-export func filter[a](pred: func(a) -> bool, xs: [a]) -> [a] {
+func myFilter(pred: int -> bool, xs: [int]) -> [int] {
   match xs {
     [] => [],
-    hd :: tl => if pred(hd) then hd :: filter(pred, tl) else filter(pred, tl)
+    hd :: tl => if pred(hd) then hd :: myFilter(pred, tl) else myFilter(pred, tl)
   }
 }
 ```
+Or use stdlib: `import std/list (filter)` then `filter(pred, xs)`
 
 ### Fold (Reduce)
 ```ailang
-export func fold[a, b](f: func(b, a) -> b, init: b, xs: [a]) -> b {
+-- Use stdlib foldl with inline func syntax for reliable type inference
+import std/list (foldl)
+let sum = foldl(func(acc: int, x: int) -> int { acc + x }, 0, [1,2,3,4,5])
+```
+
+Or write your own:
+```ailang
+func myFold(f: (int, int) -> int, init: int, xs: [int]) -> int {
   match xs {
     [] => init,
-    hd :: tl => fold(f, f(init, hd), tl)
+    hd :: tl => myFold(f, f(init, hd), tl)
   }
 }
 ```
@@ -51,14 +61,15 @@ export func fold[a, b](f: func(b, a) -> b, init: b, xs: [a]) -> b {
 
 ### Basic IO
 ```ailang
-import std/io (println, readLine)
-
+-- println is in prelude (no import needed)
 export func main() -> () ! {IO} {
-  println("What is your name?");
-  let name = readLine();
-  println("Hello, " ++ name ++ "!")
+  println("Hello, AILANG!");
+  println("The answer is: " ++ show(42))
 }
 ```
+
+> **Note:** `readLine()` is currently broken (nullary function bug since v0.4.5).
+> Use `--args-json` to pass input: `ailang run --caps IO --args-json '{"name":"Alice"}' --entry main file.ail`
 
 ### File IO
 ```ailang
@@ -72,12 +83,11 @@ export func copyFile(src: string, dst: string) -> () ! {FS} {
 
 ### Multiple Effects
 ```ailang
-import std/io (println)
 import std/fs (readFile)
 
 export func showFile(path: string) -> () ! {IO, FS} {
   let contents = readFile(path);
-  println(contents)
+  println(contents)  -- println is prelude, no import needed
 }
 ```
 
@@ -87,14 +97,14 @@ export func showFile(path: string) -> () ! {IO, FS} {
 ```ailang
 type Option[a] = Some(a) | None
 
-export func map[a, b](f: func(a) -> b, opt: Option[a]) -> Option[b] {
+func mapOption(f: int -> int, opt: Option[int]) -> Option[int] {
   match opt {
     Some(x) => Some(f(x)),
     None => None
   }
 }
 
-export func getOrElse[a](opt: Option[a], default: a) -> a {
+func getOrElse(opt: Option[int], default: int) -> int {
   match opt {
     Some(x) => x,
     None => default
@@ -102,14 +112,18 @@ export func getOrElse[a](opt: Option[a], default: a) -> a {
 }
 ```
 
-### Result Type
+### Result Type (Polymorphic ADT)
 ```ailang
-type Result[a, e] = Ok(a) | Err(e)
+-- Ok uses type parameter, Err always takes string
+type Result[a] = Ok(a) | Err(string)
 
-export func map[a, b, e](f: func(a) -> b, res: Result[a, e]) -> Result[b, e] {
-  match res {
-    Ok(x) => Ok(f(x)),
-    Err(e) => Err(e)
+pure func safeDivide(a: int, b: int) -> Result[int] =
+  if b == 0 then Err("division by zero") else Ok(a / b)
+
+export func main() -> () ! {IO} {
+  match safeDivide(10, 0) {
+    Ok(v) => println("Got: " ++ show(v)),
+    Err(msg) => println("Error: " ++ msg)
   }
 }
 ```

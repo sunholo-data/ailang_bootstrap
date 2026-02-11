@@ -65,6 +65,72 @@ jobs:
           cat gemini-extension.json
           cat .claude-plugin/plugin.json
 
+      - name: Download and extract content bundle
+        if: steps.check.outputs.needs_update == 'true'
+        run: |
+          VERSION="${{ steps.ailang.outputs.version }}"
+          CONTENT_URL="https://github.com/sunholo-data/ailang/releases/download/${VERSION}/bootstrap-content.tar.gz"
+          echo "Downloading content bundle: $CONTENT_URL"
+
+          if curl -fSL --retry 3 --retry-delay 5 "$CONTENT_URL" -o bootstrap-content.tar.gz 2>/dev/null; then
+            tar xzf bootstrap-content.tar.gz
+            echo "Content bundle extracted"
+
+            # 1. Teaching prompt → syntax reference
+            if [ -f bootstrap-content/teaching-prompt.md ]; then
+              cp bootstrap-content/teaching-prompt.md skills/ailang/resources/syntax_reference.md
+              echo "Updated: syntax_reference.md"
+            fi
+
+            # 2. Builtins list → builtins reference
+            if [ -f bootstrap-content/builtins-by-module.txt ]; then
+              {
+                echo "# AILANG Builtins Reference"
+                echo ""
+                echo "> Auto-synced from AILANG ${VERSION}. Run \`ailang builtins list --by-module\` for latest."
+                echo ""
+                echo '```'
+                cat bootstrap-content/builtins-by-module.txt
+                echo '```'
+              } > skills/ailang/resources/builtins_reference.md
+              echo "Updated: builtins_reference.md"
+            fi
+
+            # 3. Recent changelog
+            if [ -f bootstrap-content/changelog-recent.md ]; then
+              cp bootstrap-content/changelog-recent.md skills/ailang/resources/changelog_recent.md
+              echo "Updated: changelog_recent.md"
+            fi
+
+            # 4. Examples manifest
+            if [ -f bootstrap-content/manifest.json ]; then
+              cp bootstrap-content/manifest.json examples/manifest.json
+              echo "Updated: examples/manifest.json"
+            fi
+
+            # 5. Copy curated example files
+            mkdir -p examples/runnable
+            for f in hello.ail hello_world.ail ai_call.ail effects_basic.ail json_basic_decode.ail \
+                     http_simple.ail list_sum.ail record_update.ail adt_option.ail factorial.ail \
+                     recursion_fibonacci.ail test_fizzbuzz.ail; do
+              if [ -f "bootstrap-content/examples/$f" ]; then
+                cp "bootstrap-content/examples/$f" "examples/$f"
+              fi
+            done
+            for f in zip_reader.ail xml_parser.ail poly_adt_result_type.ail contracts/basic.ail; do
+              if [ -f "bootstrap-content/examples/runnable/$f" ]; then
+                mkdir -p "examples/runnable/$(dirname $f)"
+                cp "bootstrap-content/examples/runnable/$f" "examples/runnable/$f"
+              fi
+            done
+            echo "Updated: example files"
+
+            # Cleanup
+            rm -rf bootstrap-content bootstrap-content.tar.gz
+          else
+            echo "Content bundle not available for $VERSION (pre-v0.7.3 release?) - skipping content sync"
+          fi
+
       - name: Commit and tag
         if: steps.check.outputs.needs_update == 'true'
         run: |
@@ -74,6 +140,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git add gemini-extension.json .claude-plugin/plugin.json
+          git add skills/ailang/resources/ examples/ || true
           git commit -m "Sync with AILANG $VERSION"
 
           # Create or update tag (force if exists)
