@@ -226,6 +226,28 @@
       "description": "AI Effect Example"
     },
     {
+      "path": "runnable/structured_ai_basic.ail",
+      "status": "working",
+      "tags": [
+        "effects",
+        "ai",
+        "json",
+        "structured-output"
+      ],
+      "description": "Demonstrates callJsonSimple: AI returns valid JSON without schema enforcement"
+    },
+    {
+      "path": "runnable/structured_ai_schema.ail",
+      "status": "working",
+      "tags": [
+        "effects",
+        "ai",
+        "json",
+        "structured-output"
+      ],
+      "description": "Demonstrates callJson: AI returns schema-enforced JSON output"
+    },
+    {
       "path": "array_adt.ail",
       "status": "working",
       "tags": [
@@ -1100,8 +1122,7 @@
       ],
       "description": "Contract verification: requires/ensures blocks with preconditions and postconditions",
       "run_flags": [
-        "--verify-contracts",
-        "--experimental-binop-shim"
+        "--verify-contracts"
       ]
     },
     {
@@ -1115,9 +1136,150 @@
       ],
       "description": "Contract verification: theme park admission example with age/height constraints",
       "run_flags": [
-        "--verify-contracts",
-        "--experimental-binop-shim"
+        "--verify-contracts"
       ]
+    },
+    {
+      "path": "runnable/contracts/finance.ail",
+      "status": "working",
+      "tags": [
+        "contracts",
+        "smt-verification",
+        "ailang-verify",
+        "counterexample",
+        "cross-function-calls"
+      ],
+      "description": "Financial calculations with cross-function calls, provably correct tax rules, and counterexample demo"
+    },
+    {
+      "path": "runnable/contracts/access_control.ail",
+      "status": "working",
+      "tags": [
+        "contracts",
+        "smt-verification",
+        "ailang-verify",
+        "security",
+        "cross-function-calls"
+      ],
+      "description": "Role-based access control with cross-function calls and Z3-verified security properties"
+    },
+    {
+      "path": "runnable/contracts/temperature.ail",
+      "status": "working",
+      "tags": [
+        "contracts",
+        "smt-verification",
+        "ailang-verify",
+        "physics"
+      ],
+      "description": "Temperature conversion with verified physical constraints"
+    },
+    {
+      "path": "runnable/contracts/insurance.ail",
+      "status": "working",
+      "tags": [
+        "contracts",
+        "smt-verification",
+        "ailang-verify",
+        "complex",
+        "business-rules"
+      ],
+      "description": "Complex insurance pricing with 768 code paths — Z3 catches subtle discount overflow"
+    },
+    {
+      "path": "runnable/contracts/scoring.ail",
+      "status": "working",
+      "tags": [
+        "contracts",
+        "smt-verification",
+        "ailang-verify",
+        "complex",
+        "scoring"
+      ],
+      "description": "Multi-factor scoring system — Z3 finds score exceeds 100 in specific enum combination"
+    },
+    {
+      "path": "runnable/contracts/cross_function.ail",
+      "status": "working",
+      "tags": [
+        "contracts",
+        "smt-verification",
+        "ailang-verify",
+        "cross-function-calls",
+        "transitive"
+      ],
+      "description": "Cross-function verification — Z3 inlines callee definitions to verify 3-level call chains"
+    },
+    {
+      "path": "runnable/contracts/record_verify.ail",
+      "status": "working",
+      "tags": [
+        "contracts",
+        "smt-verification",
+        "ailang-verify",
+        "records",
+        "field-access",
+        "cross-function-calls",
+        "record-construction"
+      ],
+      "description": "Record contract verification — Z3 proves properties about record field access, construction, cross-function calls with records, and counterexample generation"
+    },
+    {
+      "path": "runnable/contracts/string_verify.ail",
+      "status": "working",
+      "tags": [
+        "contracts",
+        "smt-verification",
+        "ailang-verify",
+        "strings",
+        "z3-string-theory"
+      ],
+      "description": "String contract verification — Z3 proves properties about string concatenation, equality, and prefix operations"
+    },
+    {
+      "path": "runnable/contracts/list_verify.ail",
+      "status": "working",
+      "tags": [
+        "contracts",
+        "smt-verification",
+        "ailang-verify",
+        "lists",
+        "z3-sequence-theory"
+      ],
+      "description": "List contract verification — Z3 proves properties about list length, head, nth, cons using sequence theory"
+    },
+    {
+      "path": "runnable/contracts/showcase.ail",
+      "status": "working",
+      "tags": [
+        "contracts",
+        "smt-verification",
+        "ailang-verify",
+        "records",
+        "strings",
+        "lists",
+        "enums",
+        "cross-function-calls",
+        "showcase"
+      ],
+      "description": "Comprehensive verification showcase — combines enums, records, strings, lists, and cross-function calls in one file"
+    },
+    {
+      "path": "runnable/contracts/invoice.ail",
+      "status": "working",
+      "tags": [
+        "contracts",
+        "smt-verification",
+        "ailang-verify",
+        "records",
+        "strings",
+        "lists",
+        "enums",
+        "cross-function-calls",
+        "business-logic",
+        "billing"
+      ],
+      "description": "Provably correct invoice processing — Z3 verifies billing invariants across 5 tiers x 5 tax regions x promo codes x line items. Catches volume pricing bug."
     },
     {
       "path": "hello_world.ail",
@@ -1162,14 +1324,68 @@
         "std/xml"
       ],
       "description": "XML parsing with std/xml builtins: parse XML strings, query elements, extract text and attributes"
+    },
+    {
+      "path": "runnable/effectful_list.ail",
+      "status": "working",
+      "tags": ["effects", "higher-order", "std/list", "mapE", "filterE", "foldlE", "flatMapE", "forEachE", "flatMap"],
+      "description": "Effectful list combinators smoke test: mapE, filterE, foldlE, flatMapE, forEachE, and pure flatMap"
+    },
+    {
+      "path": "runnable/effectful_list_t1_mapE_basic.ail",
+      "status": "working",
+      "tags": ["types", "type-inference", "effects", "higher-order", "regression", "std/list"],
+      "description": "Type inference regression T1: mapE basic type inference"
+    },
+    {
+      "path": "runnable/effectful_list_t2_filterE_bool.ail",
+      "status": "working",
+      "tags": ["types", "type-inference", "effects", "higher-order", "regression", "std/list"],
+      "description": "Type inference regression T2: filterE infers predicate returns bool"
+    },
+    {
+      "path": "runnable/effectful_list_t3_foldlE_acc.ail",
+      "status": "working",
+      "tags": ["types", "type-inference", "effects", "higher-order", "regression", "std/list"],
+      "description": "Type inference regression T3: foldlE accumulator type inference"
+    },
+    {
+      "path": "runnable/effectful_list_t4_flatMapE_expand.ail",
+      "status": "working",
+      "tags": ["types", "type-inference", "effects", "higher-order", "regression", "std/list"],
+      "description": "Type inference regression T4: flatMapE list expansion"
+    },
+    {
+      "path": "runnable/effectful_list_t5_forEachE_unit.ail",
+      "status": "working",
+      "tags": ["types", "type-inference", "effects", "higher-order", "regression", "std/list"],
+      "description": "Type inference regression T5: forEachE returns unit"
+    },
+    {
+      "path": "runnable/effectful_list_t6_pure_flatMap.ail",
+      "status": "working",
+      "tags": ["types", "type-inference", "higher-order", "regression", "std/list"],
+      "description": "Type inference regression T6: pure flatMap (no effects)"
+    },
+    {
+      "path": "runnable/effectful_list_t7_chain_combinators.ail",
+      "status": "working",
+      "tags": ["types", "type-inference", "effects", "higher-order", "regression", "std/list"],
+      "description": "Type inference regression T7: chaining multiple effectful combinators"
+    },
+    {
+      "path": "runnable/effectful_list_t8_string_list.ail",
+      "status": "working",
+      "tags": ["types", "type-inference", "effects", "higher-order", "regression", "std/list", "std/string"],
+      "description": "Type inference regression T8: effectful combinators on string lists"
     }
   ],
   "statistics": {
-    "total": 117,
-    "working": 110,
+    "total": 131,
+    "working": 124,
     "aspirational": 4,
     "broken": 3,
-    "coverage": 0.940
+    "coverage": 0.946
   },
   "milestones": {
     "completed": [
