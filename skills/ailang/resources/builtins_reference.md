@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.8.0. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.8.1. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (4)
@@ -28,10 +28,14 @@
   _array_to_list                 [pure]
   _array_unsafe_get              [pure]
 
-# std/bytes (5)
+# std/bytes (9)
+  _bytes_concat                  [pure]
+  _bytes_concat_list             [pure]
   _bytes_from_base64             [pure]
+  _bytes_from_ints               [pure]
   _bytes_from_string             [pure]
   _bytes_length                  [pure]
+  _bytes_slice                   [pure]
   _bytes_to_base64               [pure]
   _bytes_to_string               [pure]
 
@@ -60,21 +64,25 @@
   _env_getEnv                    [env]
   _env_hasEnv                    [env]
 
-# std/fs (4)
+# std/fs (7)
+  _fs_appendFile                 [fs]
+  _fs_appendFileBytes            [fs]
   _fs_exists                     [fs]
   _fs_readFile                   [fs]
   _fs_readFileBytes              [fs]
   _fs_writeFile                  [fs]
+  _fs_writeFileBytes             [fs]
 
 # std/game (3)
   _game_delta_time               [clock]
   _game_frame_count              [clock]
   _game_total_time               [clock]
 
-# std/io (3)
+# std/io (4)
   _io_print                      [io]
   _io_println                    [io]
   _io_readLine                   [io]
+  _io_writeBytes                 [io]
 
 # std/json (3)
   _json_decode                   [pure]
@@ -149,6 +157,9 @@
   not_Bool                       [pure]
   or_Bool                        [pure]
 
+# std/process (1)
+  _process_exec                  [process]
+
 # std/rand (4)
   _rand_bool                     [rand]
   _rand_float                    [rand]
@@ -178,6 +189,17 @@
 # std/simhash (2)
   _hamming_distance              [pure]
   _simhash                       [pure]
+
+# std/stream (9)
+  _stream_close                  [stream]
+  _stream_connect                [stream]
+  _stream_onEvent                [stream]
+  _stream_runEventLoop           [stream]
+  _stream_send                   [stream]
+  _stream_sse_connect            [stream]
+  _stream_sse_post               [stream]
+  _stream_status                 [stream]
+  _stream_transmit_binary        [stream]
 
 # std/string (18)
   _str_chars                     [pure]
