@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.8.1. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.9.0. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (4)
@@ -157,8 +157,11 @@
   not_Bool                       [pure]
   or_Bool                        [pure]
 
-# std/process (1)
+# std/process (4)
+  _process_close_stdin           [process]
   _process_exec                  [process]
+  _process_spawn_process         [process]
+  _process_write_stdin           [process]
 
 # std/rand (4)
   _rand_bool                     [rand]
@@ -190,12 +193,16 @@
   _hamming_distance              [pure]
   _simhash                       [pure]
 
-# std/stream (9)
+# std/stream (13)
+  _stream_async_exec_process     [stream]
+  _stream_async_read_stdin_lines [stream]
   _stream_close                  [stream]
   _stream_connect                [stream]
   _stream_onEvent                [stream]
   _stream_runEventLoop           [stream]
+  _stream_select_events          [stream]
   _stream_send                   [stream]
+  _stream_source_of_conn         [stream]
   _stream_sse_connect            [stream]
   _stream_sse_post               [stream]
   _stream_status                 [stream]

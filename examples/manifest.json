@@ -1388,11 +1388,42 @@
         "stdout": "=== Echo test ===\nstdout: hello from AILANG\n\n=== Non-zero exit ===\nexitCode: 1\n=== NotFound test ===\nnot found: nonexistent_cmd_xyz\n=== Stderr test ===\nstderr: stderr_msg\n\nDone!\n",
         "exit_code": 0
       }
+    },
+    {
+      "path": "runnable/stream_multi_source.ail",
+      "status": "working",
+      "tags": ["stream", "async", "stdin", "multiplexer", "M-ASYNC-IO"],
+      "description": "Multi-source event multiplexing: stdin + selectEvents (M-ASYNC-IO)",
+      "expected": {
+        "stdin": "hello from stdin",
+        "stdout": "stdin: hello from stdin\ndone\n",
+        "exit_code": 0
+      }
+    },
+    {
+      "path": "runnable/stream_process_source.ail",
+      "status": "working",
+      "tags": ["stream", "async", "process", "subprocess", "M-ASYNC-IO"],
+      "description": "Subprocess stdout as SourceBytes events via asyncExecProcess (M-ASYNC-IO Phase 2)",
+      "expected": {
+        "stdout": "[echo] hello from subprocess\ndone\n",
+        "exit_code": 0
+      }
+    },
+    {
+      "path": "runnable/process_stdin_write.ail",
+      "status": "working",
+      "tags": ["process", "stdin", "pipe", "subprocess", "M-ASYNC-IO"],
+      "description": "Write data to subprocess stdin via spawnProcess + writeProcessStdin (M-ASYNC-IO Phase 3)",
+      "expected": {
+        "stdout": "hello from AILANG\nstreaming to subprocess\ndone!\nwrote line 1\nwrote line 2\nwrote line 3\n",
+        "exit_code": 0
+      }
     }
   ],
   "statistics": {
-    "total": 132,
-    "working": 125,
+    "total": 134,
+    "working": 127,
     "aspirational": 4,
     "broken": 3,
     "coverage": 0.946

@@ -472,7 +472,8 @@ import std/sem (make_frame_at, store_frame, load_frame, update_frame)
 import std/option (Option, Some, None)
 import std/result (Result, Ok, Err)
 import std/bytes (fromString, toString, toBase64, fromBase64, length, slice)
-import std/stream (connect, transmit, transmitBinary, onEvent, runEventLoop, disconnect, sseConnect, ssePost, withSSE, StreamEvent, Message, Closed, StreamError, SSEData)
+import std/stream (connect, transmit, transmitBinary, onEvent, runEventLoop, disconnect, sseConnect, ssePost, withSSE, sourceOfConn, asyncReadStdinLines, asyncExecProcess, selectEvents, StreamConn, StreamSource, StreamEvent, Message, Binary, Opened, Closed, StreamError, Ping, SSEData, SourceText, SourceBytes)
+import std/process (exec, spawnProcess, writeProcessStdin, closeProcessStdin, ProcessHandle)
 import std/zip (_zip_listEntries, _zip_readEntry, _zip_readEntryBytes)
 import std/xml (_xml_parse, _xml_findAll, _xml_findFirst, _xml_getText, _xml_getAttr, _xml_getChildren, _xml_getTag)
 ```
@@ -557,16 +558,71 @@ let total = foldlE(func(acc: int, x: int) -> int ! {IO} { println("fold"); acc +
 - `slice(b, start, len) -> Option[bytes]` - Extract subsequence (None if out of bounds)
 
 **Streaming functions** (std/stream) — requires `--caps Stream`:
-- `connect(url) -> Result[StreamConn, string]` - Open WebSocket
-- `transmit(conn, msg) -> Result[unit, string]` - Send text message
-- `transmitBinary(conn, data) -> Result[unit, string]` - Send binary bytes (no base64 overhead)
-- `onEvent(conn, handler) -> Result[unit, string]` - Register event handler
-- `runEventLoop(conn) -> Result[unit, string]` - Process events until handler returns false
-- `disconnect(conn) -> Result[unit, string]` - Close connection
-- `sseConnect(url) -> Result[StreamConn, string]` - Open SSE (read-only)
-- `ssePost(url, body, contentType) -> Result[StreamConn, string]` - POST then stream SSE response
-- `withSSE(url, handler) -> Result[unit, string]` - Connect + run + disconnect
-- Event types: `Message(string)`, `Binary(string)`, `SSEData(eventType, data)`, `Closed(code, reason)`, `StreamError(kind)`
+
+*WebSocket & SSE:*
+- `connect(url, config) -> Result[StreamConn, StreamErrorKind] ! {Stream}` - Open WebSocket
+- `transmit(conn, msg) -> Result[unit, StreamErrorKind] ! {Stream}` - Send text message
+- `transmitBinary(conn, data) -> Result[unit, StreamErrorKind] ! {Stream}` - Send binary bytes
+- `onEvent(conn, handler) -> unit ! {Stream}` - Register event handler (handler: `StreamEvent -> bool`)
+- `runEventLoop(conn) -> unit ! {Stream}` - Block until handler returns false
+- `disconnect(conn) -> unit ! {Stream}` - Close connection
+- `sseConnect(url, config) -> Result[StreamConn, StreamErrorKind] ! {Stream}` - Open SSE (GET)
+- `ssePost(url, body, config) -> Result[StreamConn, StreamErrorKind] ! {Stream}` - POST then stream SSE
+- `withStream(url, handler) -> Result[StreamConn, StreamErrorKind] ! {Stream}` - Full WebSocket lifecycle
+- `withSSE(url, handler) -> Result[StreamConn, StreamErrorKind] ! {Stream}` - Full SSE lifecycle
+- Config: `{headers: [{name: string, value: string}]}` — use `{headers: []}` for no custom headers
+
+*Multi-source multiplexing (v0.9.0):*
+- `sourceOfConn(conn, name, priority) -> StreamSource ! {Stream}` - Wrap connection as named source
+- `asyncReadStdinLines(name, priority) -> StreamSource ! {Stream}` - Stdin line reader source
+- `asyncExecProcess(cmd, args, name, priority, chunkSize) -> StreamSource ! {Stream}` - Subprocess stdout as byte chunks (requires `--caps Stream,Process`)
+- `selectEvents(sources, handler) -> unit ! {Stream}` - Priority-ordered multi-source event loop
+
+*Subprocess stdin writing (v0.9.0 Phase 3):*
+- `spawnProcess(cmd, args) -> ProcessHandle ! {Process}` - Spawn subprocess with writable stdin pipe
+- `writeProcessStdin(handle, data) -> Result[(), string] ! {Process}` - Write bytes to subprocess stdin
+- `closeProcessStdin(handle) -> () ! {Process}` - Close stdin pipe (signals EOF, subprocess exits)
+
+*Event types (StreamEvent ADT):*
+`Message(string)`, `Binary(string)`, `Opened(string)`, `Closed(int, string)`, `StreamError(StreamErrorKind)`, `Ping(string)`, `SSEData(string, string)`, `SourceText(string, string)`, `SourceBytes(string, bytes)`
+
+*Multi-source example:*
+```ailang
+import std/stream (asyncReadStdinLines, asyncExecProcess, selectEvents,
+                   StreamEvent, SourceText, SourceBytes)
+import std/bytes (toString)
+
+export func main() -> unit ! {Stream, Process, IO} {
+  let proc = asyncExecProcess("echo", ["hello"], "echo", 5, 4096);
+  let stdin = asyncReadStdinLines("stdin", 10);
+  selectEvents([proc, stdin], \event. match event {
+    SourceBytes(src, data) => { println("[" ++ src ++ "] " ++ toString(data)); true },
+    SourceText(src, text)  => { println("[" ++ src ++ "] " ++ text); false },
+    _ => true
+  })
+}
+```
+
+*Subprocess stdin writing example (v0.9.0 Phase 3):*
+```ailang
+import std/process (spawnProcess, writeProcessStdin, closeProcessStdin, ProcessHandle)
+import std/bytes (fromString)
+import std/result (Result, Ok, Err)
+
+export func main() -> () ! {Process, IO} {
+  let handle = spawnProcess("cat", []);
+  match writeProcessStdin(handle, fromString("hello\n")) {
+    Ok(_) => println("wrote line"),
+    Err(e) => println("write error: " ++ e)
+  };
+  closeProcessStdin(handle)
+}
+```
+
+- `spawnProcess` spawns subprocess with writable stdin; stdout/stderr discarded
+- `writeProcessStdin` writes bytes (non-blocking, 256-slot buffer with backpressure)
+- `closeProcessStdin` signals EOF — subprocess sees end-of-input and exits
+- Requires `--caps Process` (NOT Stream — stdin writing uses Process effect only)
 
 ## String Parsing (Returns Option)
 
