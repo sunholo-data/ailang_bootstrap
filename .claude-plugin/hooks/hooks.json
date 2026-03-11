@@ -15,15 +15,8 @@
       {
         "hooks": [
           {
-            "type": "http",
-            "url": "${AILANG_OBSERVATORY_URL}/api/hooks/claude",
-            "headers": {
-              "X-Ailang-Task-Id": "${AILANG_TASK_ID}",
-              "X-Ailang-Chain-Id": "${AILANG_CHAIN_ID}",
-              "X-Ailang-Stage-Id": "${AILANG_STAGE_ID}",
-              "X-Ailang-Message-Id": "${AILANG_MESSAGE_ID}"
-            },
-            "allowedEnvVars": ["AILANG_OBSERVATORY_URL", "AILANG_TASK_ID", "AILANG_CHAIN_ID", "AILANG_STAGE_ID", "AILANG_MESSAGE_ID"],
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/observatory_hook.sh\" SessionStart",
             "timeout": 5
           }
         ]
@@ -34,15 +27,8 @@
         "matcher": "*",
         "hooks": [
           {
-            "type": "http",
-            "url": "${AILANG_OBSERVATORY_URL}/api/hooks/claude",
-            "headers": {
-              "X-Ailang-Task-Id": "${AILANG_TASK_ID}",
-              "X-Ailang-Chain-Id": "${AILANG_CHAIN_ID}",
-              "X-Ailang-Stage-Id": "${AILANG_STAGE_ID}",
-              "X-Ailang-Message-Id": "${AILANG_MESSAGE_ID}"
-            },
-            "allowedEnvVars": ["AILANG_OBSERVATORY_URL", "AILANG_TASK_ID", "AILANG_CHAIN_ID", "AILANG_STAGE_ID", "AILANG_MESSAGE_ID"],
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/observatory_hook.sh\" PreToolUse",
             "timeout": 5
           }
         ]
@@ -53,15 +39,8 @@
         "matcher": "*",
         "hooks": [
           {
-            "type": "http",
-            "url": "${AILANG_OBSERVATORY_URL}/api/hooks/claude",
-            "headers": {
-              "X-Ailang-Task-Id": "${AILANG_TASK_ID}",
-              "X-Ailang-Chain-Id": "${AILANG_CHAIN_ID}",
-              "X-Ailang-Stage-Id": "${AILANG_STAGE_ID}",
-              "X-Ailang-Message-Id": "${AILANG_MESSAGE_ID}"
-            },
-            "allowedEnvVars": ["AILANG_OBSERVATORY_URL", "AILANG_TASK_ID", "AILANG_CHAIN_ID", "AILANG_STAGE_ID", "AILANG_MESSAGE_ID"],
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/observatory_hook.sh\" PostToolUse",
             "timeout": 5
           }
         ]
@@ -72,15 +51,8 @@
         "matcher": "*",
         "hooks": [
           {
-            "type": "http",
-            "url": "${AILANG_OBSERVATORY_URL}/api/hooks/claude",
-            "headers": {
-              "X-Ailang-Task-Id": "${AILANG_TASK_ID}",
-              "X-Ailang-Chain-Id": "${AILANG_CHAIN_ID}",
-              "X-Ailang-Stage-Id": "${AILANG_STAGE_ID}",
-              "X-Ailang-Message-Id": "${AILANG_MESSAGE_ID}"
-            },
-            "allowedEnvVars": ["AILANG_OBSERVATORY_URL", "AILANG_TASK_ID", "AILANG_CHAIN_ID", "AILANG_STAGE_ID", "AILANG_MESSAGE_ID"],
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/observatory_hook.sh\" PostToolUseFailure",
             "timeout": 5
           }
         ]
@@ -90,15 +62,8 @@
       {
         "hooks": [
           {
-            "type": "http",
-            "url": "${AILANG_OBSERVATORY_URL}/api/hooks/claude",
-            "headers": {
-              "X-Ailang-Task-Id": "${AILANG_TASK_ID}",
-              "X-Ailang-Chain-Id": "${AILANG_CHAIN_ID}",
-              "X-Ailang-Stage-Id": "${AILANG_STAGE_ID}",
-              "X-Ailang-Message-Id": "${AILANG_MESSAGE_ID}"
-            },
-            "allowedEnvVars": ["AILANG_OBSERVATORY_URL", "AILANG_TASK_ID", "AILANG_CHAIN_ID", "AILANG_STAGE_ID", "AILANG_MESSAGE_ID"],
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/observatory_hook.sh\" SubagentStart",
             "timeout": 5
           }
         ]
@@ -108,15 +73,8 @@
       {
         "hooks": [
           {
-            "type": "http",
-            "url": "${AILANG_OBSERVATORY_URL}/api/hooks/claude",
-            "headers": {
-              "X-Ailang-Task-Id": "${AILANG_TASK_ID}",
-              "X-Ailang-Chain-Id": "${AILANG_CHAIN_ID}",
-              "X-Ailang-Stage-Id": "${AILANG_STAGE_ID}",
-              "X-Ailang-Message-Id": "${AILANG_MESSAGE_ID}"
-            },
-            "allowedEnvVars": ["AILANG_OBSERVATORY_URL", "AILANG_TASK_ID", "AILANG_CHAIN_ID", "AILANG_STAGE_ID", "AILANG_MESSAGE_ID"],
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/observatory_hook.sh\" SubagentStop",
             "timeout": 5
           }
         ]
@@ -126,15 +84,8 @@
       {
         "hooks": [
           {
-            "type": "http",
-            "url": "${AILANG_OBSERVATORY_URL}/api/hooks/claude",
-            "headers": {
-              "X-Ailang-Task-Id": "${AILANG_TASK_ID}",
-              "X-Ailang-Chain-Id": "${AILANG_CHAIN_ID}",
-              "X-Ailang-Stage-Id": "${AILANG_STAGE_ID}",
-              "X-Ailang-Message-Id": "${AILANG_MESSAGE_ID}"
-            },
-            "allowedEnvVars": ["AILANG_OBSERVATORY_URL", "AILANG_TASK_ID", "AILANG_CHAIN_ID", "AILANG_STAGE_ID", "AILANG_MESSAGE_ID"],
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/observatory_hook.sh\" Stop",
             "timeout": 5
           }
         ]
