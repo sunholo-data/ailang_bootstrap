@@ -16,6 +16,26 @@
       "name": "ailang-inbox",
       "source": "./skills/ailang-inbox",
       "description": "Cross-agent messaging - check messages, send notifications, track workflows"
+    },
+    {
+      "name": "website-builder",
+      "source": "./skills/website-builder",
+      "description": "Build websites from structured briefs - HTML/CSS generation, validation, Git workflow"
+    },
+    {
+      "name": "design-doc-creator",
+      "source": "./skills/design-doc-creator",
+      "description": "Create AILANG design documents with systemic analysis and axiom compliance"
+    },
+    {
+      "name": "sprint-planner",
+      "source": "./skills/sprint-planner",
+      "description": "Plan sprints from design docs with velocity analysis and milestone tracking"
+    },
+    {
+      "name": "sprint-executor",
+      "source": "./skills/sprint-executor",
+      "description": "Execute sprint plans with TDD, progress tracking, and parallel milestones"
     }
   ]
 }

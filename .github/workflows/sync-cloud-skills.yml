@@ -1,0 +1,81 @@
+name: Sync Cloud Agent Skills
+
+on:
+  # Check daily for skill updates (1 hour after release sync)
+  schedule:
+    - cron: '0 7 * * *'
+  # Manual trigger
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-skills:
+    name: Sync cloud agent skills from source repos
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sync from ailang repo
+        run: |
+          git clone --depth 1 --branch dev https://github.com/sunholo-data/ailang.git /tmp/ailang
+
+          for skill in design-doc-creator sprint-planner sprint-executor; do
+            if [ -d "/tmp/ailang/.claude/skills/$skill" ]; then
+              rm -rf "skills/$skill"
+              cp -r "/tmp/ailang/.claude/skills/$skill" "skills/$skill"
+              echo "Synced: $skill"
+            else
+              echo "Warning: $skill not found in ailang repo"
+            fi
+          done
+
+          rm -rf /tmp/ailang
+
+      - name: Sync website-builder from demos repo
+        run: |
+          git clone --depth 1 https://github.com/sunholo-data/ailang-demos.git /tmp/demos
+
+          # Try multiple possible locations for the website-builder skill
+          FOUND=false
+          for path in \
+            "/tmp/demos/website_builder/.claude/skills/website-builder" \
+            "/tmp/demos/.claude/skills/website-builder"; do
+            if [ -d "$path" ]; then
+              rm -rf skills/website-builder
+              cp -r "$path" skills/website-builder
+              echo "Synced: website-builder (from $path)"
+              FOUND=true
+              break
+            fi
+          done
+
+          if [ "$FOUND" = "false" ]; then
+            echo "Warning: website-builder skill not found in demos repo"
+          fi
+
+          rm -rf /tmp/demos
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No skill changes detected"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Skill changes detected:"
+            git diff --stat
+          fi
+
+      - name: Commit and push
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add skills/
+          git commit -m "Sync cloud agent skills from source repos"
+          git push
