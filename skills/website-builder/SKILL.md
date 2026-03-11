@@ -57,13 +57,13 @@ The portal sends a JSON brief with pre-extracted content:
    - Additional pages: `about.html`, `gallery.html`, `services.html`, `contact.html` etc.
    - `style.css` (shared stylesheet, linked from each page)
    - `images/` directory — copy relevant images from staging
-4. **Validate every HTML file**:
+4. **Validate every HTML file** (if validator available):
    ```bash
    ailang run --entry main --caps IO,Env \
-     /Users/mark/dev/sunholo/demos/website_builder/scripts/validate.ail \
+     scripts/validate.ail \
      sites/<user>/<site>/index.html
    ```
-   Fix any validation errors before proceeding.
+   If the validator script is not found, skip validation — the portal will validate on preview.
 5. **Git commit** on a working branch:
    ```bash
    git checkout -b build/<user>/<site>
@@ -137,8 +137,9 @@ These are checked by the AILANG validator and will cause the page to be blocked.
 
 ## File Paths
 
-- **Websites repo**: `~/dev/sunholo/sunholo-websites/`
-- **Staging**: `~/dev/sunholo/sunholo-websites/staging/<user>/<site>/`
-- **Output**: `~/dev/sunholo/sunholo-websites/sites/<user>/<site>/`
-- **Validator**: `/Users/mark/dev/sunholo/demos/website_builder/scripts/validate.ail`
-- **DocParse CLI**: `~/.local/bin/docparse` (for DOCX/PPTX/XLSX extraction)
+All paths are relative to the workspace root (the cloned `sunholo-websites` repo):
+
+- **Staging**: `staging/<user>/<site>/`
+- **Output**: `sites/<user>/<site>/`
+- **Validator**: `scripts/validate.ail` (if present in workspace)
+- **DocParse CLI**: `docparse` (if installed, otherwise skip document extraction)
