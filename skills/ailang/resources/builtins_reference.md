@@ -1,12 +1,17 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.9.0. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.9.1.1. Run `ailang builtins list --by-module` for latest.
 
 ```
-# $builtin (4)
+# $builtin (9)
+  _list_contains                 [pure]
+  _list_drop                     [pure]
+  _list_extract                  [pure]
   _list_head                     [pure]
   _list_length                   [pure]
   _list_nth                      [pure]
+  _list_reverse                  [pure]
+  _list_take                     [pure]
   show                           [pure]
 
 # core (2)
