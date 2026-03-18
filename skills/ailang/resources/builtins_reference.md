@@ -1,17 +1,25 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.9.1.1. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.9.2. Run `ailang builtins list --by-module` for latest.
 
 ```
-# $builtin (9)
+# $builtin (17)
   _list_contains                 [pure]
+  _list_dedup                    [pure]
+  _list_difference               [pure]
   _list_drop                     [pure]
   _list_extract                  [pure]
+  _list_filter                   [pure]
+  _list_foldl                    [pure]
   _list_head                     [pure]
+  _list_intersect                [pure]
   _list_length                   [pure]
+  _list_map                      [pure]
+  _list_member                   [pure]
   _list_nth                      [pure]
   _list_reverse                  [pure]
   _list_take                     [pure]
+  _list_union                    [pure]
   show                           [pure]
 
 # core (2)
@@ -69,10 +77,11 @@
   _env_getEnv                    [env]
   _env_hasEnv                    [env]
 
-# std/fs (7)
+# std/fs (8)
   _fs_appendFile                 [fs]
   _fs_appendFileBytes            [fs]
   _fs_exists                     [fs]
+  _fs_listDir                    [fs]
   _fs_readFile                   [fs]
   _fs_readFileBytes              [fs]
   _fs_writeFile                  [fs]
@@ -213,19 +222,24 @@
   _stream_status                 [stream]
   _stream_transmit_binary        [stream]
 
-# std/string (18)
+# std/string (23)
+  _str_charAt                    [pure]
   _str_chars                     [pure]
   _str_compare                   [pure]
   _str_endsWith                  [pure]
   _str_eq                        [pure]
   _str_find                      [pure]
+  _str_foldChars                 [pure]
+  _str_join                      [pure]
   _str_len                       [pure]
   _str_lower                     [pure]
   _str_slice                     [pure]
   _str_split                     [pure]
+  _str_splitAny                  [pure]
   _str_startsWith                [pure]
   _str_trim                      [pure]
   _str_upper                     [pure]
+  _str_words                     [pure]
   _stringToFloat                 [pure]
   _stringToInt                   [pure]
   _string_floatToStr             [pure]
@@ -233,16 +247,23 @@
   _string_reverse                [pure]
   concat_String                  [pure]
 
-# std/xml (7)
+# std/xml (13)
   _xml_findAll                   [pure]
+  _xml_findAllAttrs              [pure]
+  _xml_findAllTexts              [pure]
   _xml_findFirst                 [pure]
   _xml_getAttr                   [pure]
   _xml_getChildren               [pure]
   _xml_getTag                    [pure]
   _xml_getText                   [pure]
   _xml_parse                     [pure]
+  _xml_parseElements             [pure]
+  _xml_parseWithLimit            [pure]
+  _xml_serialize                 [pure]
+  _xml_serializeWithDecl         [pure]
 
-# std/zip (3)
+# std/zip (4)
+  _zip_createArchive             [fs]
   _zip_listEntries               [fs]
   _zip_readEntry                 [fs]
   _zip_readEntryBytes            [fs]
