@@ -520,3 +520,5 @@ The dashboard provides:
 - Agent activity timeline
 - Workflow visualization
 - Message filtering and search
+
+**Docs**: https://ailang.sunholo.com/docs/guides/agent-integration

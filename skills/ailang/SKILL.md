@@ -242,6 +242,7 @@ ailang publish
 - See [cli_reference.md](resources/cli_reference.md) for full CLI docs
 - See [editor_support.md](resources/editor_support.md) for VS Code, Vim, Neovim setup
 - Check the [ailang-debug](../ailang-debug/SKILL.md) skill for error fixes
+- **Docs**: https://ailang.sunholo.com/docs/guides/getting-started
 
 ## Done? Notify
 
