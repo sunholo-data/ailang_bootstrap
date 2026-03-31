@@ -1,5 +1,5 @@
 ---
-name: AILANG
+name: ailang
 description: Write AILANG code. ALWAYS run 'ailang prompt' first - it contains the current syntax rules and templates.
 ---
 

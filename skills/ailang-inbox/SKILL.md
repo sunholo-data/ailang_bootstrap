@@ -1,5 +1,5 @@
 ---
-name: AILANG Inbox
+name: ailang-inbox
 description: Cross-agent communication system with semantic search and GitHub sync. Check messages, find similar content, deduplicate, and sync with GitHub Issues for AI workflows across sessions.
 ---
 

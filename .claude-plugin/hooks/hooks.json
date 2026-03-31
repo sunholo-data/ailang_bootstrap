@@ -1,5 +1,5 @@
 {
-  "description": "AILANG agent hooks - message checking + Observatory telemetry",
+  "description": "AILANG agent hooks - message checking, brain capture + Observatory telemetry",
   "hooks": {
     "SessionStart": [
       {
@@ -9,6 +9,15 @@
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/session_start.sh\"",
             "timeout": 10
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/brain_session.sh\"",
+            "timeout": 5
           }
         ]
       },
@@ -45,6 +54,16 @@
       }
     ],
     "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/brain_resolution.sh\"",
+            "timeout": 5
+          }
+        ]
+      },
       {
         "matcher": "*",
         "hooks": [

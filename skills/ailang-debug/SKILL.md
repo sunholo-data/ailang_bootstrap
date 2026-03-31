@@ -1,5 +1,5 @@
 ---
-name: AILANG Debug
+name: ailang-debug
 description: Debug AILANG code errors. Use when you encounter type errors, parse errors, or runtime failures in AILANG programs.
 ---
 
