@@ -1447,7 +1447,7 @@
       "description": "Record pattern matching in contracts — Z3 verifies match expressions that destructure records into field bindings"
     },
     {
-      "path": "runnable/contracts/list_recursive_verify.ail",
+      "path": "expected_fail/contracts/list_recursive_verify.ail",
       "status": "working",
       "tags": [
         "contracts",
@@ -1461,7 +1461,7 @@
       "description": "Recursive list operation contracts — Z3 proves containment and extraction properties using seq.contains and seq.extract"
     },
     {
-      "path": "runnable/contracts/per_function_depth_verify.ail",
+      "path": "expected_fail/contracts/per_function_depth_verify.ail",
       "status": "working",
       "tags": [
         "contracts",
@@ -1474,7 +1474,7 @@
       "description": "Per-function recursion depth — @verify(depth: N) attribute overrides global --verify-recursive-depth for individual functions"
     },
     {
-      "path": "runnable/contracts/hof_verify.ail",
+      "path": "expected_fail/contracts/hof_verify.ail",
       "status": "working",
       "tags": [
         "contracts",
@@ -1489,7 +1489,7 @@
       "description": "Higher-order function verification — Z3 proves properties about map/filter with known lambdas via monomorphic inlining and bounded unrolling"
     },
     {
-      "path": "runnable/contracts/quantifier_verify.ail",
+      "path": "expected_fail/contracts/quantifier_verify.ail",
       "status": "working",
       "tags": [
         "contracts",

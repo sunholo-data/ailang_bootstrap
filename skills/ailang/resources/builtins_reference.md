@@ -1,9 +1,9 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.9.2. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.10.0. Run `ailang builtins list --by-module` for latest.
 
 ```
-# $builtin (17)
+# $builtin (19)
   _list_contains                 [pure]
   _list_dedup                    [pure]
   _list_difference               [pure]
@@ -19,6 +19,8 @@
   _list_nth                      [pure]
   _list_reverse                  [pure]
   _list_take                     [pure]
+  _list_takeFlatMap              [pure]
+  _list_takeMap                  [pure]
   _list_union                    [pure]
   show                           [pure]
 
@@ -26,8 +28,10 @@
   _float_to_int                  [pure]
   _int_to_float                  [pure]
 
-# std/ai (4)
+# std/ai (6)
   _ai_call                       [ai]
+  _ai_call_image                 [ai]
+  _ai_call_image_base64          [ai]
   _ai_call_json                  [ai]
   _ai_call_json_simple           [ai]
   _ollama_embed                  [io]
@@ -41,13 +45,16 @@
   _array_to_list                 [pure]
   _array_unsafe_get              [pure]
 
-# std/bytes (9)
+# std/bytes (12)
   _bytes_concat                  [pure]
   _bytes_concat_list             [pure]
+  _bytes_filename                [pure]
   _bytes_from_base64             [pure]
+  _bytes_from_base64url          [pure]
   _bytes_from_ints               [pure]
   _bytes_from_string             [pure]
   _bytes_length                  [pure]
+  _bytes_mime_type               [pure]
   _bytes_slice                   [pure]
   _bytes_to_base64               [pure]
   _bytes_to_string               [pure]
@@ -55,6 +62,13 @@
 # std/clock (2)
   _clock_now                     [clock]
   _clock_sleep                   [clock]
+
+# std/crypto (5)
+  _crypto_constanttimeequal      [pure]
+  _crypto_hmacsha256             [pure]
+  _crypto_rsa_verify_pkcs1v15    [pure]
+  _crypto_sha256bytes            [pure]
+  _crypto_sha256hex              [pure]
 
 # std/datetime (10)
   _dt_add                        [pure]
@@ -77,13 +91,18 @@
   _env_getEnv                    [env]
   _env_hasEnv                    [env]
 
-# std/fs (8)
+# std/fs (13)
   _fs_appendFile                 [fs]
   _fs_appendFileBytes            [fs]
   _fs_exists                     [fs]
+  _fs_isDir                      [fs]
+  _fs_isFile                     [fs]
   _fs_listDir                    [fs]
+  _fs_mkdir                      [fs]
+  _fs_mkdirAll                   [fs]
   _fs_readFile                   [fs]
   _fs_readFileBytes              [fs]
+  _fs_removeFile                 [fs]
   _fs_writeFile                  [fs]
   _fs_writeFileBytes             [fs]
 
@@ -91,6 +110,10 @@
   _game_delta_time               [clock]
   _game_frame_count              [clock]
   _game_total_time               [clock]
+
+# std/http (2)
+  _get_header                    [pure]
+  _has_header                    [pure]
 
 # std/io (4)
   _io_print                      [io]
@@ -177,11 +200,12 @@
   _process_spawn_process         [process]
   _process_write_stdin           [process]
 
-# std/rand (4)
+# std/rand (5)
   _rand_bool                     [rand]
   _rand_float                    [rand]
   _rand_int                      [rand]
   _rand_seed                     [rand]
+  _uuid4                         [rand]
 
 # std/sem (2)
   _embedding_decode              [pure]
@@ -222,7 +246,7 @@
   _stream_status                 [stream]
   _stream_transmit_binary        [stream]
 
-# std/string (23)
+# std/string (24)
   _str_charAt                    [pure]
   _str_chars                     [pure]
   _str_compare                   [pure]
@@ -233,6 +257,7 @@
   _str_join                      [pure]
   _str_len                       [pure]
   _str_lower                     [pure]
+  _str_replace                   [pure]
   _str_slice                     [pure]
   _str_split                     [pure]
   _str_splitAny                  [pure]
@@ -247,7 +272,14 @@
   _string_reverse                [pure]
   concat_String                  [pure]
 
-# std/xml (13)
+# std/trace_test (1)
+  _trace_check                   [pure]
+
+# std/xml (17)
+  _escapeXml                     [pure]
+  _xmlComment                    [pure]
+  _xmlElement                    [pure]
+  _xmlText                       [pure]
   _xml_findAll                   [pure]
   _xml_findAllAttrs              [pure]
   _xml_findAllTexts              [pure]
@@ -262,13 +294,11 @@
   _xml_serialize                 [pure]
   _xml_serializeWithDecl         [pure]
 
-# std/zip (4)
+# std/zip (5)
   _zip_createArchive             [fs]
+  _zip_createArchiveWithBytes    [fs]
   _zip_listEntries               [fs]
   _zip_readEntry                 [fs]
   _zip_readEntryBytes            [fs]
-
-# stdlib/trace_test (1)
-  _trace_check                   [pure]
 
 ```
