@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Purpose
 
-This repository serves as a bootstrap/plugin package for AILANG, enabling AI coding agents (Claude Code, Gemini CLI) to easily import and use AILANG capabilities.
+This repository serves as a bootstrap/plugin package for AILANG, enabling AI coding agents (Claude Code, Gemini CLI, Codex CLI) to easily import and use AILANG capabilities.
 
 ## Structure
 
@@ -13,6 +13,9 @@ ailang_bootstrap/
 ├── .claude-plugin/
 │   ├── plugin.json         # Claude Code plugin manifest
 │   └── marketplace.json    # Skills marketplace
+├── .codex-plugin/
+│   └── plugin.json         # Codex CLI plugin manifest
+├── .mcp.json               # MCP server config for Codex (shared JSON format)
 ├── gemini-extension.json   # Gemini CLI extension manifest
 ├── GEMINI.md               # Gemini CLI context file
 ├── commands/               # Slash commands (DISTRIBUTED with plugin)
@@ -53,11 +56,12 @@ When users install this plugin, they get:
 
 They do NOT get `.claude/commands/` - those are for repo maintainers only.
 
-## Dual Distribution
+## Distribution Targets
 
-This repo supports both:
+This repo supports three AI coding agent platforms:
 - **Claude Code Plugin**: Via `.claude-plugin/plugin.json` and `skills/` directory
 - **Gemini CLI Extension**: Via `gemini-extension.json` manifest with platform-specific binary bundles
+- **OpenAI Codex CLI Plugin**: Via `.codex-plugin/plugin.json` with shared `skills/` and `.mcp.json`
 
 ## Release Process
 
@@ -110,6 +114,9 @@ Use `/branch` to check status and `/promote` to move changes through the pipelin
 ```bash
 # Test skills locally (Claude Code)
 claude plugin add ./
+
+# Test skills locally (Codex CLI)
+codex plugin add ./
 
 # Check branch status
 /branch

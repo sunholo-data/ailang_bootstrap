@@ -1,0 +1,13 @@
+{
+  "name": "ailang",
+  "version": "0.7.3",
+  "description": "AILANG - A deterministic programming language designed for AI code synthesis and reasoning",
+  "author": { "name": "Holosun ApS" },
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "AILANG",
+    "shortDescription": "Write, run, and develop with AILANG",
+    "category": "development"
+  }
+}

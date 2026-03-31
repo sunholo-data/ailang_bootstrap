@@ -1,5 +1,5 @@
 ---
-name: AILANG Sprint Executor
+name: ailang-sprint-executor
 description: Execute approved sprint plans with test-driven development, continuous linting, progress tracking, and pause points. Supports parallel milestone execution via Task sub-agents. Use when user says "execute sprint", "start sprint", or wants to implement an approved sprint plan.
 ---
 

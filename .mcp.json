@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "ailang-tools": {
+      "command": "bash",
+      "args": ["mcp-server/start.sh"],
+      "cwd": "."
+    }
+  }
+}

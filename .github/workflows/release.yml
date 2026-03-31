@@ -91,6 +91,8 @@ jobs:
               gemini-extension.json \
               GEMINI.md \
               .claude-plugin/ \
+              .codex-plugin/ \
+              .mcp.json \
               skills/ \
               bin/ \
               README.md \
@@ -101,6 +103,8 @@ jobs:
               gemini-extension.json \
               GEMINI.md \
               .claude-plugin/ \
+              .codex-plugin/ \
+              .mcp.json \
               skills/ \
               bin/ \
               README.md \

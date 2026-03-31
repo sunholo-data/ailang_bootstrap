@@ -1,5 +1,5 @@
 ---
-name: AILANG
+name: ailang
 description: Write AILANG code. ALWAYS run 'ailang prompt' first - it contains the current syntax rules and templates.
 ---
 
@@ -67,32 +67,66 @@ ailang --version
 | `ailang check file.ail` | Type-check without running |
 | `ailang run --caps IO --entry main file.ail` | Run program |
 | `ailang repl` | Interactive testing |
-| `ailang builtins list --verbose --by-module` | **Full stdlib docs with examples** |
+| `ailang docs --list` | **List all stdlib modules** |
+| `ailang docs std/array` | **Show module exports and signatures** |
+| `ailang builtins list --verbose --by-module` | Full stdlib docs with examples |
 | `ailang examples search "query"` | **Find working code examples (v0.6.2+)** |
 | `ailang examples show NAME` | View example with expected output |
+| `ailang search "query"` | Search package registry |
+| `ailang install vendor/name` | Install a package |
+| `ailang pkg-docs vendor/name` | View package AI usage guide |
 
 ## Exploring the Standard Library
 
-**The CLI is the source of truth.** Always use `ailang builtins list --verbose` for current, accurate documentation:
+**The CLI is the source of truth.** Use `ailang docs` for module-level docs and `ailang builtins list --verbose` for all builtins:
 
 ```bash
-# SOURCE OF TRUTH: Full docs with examples and signatures
-ailang builtins list --verbose --by-module
+# List all available stdlib modules
+ailang docs --list
 
-# Search for specific module (e.g., array functions)
-ailang builtins list --verbose --by-module | grep -A 30 "std/array"
+# Show full exports + signatures for a module (PREFER THIS)
+ailang docs std/string
+ailang docs std/json
+ailang docs std/stream
+
+# Full builtins with examples and signatures
+ailang builtins list --verbose --by-module
 
 # Search for specific function
 ailang builtins list --verbose | grep -A 10 "httpGet"
 ```
 
-The CLI output shows the authoritative documentation:
-- **Usage:** Exact import statement (`import std/fs (readFile)`)
-- **Parameters:** What each argument expects
-- **Returns:** What the function returns
-- **Examples:** Working code snippets
+**Key stdlib modules (v0.10.0):**
+| Module | Purpose |
+|--------|---------|
+| `std/ai` | LLM calls via `call(prompt)` |
+| `std/array` | O(1) indexed arrays |
+| `std/bytes` | UTF-8 / base64 operations |
+| `std/clock` | Time and sleep |
+| `std/crypto` | Cryptographic operations |
+| `std/datetime` | Pure date/time manipulation |
+| `std/debug` | Structured tracing and assertions |
+| `std/embedding` | Embedding vectors |
+| `std/env` | Environment variables |
+| `std/fs` | File read/write |
+| `std/io` | Print / stdin |
+| `std/json` | JSON encode/decode |
+| `std/jwt` | JWT parsing and verification |
+| `std/list` | Functional list ops (map, filter, fold) |
+| `std/map` | O(1) key-value maps |
+| `std/math` | Trig, log, rounding |
+| `std/net` | HTTP requests |
+| `std/option` | Optional values |
+| `std/process` | Execute external commands |
+| `std/rand` | Random numbers |
+| `std/result` | Success/failure results |
+| `std/sem` | Semantic frame caching |
+| `std/sharedindex` | Namespace-partitioned similarity indexing |
+| `std/sharedmem` | SharedMem effect wrappers |
+| `std/simhash` | SimHash fingerprinting |
+| `std/stream` | WebSocket / SSE streaming |
 
-**Note:** This skill provides guidance, but `ailang prompt` and `ailang builtins list --verbose` are always more up-to-date.
+**Note:** This skill provides guidance, but `ailang prompt` and `ailang docs` are always more up-to-date.
 
 ## Finding Working Examples (v0.6.2+)
 
@@ -180,6 +214,26 @@ export func main(path: string) -> () ! {IO, FS, AI} {
 }
 ```
 
+## Packages & Registry
+
+Install and use community packages from the AILANG registry:
+
+```bash
+# Discover packages
+ailang search "auth"              # Search by keyword
+ailang search --tag gcp           # Browse by tag
+ailang pkg-docs sunholo/auth      # View AI usage guide for a package
+
+# Use a package
+ailang install sunholo/auth@0.1.0
+ailang add --registry sunholo/auth@0.1.0  # Add as dependency
+
+# Publish a package
+ailang init package --name vendor/name    # Create ailang.toml
+ailang publish --dry-run                  # Preview
+ailang publish
+```
+
 ## When Stuck
 
 - Run `ailang devtools-prompt` for full toolchain reference (debugging, tracing, eval, chains, coordinator)
@@ -188,6 +242,7 @@ export func main(path: string) -> () ! {IO, FS, AI} {
 - See [cli_reference.md](resources/cli_reference.md) for full CLI docs
 - See [editor_support.md](resources/editor_support.md) for VS Code, Vim, Neovim setup
 - Check the [ailang-debug](../ailang-debug/SKILL.md) skill for error fixes
+- **Docs**: https://ailang.sunholo.com/docs/guides/getting-started
 
 ## Done? Notify
 

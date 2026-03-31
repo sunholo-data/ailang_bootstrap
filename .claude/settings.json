@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:developers.openai.com)"
+    ],
+    "additionalDirectories": [
+      "/Users/mark/dev/sunholo/ailang/docs/docs/guides"
+    ]
+  }
+}
