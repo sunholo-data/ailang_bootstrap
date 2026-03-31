@@ -88,6 +88,7 @@ All milestones have been completed and tests pass.
 6. **DX-First**: Improve AILANG development experience as we go - make it easier next time
 7. **Parallelize When Possible**: Independent milestones run as concurrent Task sub-agents for speed
 8. **Failing Tests First**: Sub-agents MUST write failing tests before implementation — no exceptions
+9. **Determinism Verified**: Pure builtins (`IsPure: true`) MUST be tested with `-count=20` — single-pass tests hide Go map iteration nondeterminism. Use realistic inputs, not toy examples. See [milestone_checklist.md](resources/milestone_checklist.md) for details.
 
 ## Multi-Session Continuity (NEW)
 
@@ -251,16 +252,13 @@ After Phase 1 initialization, choose between sequential or parallel execution ba
 2. **Implement** - Write code with DX awareness (helper functions, debug flags, better errors)
 3. **Write Tests** - TDD recommended for complex logic, comprehensive coverage required
 4. **Verify Quality** - Run `milestone_checkpoint.sh <milestone-name>` (tests + lint must pass)
-5. **Update Documentation**:
-   - Active changelog in `changelogs/` (what, LOC, key decisions) — find active file with `ls changelogs/ | grep current`
-   - Example files (REQUIRED for new language features):
-     - Create `examples/runnable/<feature>.ail` with comprehensive examples
-     - Add entry to `examples/manifest.json` (path, status, tags, description)
-     - Update statistics in manifest (total, working counts)
-     - Verify searchable: `ailang examples search "<feature>"`
-   - Sprint plan markdown (mark milestone as ✅)
-6. **Update Sprint JSON** ⚠️ **CRITICAL** - The checkpoint script reminds you!
-   - Update `passes: true/false` in `.ailang/state/sprints/sprint_<id>.json`
+5. **Write Documentation** (evaluator verifies completeness):
+   - CHANGELOG entry in `changelogs/` — find active file with `ls changelogs/ | grep current`
+   - Example files for new language features: `examples/runnable/<feature>.ail`
+   - Update `examples/manifest.json` if adding examples
+   - Mark milestone as ✅ in sprint plan markdown
+6. **Update Sprint JSON**:
+   - Set `passes: true/false` in `.ailang/state/sprints/sprint_<id>.json`
    - Set `completed: "<ISO timestamp>"`
    - Add `notes: "<summary of what was done>"`
 7. **DX Reflection** - Identify and implement quick wins (<15 min), defer larger improvements
@@ -520,17 +518,52 @@ Create `docs/sprint-retros/<sprint-id>-retro.md` with:
 
 ### Phase 4: Finalize Sprint
 
-1. **Final Testing** - Run `make test`, `make lint`, `make test-coverage-badge`
-2. **Documentation Review** - Verify CHANGELOG.md, example files, sprint plan complete
-3. **Example Manifest** - For new language features, verify `examples/manifest.json` updated
-4. **Final Commit** - Git commit with sprint summary (milestones, LOC, velocity)
-5. **Move Design Docs** - Run `finalize_sprint.sh <sprint-id> [version]` to:
-   - Move design docs from `planned/` to `implemented/<version>/`
-   - Update design doc status to IMPLEMENTED
-   - Update sprint JSON status to "completed"
-   - Update file paths in sprint JSON
-6. **Summary Report** - Compare planned vs actual (LOC, time, velocity)
-7. **DX Impact Summary** - Document improvements made during sprint
+1. **Final Commit** - Git commit with sprint summary (milestones, LOC, velocity)
+2. **Summary Report** - Compare planned vs actual (LOC, time, velocity)
+3. **DX Impact Summary** - Document improvements made during sprint
+
+**Note:** Documentation verification, design doc moves, and quality checks are handled by the
+sprint-evaluator in Phase 5. The executor focuses on implementation — the evaluator judges it.
+
+### Phase 5: Hand Off to sprint-evaluator
+
+**CRITICAL: After finalizing a sprint, ALWAYS hand off to sprint-evaluator for independent quality assessment.**
+
+Based on [Anthropic's generator-evaluator architecture](https://www.anthropic.com/engineering/harness-design-long-running-apps) — separating the agent doing the work from the agent judging it is "a strong lever" for quality.
+
+This is the standard workflow:
+1. **sprint-executor** (this skill): Implements the plan with TDD
+2. **sprint-evaluator** (quality judge): Independently evaluates implementation against design doc and acceptance criteria
+
+**Send handoff message:**
+```bash
+ailang messages send sprint-evaluator '{
+  "type": "implementation_complete",
+  "correlation_id": "eval_<sprint-id>_<date>",
+  "sprint_id": "<sprint-id>",
+  "branch_name": "<branch>",
+  "sprint_json_path": ".ailang/state/sprints/sprint_<id>.json",
+  "design_doc_path": "<path to design doc>",
+  "files_created": [...],
+  "files_modified": [...],
+  "evaluation_round": 1
+}' --title "Sprint <sprint-id> ready for evaluation" --from "sprint-executor"
+```
+
+**Why separate evaluation?**
+- Agents doing work struggle with self-evaluation ("confidently praise work even when mediocre")
+- Concrete scoring rubric (100 points, 70 to pass) catches issues executor may miss
+- Feedback loop drives quality: fail → specific feedback → retry (max 3 rounds)
+
+### Handling Evaluation Feedback
+
+**If session starts with an `evaluation_feedback` message:**
+1. Read the feedback: `ailang messages read MSG_ID`
+2. Parse the specific issues (files, criteria, suggestions)
+3. Address each issue in priority order (high severity first)
+4. Re-run `milestone_checkpoint.sh` for affected milestones
+5. Re-run `finalize_sprint.sh`
+6. Hand off to sprint-evaluator again (increment evaluation_round)
 
 ## Key Features
 
@@ -693,7 +726,7 @@ coordinator:
       inbox: sprint-executor
       workspace: /path/to/ailang
       capabilities: [code, test, docs]
-      trigger_on_complete: []  # End of chain
+      trigger_on_complete: [sprint-evaluator]  # Evaluator judges implementation
       auto_approve_handoffs: false
       auto_merge: false
       session_continuity: true

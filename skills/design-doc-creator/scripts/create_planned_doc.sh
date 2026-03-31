@@ -20,16 +20,20 @@ NC='\033[0m' # No Color
 
 # Get current version from changelogs/ or std/VERSION
 get_current_version() {
-    # Try std/VERSION first (canonical source)
+    # Try std/VERSION first (canonical source), skip if set to "dev"
     local VERSION_FILE="$PROJECT_ROOT/std/VERSION"
     if [ -f "$VERSION_FILE" ]; then
-        cat "$VERSION_FILE" | tr -d '[:space:]'
-        return
+        local ver
+        ver=$(cat "$VERSION_FILE" | tr -d '[:space:]')
+        if [ "$ver" != "dev" ] && [ -n "$ver" ]; then
+            echo "$ver"
+            return
+        fi
     fi
     # Fall back to scanning changelogs/ for latest version header
     local CHANGELOGS_DIR="$PROJECT_ROOT/changelogs"
     if [ -d "$CHANGELOGS_DIR" ]; then
-        grep -roE 'v[0-9]+\.[0-9]+\.[0-9]+' "$CHANGELOGS_DIR"/*.md 2>/dev/null | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | sort -V | tail -1
+        grep -hE '^## \[v[0-9]+\.[0-9]+\.[0-9]+\]' "$CHANGELOGS_DIR"/*.md 2>/dev/null | grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+' | sort -V | tail -1
         return
     fi
     echo "unknown"
@@ -38,11 +42,17 @@ get_current_version() {
 # Compute next patch version (e.g., v0.5.6 -> v0_5_7)
 get_next_version_folder() {
     local current="$1"
+    # Handle non-semver values (e.g., "dev")
+    if ! echo "$current" | grep -qE '^v?[0-9]+\.[0-9]+'; then
+        echo "v0_0_1"
+        return
+    fi
     # Extract major.minor.patch
     local version="${current#v}"  # Remove 'v' prefix
     local major=$(echo "$version" | cut -d. -f1)
     local minor=$(echo "$version" | cut -d. -f2)
     local patch=$(echo "$version" | cut -d. -f3)
+    patch="${patch:-0}"  # Default to 0 if missing
     # Increment patch
     local next_patch=$((patch + 1))
     # Return folder format (v0_5_7)
@@ -269,6 +279,29 @@ Every feature must align with AILANG's 12 Design Axioms. Score each axiom and ve
 - [Measurable outcome 2]
 - [Measurable outcome 3]
 
+## High-Impact Decisions
+
+<!-- What choices are being made? Not "what we're building" (that's Solution Design) but
+     "what we're deciding." Chosen By: human = needs approval, agent = implementer decides,
+     compiler = language semantics decide. Deadline: design = before coding, compile = before
+     shipping, runtime = may remain flexible. Change Cost: high = architectural ripple,
+     med = multi-file, low = localized. Aim for 3-7 rows. -->
+
+| Decision | Why High Impact | Chosen By | Deadline | Change Cost |
+|----------|-----------------|-----------|----------|-------------|
+| [Decision 1] | [Why it matters] | [human/agent/compiler] | [design/compile/runtime] | [high/med/low] |
+| [Decision 2] | [Why it matters] | [human/agent/compiler] | [design/compile/runtime] | [high/med/low] |
+
+### Design Freeze
+
+<!-- Every "high" change-cost decision above must appear here as a checkbox.
+     Unchecked items = sprint-executor should PAUSE for human input. -->
+
+Before implementation begins, these must be resolved:
+
+- [ ] [Decision that must be made before coding]
+- [ ] [Decision that must be made before coding]
+
 ## Solution Design
 
 ### Overview
@@ -347,10 +380,21 @@ Every feature must align with AILANG's 12 Design Axioms. Score each axiom and ve
 **Manual testing:**
 - [What to verify manually]
 
+## Deferred Decisions
+
+<!-- NOT the same as Non-Goals. Non-Goals = "we won't do X."
+     Deferred Decisions = "we WILL do X but haven't decided HOW yet."
+     This tells agents where they have latitude. Always say who may resolve. -->
+
+The following are intentionally left open for the implementer:
+
+- [Decision 1] — [who may resolve, e.g., "agent may choose"]
+- [Decision 2] — [who may resolve]
+
 ## Non-Goals
 
-**Not in this feature:**
-- [Thing 1] - [Why deferred]
+**Not attempted in this feature:**
+- [Thing 1] - [Why out of scope]
 - [Thing 2] - [Why out of scope]
 
 ## Timeline
@@ -460,13 +504,11 @@ echo "  1. Edit $DOC_PATH to fill in the template"
 echo "  2. Replace [placeholders] with actual content"
 echo "  3. Commit when ready: git add $DOC_PATH"
 echo ""
-echo -e "${YELLOW}Pro tips:${NC}"
-echo "  - Complete the Axiom Compliance section (score all 12 axioms)"
-echo "  - Hard violations on A1/A3/A4/A7 = automatic rejection"
-echo "  - Net axiom score must be ≥ +2 to proceed"
-echo "  - Use M-XXX naming for milestone features"
-echo "  - Include concrete examples and metrics"
-echo "  - Keep estimates realistic (2x your initial guess)"
+echo -e "${YELLOW}Key sections to fill:${NC}"
+echo "  - High-Impact Decisions: name the actual choices, who decides, change cost"
+echo "  - Design Freeze: check off decisions before sprint-executor starts"
+echo "  - Deferred Decisions: grant agent latitude (separate from Non-Goals)"
+echo "  - Axiom Compliance: score all 12, net ≥ +2, no -1 on A1/A3/A4/A7"
 echo ""
 # Output coordinator markers (deterministic - script knows exactly what was created)
 echo "---"
