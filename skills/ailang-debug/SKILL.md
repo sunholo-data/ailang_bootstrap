@@ -146,3 +146,5 @@ export func myMap[a,b](f: func(a) -> b, xs: [a]) -> [b] {
 **Always prefer CLI commands** (`ailang prompt`, `ailang builtins list --verbose`) over static docs - they're always up-to-date.
 
 See [resources/error_catalog.md](resources/error_catalog.md) for additional error patterns.
+
+**Docs**: https://ailang.sunholo.com/docs/reference/language-syntax

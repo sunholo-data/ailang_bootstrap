@@ -29,8 +29,12 @@ ailang messages list --inbox user --unread
 | `ailang messages ack MSG_ID` | Mark as read |
 | `ailang messages ack --all` | Mark all as read |
 | `ailang messages read MSG_ID` | View full message |
+| `ailang messages reply MSG_ID "text"` | Reply to GitHub issue thread |
+| `ailang messages forward MSG_ID --to inbox` | Forward to another inbox |
+| `ailang messages triage` | Cluster unread messages by intent |
 | `ailang messages search "query"` | Semantic search (SimHash) |
 | `ailang messages search "query" --neural` | Neural search (Ollama) |
+| `ailang messages search --space code "path"` | Search specific envelope slot |
 | `ailang messages dedupe` | Find duplicate messages |
 | `ailang messages dedupe --apply` | Mark duplicates |
 
@@ -216,6 +220,98 @@ Track related messages across agent handoffs:
   "priority": "high"
 }
 ```
+
+## Triage (v0.10.0+)
+
+Cluster unread messages by similarity to understand what's in your inbox at a glance:
+
+```bash
+# Cluster by intent (default) — "what are people asking about?"
+ailang messages triage
+
+# Cluster by code region — "which files are affected?"
+ailang messages triage --cluster-by code
+
+# Cluster by context — "what were senders working on?"
+ailang messages triage --cluster-by context
+
+# Show top 5 clusters only
+ailang messages triage --top 5
+
+# JSON output for programmatic use
+ailang messages triage --json
+```
+
+## Reply and Forward
+
+```bash
+# Reply to a GitHub issue thread associated with a message
+ailang messages reply MSG_ID "Fixed in v0.10.0" --from claude-code
+
+# Forward a message to another inbox
+ailang messages forward MSG_ID --to sprint-executor
+ailang messages forward MSG_ID --to coordinator --reason "Label changed"
+```
+
+## Semantic Envelope (v0.8.1+)
+
+Messages carry multi-aspect embedding vectors — 5 named slots searchable independently:
+
+| Slot | Set by | Meaning |
+|------|--------|---------|
+| `intent` | Auto (title + payload) | What is being asked? |
+| `code` | `--envelope-code <files>` | Which code is affected? |
+| `context` | `--envelope-context <desc>` | What was the sender working on? |
+| `skill` | Builder API | What expertise is needed? |
+| `resolution` | Auto on completion | How was this resolved? |
+
+```bash
+# Send with code envelope
+ailang messages send executor "Fix bug" --envelope-code internal/types/unify.go
+ailang messages send executor "Fix bug" --envelope-code "src/a.ail,src/b.ail"
+
+# Auto-detect from git modified files
+ailang messages send executor "Fix bug"   # --envelope-code defaults to git changes
+
+# Skip envelope entirely
+ailang messages send executor "Fix bug" --no-envelope
+
+# Add context envelope
+ailang messages send executor "Fix bug" --envelope-context "reviewing AST switches"
+
+# Search a specific slot
+ailang messages search --space code "internal/types"
+ailang messages search --space intent "fix crash"
+ailang messages search --space resolution "parser"
+```
+
+Requires an embeddings provider in `~/.ailang/config.yaml` (ollama, openai, or gemini).
+
+## Package Coordination Messages
+
+Packages use structured inbox addressing:
+
+| Address | Meaning |
+|---------|---------|
+| `pkg:vendor/name` | Package inbox |
+| `workspace:name` | Workspace inbox |
+| `team:name` | Team inbox |
+
+```bash
+# Send to a package inbox
+ailang messages send pkg:sunholo/auth "New version available"
+
+# Notify dependents of an upgrade (creates typed envelope)
+ailang pkg notify-upgrade sunholo/auth@0.2.0
+
+# List workspaces depending on a package
+ailang pkg affected-by sunholo/auth
+```
+
+Typed envelopes used by publish/install workflows:
+`upgrade-available`, `interface-change-notice`, `effect-widening-warning`,
+`compatibility-report`, `contract-regression`, `migration-request`,
+`deprecation-notice`, `upgrade-complete`, `blocked`, `superseded`
 
 ## Watch for Messages
 
