@@ -1,5 +1,5 @@
 ---
-name: ailang-sprint-planner
+name: AILANG Sprint Planner
 description: Analyze design docs, calculate velocity from recent work, and create realistic sprint plans with day-by-day breakdowns. Use when user asks to "plan sprint", "create sprint plan", or wants to estimate development timeline.
 ---
 
