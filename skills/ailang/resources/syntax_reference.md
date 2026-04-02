@@ -370,6 +370,13 @@ export func main() -> () ! {IO} {
   println("Hello, World!")
 }
 
+-- Exit with explicit code (for CLI tools)
+import std/io (println, exit)
+export func main() -> () ! {IO} {
+  println("error: invalid argument");
+  exit(1)
+}
+
 -- Main with file system access
 export func main() -> () ! {IO, FS} {
   let content = readFile("data.txt");
@@ -418,6 +425,7 @@ func loop() -> () ! {IO} {
 | Read from stdin | `! {IO}` (use `readLine()` from `std/io`) |
 | AI calls | `! {AI}` |
 | Run external commands | `! {Process}` or `! {IO, Process}` |
+| Exit with code | `! {IO}` (use `exit(code)` from `std/io`) |
 | Full program | `! {IO, FS, Net}` as needed |
 
 **Effect errors and how to fix:**
@@ -439,7 +447,7 @@ export func main() -> () ! {IO} { println("hi") }
 
 | Effect | Functions | Import |
 |--------|-----------|--------|
-| `IO` | `print`, `println`, `readLine` | `std/io` (print is builtin) |
+| `IO` | `print`, `println`, `readLine`, `exit` | `std/io` (print is builtin) |
 | `FS` | `readFile`, `writeFile`, `fileExists`, `listDir`, `mkdir`, `mkdirAll`, `isDir`, `isFile`, `removeFile`, `_zip_*` | `std/fs`, `std/zip` |
 | `Net` | `httpGet`, `httpPost`, `httpRequest` | `std/net` |
 | `Env` | `getArgs`, `getEnv`, `getEnvOr` | `std/env` |
@@ -827,8 +835,33 @@ export func main() -> () ! {IO} {
 | Arithmetic | `+`, `-`, `*`, `/`, `%`, `**` |
 | Comparison | `<`, `>`, `<=`, `>=`, `==`, `!=` |
 | Logical | `&&`, `\|\|`, `not` |
+| Bitwise | `&` (AND), `^` (XOR), `~` (NOT), `<<` (shift left), `>>` (shift right) |
 | String/List | `++` (concatenation) |
 | List | `::` (cons/prepend) |
+
+**Bitwise operators** (int only, C-standard precedence bands):
+```ailang
+-- AND, XOR, shifts, complement
+println(show(12 & 10))   -- 8
+println(show(12 ^ 10))   -- 6
+println(show(1 << 4))    -- 16
+println(show(16 >> 2))   -- 4
+println(show(~0))         -- -1
+
+-- XOR is self-inverse (encryption pattern)
+let encrypted = 42 ^ 137
+let decrypted = encrypted ^ 137  -- 42
+
+-- Note: bitwise OR (|) is not an operator (conflicts with ADT syntax).
+-- Use bitwiseOr(a, b) from std/math instead.
+```
+
+**Bitwise precedence** (loosest → tightest): `|| && ^ & == < << + *`
+- `&` and `^` bind LOOSER than `==` (C convention: use parens in `(x & mask) == 0`)
+- `<<`/`>>` bind LOOSER than `+` (C convention: use parens in `1 << (n + 1)`)
+- `~` is prefix (same level as unary `-`)
+
+**Signed hash semantics**: AILANG integers are signed 64-bit values. Bitwise and shift operations act on the 64-bit bit pattern. Hash functions may print negative int results even when the underlying bit pattern matches unsigned reference implementations.
 
 ## Boolean Operations
 
@@ -1621,7 +1654,7 @@ ailang run --verify-contracts --caps IO --entry main file.ail
 
 **What can be verified** (decidable fragment):
 - Types: `int`, `bool`, `string`, enum ADT, record, `[int]` lists
-- Arithmetic (`+`, `-`, `*`, `/`), comparison (`>=`, `<=`, `==`, `!=`), logical (`&&`, `||`)
+- Arithmetic (`+`, `-`, `*`, `/`), comparison (`>=`, `<=`, `==`, `!=`), logical (`&&`, `||`), bitwise (`&`, `^`, `~`, `<<`, `>>`)
 - `if`/`else`, `let` bindings, `match` on enums/ADTs
 - String ops (use `std/string`): `length`, `startsWith`, `endsWith`, `find`, `substring`, `contains`, concat (`++`)
 - List ops: `length` (from `std/list`), `_list_head`, `_list_nth`, cons (`::`), concat (`++`), literals
@@ -1824,3 +1857,20 @@ ailang repl                                           # Interactive REPL
 ```
 
 **Flags must come BEFORE the filename!**
+
+### FS Sandbox
+
+Restrict all file system operations to a directory with `AILANG_FS_SANDBOX`:
+
+```bash
+AILANG_FS_SANDBOX=/tmp/work ailang run --entry main --caps IO,FS file.ail
+```
+
+When set, all paths are resolved relative to the sandbox root:
+- `readFile("data.txt")` reads `/tmp/work/data.txt`
+- `writeFile("out.txt", s)` writes `/tmp/work/out.txt`
+- `_zip_listEntries("archive.zip")` opens `/tmp/work/archive.zip`
+
+Applies to **all FS builtins**: `readFile`, `writeFile`, `readFileBytes`, `writeFileBytes`, `appendFile`, `appendFileBytes`, `fileExists`, `listDir`, `mkdir`, `mkdirAll`, `isDir`, `isFile`, `removeFile`, and all `std/zip` operations. Also sets the working directory for `std/process` `exec`.
+
+If unset (default), paths resolve normally from the process working directory.
