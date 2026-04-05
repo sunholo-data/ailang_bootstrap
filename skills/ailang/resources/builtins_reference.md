@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.10.2. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.10.4. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (19)
@@ -267,23 +267,28 @@
   _stream_status                 [stream]
   _stream_transmit_binary        [stream]
 
-# std/string (25)
+# std/string (30)
   _str_charAt                    [pure]
   _str_charCode                  [pure]
   _str_chars                     [pure]
   _str_compare                   [pure]
+  _str_decodeQP                  [pure]
   _str_endsWith                  [pure]
   _str_eq                        [pure]
   _str_find                      [pure]
   _str_foldChars                 [pure]
+  _str_foldSlices                [pure]
   _str_join                      [pure]
   _str_len                       [pure]
   _str_lower                     [pure]
+  _str_mapSlicesJoin             [pure]
   _str_replace                   [pure]
+  _str_replaceMany               [pure]
   _str_slice                     [pure]
   _str_split                     [pure]
   _str_splitAny                  [pure]
   _str_startsWith                [pure]
+  _str_startsWithIC              [pure]
   _str_trim                      [pure]
   _str_upper                     [pure]
   _str_words                     [pure]
