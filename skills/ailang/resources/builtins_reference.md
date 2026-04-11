@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.10.15. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.11.1. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (19)
@@ -298,6 +298,11 @@
   _string_intToStr               [pure]
   _string_reverse                [pure]
   concat_String                  [pure]
+
+# std/trace (3)
+  _trace_event                   [trace]
+  _trace_span_end                [trace]
+  _trace_span_start              [trace]
 
 # std/trace_test (1)
   _trace_check                   [pure]
