@@ -1,4 +1,4 @@
-# AILANG v0.8.2 - AI Teaching Prompt
+# AILANG v0.11.4 - AI Teaching Prompt
 
 AILANG is a **pure functional language** with Hindley-Milner type inference and algebraic effects. Write code using **recursion** (no loops), **pattern matching**, and **explicit effect declarations**.
 
@@ -828,6 +828,58 @@ export func main() -> () ! {IO} {
 
 **Note:** `chars` is Unicode-aware - emoji and accented characters are handled correctly.
 
+## High-Performance String Builtins (v0.10.4)
+
+For email/HTML/CSV-style processing where naive accumulation is O(n²),
+prefer these single-pass O(n) builtins from `std/string`:
+
+| Function | Use case |
+|----------|----------|
+| `decodeQuotedPrintable(s)` | RFC 2045 §6.7 decode (`=20` → space, soft-line-breaks) |
+| `replaceMany(s, pairs)` | Multi-pattern replace, e.g. HTML entity decode in one pass |
+| `foldSlices(s, delim, acc, f)` | Fold over `split(s, delim)` without allocating the list |
+| `mapSlicesJoin(s, delim, f)` | `split → map → join` in O(n), no intermediate list |
+| `startsWithIgnoreCase(s, p)` | Case-insensitive prefix check (header parsing) |
+
+```ailang
+import std/string (replaceMany, foldSlices, mapSlicesJoin)
+
+-- Decode 23 HTML entities in one pass
+let html = replaceMany(raw, [("&amp;", "&"), ("&lt;", "<"), ("&gt;", ">")])
+
+-- Sum line lengths without materializing the list of lines
+let total = foldSlices(text, "\n", 0, \acc line. acc + length(line))
+
+-- Uppercase each CSV field
+let upper = mapSlicesJoin(csv, ",", \field. toUpper(field))
+```
+
+`substring`/`find` have an ASCII fast-path: 24× faster on pure-ASCII input
+(common for headers, JSON, XML).
+
+## Polymorphic Comparison Lambdas (v0.11.4)
+
+Let-bound lambdas using only `<`/`>`/`<=`/`>=`/`==`/`!=` are now properly
+polymorphic — they no longer monomorphize to `Int`. This works:
+
+```ailang
+let max = \x. \y. if x > y then x else y in {
+  let a = max(3.14)(2.71);   -- Float
+  let b = max(10)(20);        -- Int
+  let c = max("foo")("bar");  -- String
+  ...
+}
+```
+
+Before v0.11.4, calling `max(3.14)(2.71)` crashed with `gt_Int: expected
+IntValue, got *eval.FloatValue` because the lambda was prematurely defaulted
+to `Int`. The constraint is now preserved through generalization, so the
+correct dictionary (`gt_Int` / `gt_Float` / `gt_String`) is selected at
+each call site.
+
+`Num`/`Fractional` defaulting is unchanged — only `Ord`-only / `Eq`-only /
+`Show`-only constraints stay polymorphic.
+
 ## Operators
 
 | Type | Operators |
@@ -877,6 +929,24 @@ if x == 0 || y == 0 then "has zero" else "no"
 if not isEmpty(list) then process(list) else []
 if !done then retry() else finish()
 ```
+
+**Short-circuit evaluation (v0.11.3):** `&&` and `||` are lazy — the RHS is NOT
+evaluated when the LHS determines the result. This makes guarded expressions safe:
+
+```ailang
+-- SAFE: charAt(s, i-1) is only called when i > 0
+if i > 0 && charAt(s, i - 1) == "\\" then "escaped" else "normal"
+
+-- SAFE: lookup never runs when key is missing
+if member(key, m) && lookup(key, m) == target then "match" else "no"
+
+-- || short-circuits: the RHS effect runs only if LHS is false
+if cached || expensiveFetch() then "ok" else "fail"
+```
+
+`&&` and `||` desugar to `if`: `a && b` → `if a then b else false`,
+`a || b` → `if a then true else b`. Both are equivalent to nested `if` but
+much more readable.
 
 ## String and List Concatenation
 
@@ -1445,6 +1515,31 @@ export func main() -> () ! {IO, FS} {
 
 Run: `ailang run --entry main --caps IO,FS file.ail`
 
+## Tar + Gzip (std/tar, std/gzip) — v0.12.0+
+
+Native reading of `.tar`, `.tar.gz`, and raw gzip streams. No shell-out, no temp files. Matches `std/zip` conventions: binary data crosses as base64.
+
+```ailang
+import std/tar (readFromGzip, extractAll)
+import std/gzip (decompress, decompressFile)
+
+-- Pull one file straight from a .tar.gz (primary use: arXiv bundles)
+match readFromGzip("paper.tar.gz", "main.tex") {
+  Ok(tex) => println(tex),
+  Err(msg) => println("read failed: " ++ msg)
+}
+
+-- Safe extraction: rejects ../ entries, symlinks, absolute paths
+match extractAll("archive.tar", "./dest") {
+  Ok(paths) => println("wrote " ++ show(length(paths)) ++ " files"),
+  Err(msg) => println("blocked: " ++ msg)
+}
+```
+
+- `std/gzip`: `decompress(b64)`, `compress(b64, level)` — **pure**; `decompressFile(path) ! {FS}`
+- `std/tar`: `listEntries`, `readEntry`, `readEntryBytes`, `extractAll`, `readFromGzip`, `readFromGzipBytes` — all `! {FS}`
+- Caps: 10K entries, 100MB decompressed per entry (bomb defence). Respects `AILANG_FS_SANDBOX`.
+
 ## XML Parsing (std/xml)
 
 Parse and query XML documents. **Pure functions** (no effect needed):
@@ -1505,6 +1600,144 @@ match _zip_readEntry("report.docx", "word/document.xml") {
   Err(e) => println("ZIP error: " ++ e)
 }
 ```
+
+## Streaming XML / Bounded Folds (v0.10.1, v0.11.3)
+
+For large XML (multi-MB) inside ZIP archives, `parseFold` and `scanFold`
+fold over `<tag>` elements **without materializing the whole document**:
+
+```ailang
+import std/xml (parseFold, getText, getAttr)
+import std/zip (scanFold)
+import std/iter (FoldStep, Continue, Stop)
+import std/option (Some, None)
+
+-- Pure: fold over rows in an XML string
+let total = parseFold(xml, "row", 0, \acc node.
+  acc + 1
+)
+
+-- Effectful: fold over rows directly from a ZIP entry (never materializes XML)
+let count = scanFold("data.xlsx", "xl/sharedStrings.xml", "si", 0,
+  \acc node. acc + 1
+)
+```
+
+**Bounded prefix scans (v0.11.3):** When you only need the first N rows of a
+50K-row sheet, return `Stop(acc)` to halt the scan immediately:
+
+```ailang
+import std/xml (parseFoldStep)
+import std/iter (FoldStep, Continue, Stop)
+
+-- Take first 5000 rows then stop — the rest of the document isn't scanned
+let first5k = parseFoldStep(xml, "row", [], \acc node.
+  if length(acc) >= 5000
+    then Stop(acc)
+    else Continue(acc ++ [getText(node)])
+)
+```
+
+`parseFoldStep` and `scanFoldStep` mirror `parseFold`/`scanFold` but the
+handler returns `FoldStep[a] = Continue(a) | Stop(a)`. Use them whenever
+the document is much larger than what you need.
+
+## Maps (std/map, v0.10.1)
+
+`Map[k, v]` — immutable hash map, O(1) lookup, copy-on-write inserts:
+
+```ailang
+import std/map as M
+
+let m0 = M.empty()
+let m1 = M.insert(m0, "alice", 30)
+let m2 = M.insert(m1, "bob", 25)
+
+match M.lookup(m2, "alice") {
+  Some(age) => println(show(age)),  -- 30
+  None      => println("missing")
+}
+
+println(show(M.size(m2)))          -- 2
+println(show(M.member(m2, "bob")))  -- true
+
+-- Iteration is sorted (deterministic)
+let xs = M.toList(m2)               -- [("alice", 30), ("bob", 25)]
+let m3 = M.fromList([("c", 1), ("d", 2)])
+```
+
+Builtins: `empty`, `insert`, `lookup`, `member`, `remove`, `size`,
+`keys`, `values`, `fromList`, `toList`. Keys can be int/string/bool —
+keys use canonical encoding internally.
+
+## JWT Verification (std/jwt, v0.10.0)
+
+Pure JWT parsing and RS256 signature verification (e.g., Firebase ID tokens):
+
+```ailang
+import std/jwt (decodeJWT, verifyRS256, verifyWithKid, isExpired, checkIssuer)
+
+-- Decode without verification (for inspection)
+match decodeJWT(token) {
+  Ok({header, payload, signature}) => println(payload),
+  Err(msg) => println("decode failed: " ++ msg)
+}
+
+-- Verify RS256 signature against a PEM public key
+match verifyRS256(token, pemPublicKey) {
+  Ok(claims) => if isExpired(claims, nowUnix) then "expired" else "valid",
+  Err(msg)   => "invalid: " ++ msg
+}
+
+-- Firebase/OAuth pattern: select key by 'kid' header
+verifyWithKid(token, \kid. lookupKey(kid, jwks))
+```
+
+Backed by `rsaVerifyPKCS1v15(message, signature, publicKeyPEM)` in
+`std/crypto`, plus `fromBase64URL` in `std/bytes` (RFC 4648 §5, no padding).
+JWT functions are pure — fetch keys yourself via `std/net`.
+
+## Custom Tracing (std/trace, v0.11.1)
+
+Emit OTEL-compatible spans and events from AILANG code. Requires `Trace` effect:
+
+```ailang
+import std/trace (spanStart, spanEnd, event)
+
+export func processBatch(items: [Item]) -> int ! {Trace, IO} {
+  spanStart("batch.process");
+  event("batch.size", show(length(items)));
+  let n = doWork(items);
+  spanEnd("batch.process");
+  n
+}
+```
+
+Run: `ailang run --caps IO,Trace --emit-trace jsonl --entry main file.ail`
+
+In WASM, register a JS callback via `ailangSetTraceHandler` to receive
+events live (function_enter/exit, effect, contract_check, budget_delta).
+
+## Process Exit (v0.10.1)
+
+`exit(code: int) -> ()` in `std/io` terminates the process with a specific
+exit code. Required for CLI tools that need to signal failure:
+
+```ailang
+import std/io (println, exit)
+
+export func main() -> () ! {IO} {
+  match validate(args) {
+    Ok(())   => println("ok"),
+    Err(msg) => {
+      println("error: " ++ msg);
+      exit(1)
+    }
+  }
+}
+```
+
+Telemetry/traces are flushed before the process exits.
 
 ## Arrays (O(1) indexed access)
 

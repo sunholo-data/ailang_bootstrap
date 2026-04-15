@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.11.2. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.12.0. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (19)
@@ -112,6 +112,11 @@
   _game_delta_time               [clock]
   _game_frame_count              [clock]
   _game_total_time               [clock]
+
+# std/gzip (3)
+  _gzip_compress                 [pure]
+  _gzip_decompress               [pure]
+  _gzip_decompressFile           [fs]
 
 # std/http (2)
   _get_header                    [pure]
@@ -299,6 +304,14 @@
   _string_reverse                [pure]
   concat_String                  [pure]
 
+# std/tar (6)
+  _tar_extractAll                [fs]
+  _tar_listEntries               [fs]
+  _tar_readEntry                 [fs]
+  _tar_readEntryBytes            [fs]
+  _tar_readFromGzip              [fs]
+  _tar_readFromGzipBytes         [fs]
+
 # std/trace (3)
   _trace_event                   [trace]
   _trace_span_end                [trace]
@@ -307,7 +320,7 @@
 # std/trace_test (1)
   _trace_check                   [pure]
 
-# std/xml (18)
+# std/xml (19)
   _escapeXml                     [pure]
   _xmlComment                    [pure]
   _xmlElement                    [pure]
@@ -323,16 +336,18 @@
   _xml_parse                     [pure]
   _xml_parseElements             [pure]
   _xml_parseFold                 [pure]
+  _xml_parseFoldStep             [pure]
   _xml_parseWithLimit            [pure]
   _xml_serialize                 [pure]
   _xml_serializeWithDecl         [pure]
 
-# std/zip (6)
+# std/zip (7)
   _zip_createArchive             [fs]
   _zip_createArchiveWithBytes    [fs]
   _zip_listEntries               [fs]
   _zip_readEntry                 [fs]
   _zip_readEntryBytes            [fs]
   _zip_xml_scanFold              [fs]
+  _zip_xml_scanFoldStep          [fs]
 
 ```
