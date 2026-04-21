@@ -106,9 +106,9 @@ export func main() -> () ! {IO} {
   let person = {name: "Alice", age: 30, city: "NYC"};
   let older = {person | age: person.age + 1};         -- Update one field
   let moved = {older | city: "SF"};                   -- Chain updates
-  println(person.name ++ ", " ++ show(person.age) ++ ", " ++ person.city);
-  println(older.name ++ ", " ++ show(older.age) ++ ", " ++ older.city);
-  println(moved.name ++ ", " ++ show(moved.age) ++ ", " ++ moved.city)
+  println("${person.name}, ${show(person.age)}, ${person.city}");
+  println("${older.name}, ${show(older.age)}, ${older.city}");
+  println("${moved.name}, ${show(moved.age)}, ${moved.city}")
 }
 ```
 
@@ -162,7 +162,8 @@ export func main() -> () ! {IO, AI} = println(call("What is 2+2?"))
 | `\(a, b). body` pair syntax | Use `func(a: T, b: U) -> R { body }` |
 | nested `func f(...) =` | Use `let f = \x. body` for nested functions |
 | `!condition` | Both `!x` and `not x` work — prefer `not` for readability |
-| `concat(a, b)` | `a ++ b` - use `++` for string/list concatenation |
+| `concat(a, b)` for strings | `"${a}${b}"` interpolation — `++` is list-only in v0.13.0+ |
+| `concat(a, b)` for lists | `a ++ b` |
 
 ## Let Bindings: Block Style vs Expression Style
 
@@ -351,7 +352,7 @@ func twice(f: int -> int, x: int) -> int = f(f(x))
 pure func add(x: int, y: int) -> int = x + y
 
 -- IO effect - for print/println/readLine
-func greet(name: string) -> () ! {IO} = println("Hello " ++ name)
+func greet(name: string) -> () ! {IO} = println("Hello ${name}")
 
 -- Single effect with return value
 func ask(prompt: string) -> string ! {IO} {
@@ -408,7 +409,7 @@ func loop() -> () ! {IO} {
   let line = readLine();
   if line == "" then ()
   else {
-    println("Got: " ++ line);
+    println("Got: ${line}");
     loop()
   }
 }
@@ -466,9 +467,9 @@ import std/debug (log, check)
 
 -- No ! {Debug} needed — ghost effect is invisible to callers
 func process(data: string) -> string ! {Net} {
-  log("processing: " ++ data);
+  log("processing: ${data}");
   check(length(data) > 0, "data must not be empty");
-  httpGet("https://example.com/" ++ data)
+  httpGet("https://example.com/${data}")
 }
 ```
 
@@ -479,7 +480,7 @@ import std/json (kv, js, jnum)
 
 func handleRequest(path: string) -> Response ! {Net} {
   infoWith("Request", [kv("path", js(path))]);
-  httpGet("https://api.example.com" ++ path)
+  httpGet("https://api.example.com${path}")
 }
 ```
 
@@ -560,8 +561,8 @@ let evens = filter(\x. x % 2 == 0, [1, 2, 3, 4])  -- [2, 4]
 let sum = foldl(func(acc: int, x: int) -> int { acc + x }, 0, [1, 2, 3])  -- 6
 
 -- Effectful: use mapE/filterE/foldlE (replaces hand-rolled recursion!)
-let results = mapE(\x. { println("processing " ++ show(x)); x * 2 }, [1, 2, 3]);
-let checked = filterE(\x. { println("checking " ++ show(x)); x > 2 }, [1, 2, 3, 4]);
+let results = mapE(\x. { println("processing ${show(x)}"); x * 2 }, [1, 2, 3]);
+let checked = filterE(\x. { println("checking ${show(x)}"); x > 2 }, [1, 2, 3, 4]);
 let total = foldlE(func(acc: int, x: int) -> int ! {IO} { println("fold"); acc + x }, 0, [10, 20]);
 ```
 
@@ -638,8 +639,8 @@ export func main() -> unit ! {Stream, Process, IO} {
   let proc = asyncExecProcess("echo", ["hello"], "echo", 5, 4096);
   let stdin = asyncReadStdinLines("stdin", 10);
   selectEvents([proc, stdin], \event. match event {
-    SourceBytes(src, data) => { println("[" ++ src ++ "] " ++ toString(data)); true },
-    SourceText(src, text)  => { println("[" ++ src ++ "] " ++ text); false },
+    SourceBytes(src, data) => { println("[${src}] ${toString(data)}"); true },
+    SourceText(src, text)  => { println("[${src}] ${text}"); false },
     _ => true
   })
 }
@@ -655,7 +656,7 @@ export func main() -> () ! {Process, IO} {
   let handle = spawnProcess("cat", []);
   match writeProcessStdin(handle, fromString("hello\n")) {
     Ok(_) => println("wrote line"),
-    Err(e) => println("write error: " ++ e)
+    Err(e) => println("write error: ${e}")
   };
   closeProcessStdin(handle)
 }
@@ -676,7 +677,7 @@ import std/string (stringToInt)
 
 export func main() -> () ! {IO} {
   match stringToInt("42") {
-    Some(n) => println("Parsed: " ++ show(n)),
+    Some(n) => println("Parsed: ${show(n)}"),
     None => println("Invalid number")
   }
 }
@@ -690,7 +691,7 @@ import std/string (stringToInt)
 
 -- Pure function (no effects)
 pure func formatMessage(name: string, count: int) -> string =
-  "User " ++ name ++ " has " ++ show(count) ++ " items"
+  "User ${name} has ${show(count)} items"
 
 -- FS effect only
 func readCount(filename: string) -> int ! {FS} {
@@ -759,8 +760,8 @@ pure func parseAndDivide(s: string, divisor: int) -> Result[int] =
 -- Format Result for output
 pure func showResult(r: Result[int]) -> string =
   match r {
-    Ok(v) => "Result: " ++ show(v),
-    Err(msg) => "Error: " ++ msg
+    Ok(v) => "Result: ${show(v)}",
+    Err(msg) => "Error: ${msg}"
   }
 
 export func main() -> () ! {IO} {
@@ -888,8 +889,8 @@ each call site.
 | Comparison | `<`, `>`, `<=`, `>=`, `==`, `!=` |
 | Logical | `&&`, `\|\|`, `not` |
 | Bitwise | `&` (AND), `^` (XOR), `~` (NOT), `<<` (shift left), `>>` (shift right) |
-| String/List | `++` (concatenation) |
-| List | `::` (cons/prepend) |
+| List | `++` (concatenation, list-only); `::` (cons/prepend) |
+| String | `"${expr}"` interpolation; `concat([parts])`; `join(sep, parts)` |
 
 **Bitwise operators** (int only, C-standard precedence bands):
 ```ailang
@@ -948,19 +949,50 @@ if cached || expensiveFetch() then "ok" else "fail"
 `a || b` → `if a then true else b`. Both are equivalent to nested `if` but
 much more readable.
 
-## String and List Concatenation
+## String Interpolation (v0.12.1+, PREFERRED)
 
-**Use `++` for concatenation (NOT `concat()`):**
+**Use `"${expr}"` for building strings with embedded values. This is the preferred, idiomatic form.**
 
 ```ailang
--- String concatenation
-let greeting = "Hello" ++ " " ++ "World"   -- "Hello World"
+-- Basic substitution: any expression inside ${...}
+let name = "Alice" in
+let age = 30 in
+println("Hello, ${name}! You are ${age} years old.")
+-- → Hello, Alice! You are 30 years old.
 
--- List concatenation
+-- Arithmetic and function calls inside ${...}
+println("Next year: ${age + 1}, square: ${age * age}")
+println("First letter: ${substring(name, 0, 1)}")
+
+-- Nested braces work (record literals, field access, let-blocks)
+println("Point: ${show({x: 1, y: 2}.x)}")
+println("Squared: ${let sq = age * age in sq}")
+
+-- Escape with backslash to get a literal ${
+println("Use \${var} to interpolate.")
+-- → Use ${var} to interpolate.
+```
+
+**How it works:** `"Hello, ${x}!"` desugars to `concat_String(concat_String("Hello, ", show(x)), "!")`.
+`show_String` is identity, so string-typed values are spliced without quoting. Any `Show`-able type
+works automatically (int, float, bool, records, ADTs).
+
+## String and List Concatenation
+
+**`++` is for lists only (v0.13.0+). For strings, use `"${...}"` interpolation,
+`concat([parts])` from `std/string`, or `join(sep, parts)`.**
+
+```ailang
+-- Strings: use interpolation
+let msg = "Count: ${length(items)}"
+let greeting = "Hello ${name}"
+
+-- Strings: concat a list of parts
+import std/string (concat)
+let s = concat(["Hello", " ", "World"])
+
+-- Lists: ++ concatenates
 let combined = [1, 2] ++ [3, 4]            -- [1, 2, 3, 4]
-
--- Mixed in expressions
-let msg = "Count: " ++ show(length(items))
 ```
 
 ## Pattern Matching
@@ -1015,12 +1047,12 @@ match result {
 **On Records (destructuring):**
 ```ailang
 match person {
-  {name, age} => name ++ " is " ++ show(age)
+  {name, age} => "${name} is ${show(age)}"
 }
 
 -- Record with renaming
 match config {
-  {host, port: p} => host ++ ":" ++ show(p)
+  {host, port: p} => "${host}:${show(p)}"
 }
 
 -- Nested record patterns
@@ -1054,8 +1086,8 @@ export func main() -> () ! {IO} {
   let diffColor = Red != Blue;          -- true
   let sameShape = Circle(5) == Circle(5);     -- true
   let diffShape = Circle(5) != Rectangle(5, 10);  -- true
-  print("Color test: " ++ show(sameColor));
-  print("Shape test: " ++ show(sameShape))
+  print("Color test: ${show(sameColor)}");
+  print("Shape test: ${show(sameShape)}")
 }
 ```
 
@@ -1111,13 +1143,13 @@ export func main() -> () ! {IO} {
   let r2 = safeDivide(10, 0);  -- Err("division by zero")
 
   match r1 {
-    Ok(v) => println("Got: " ++ show(v)),
-    Err(msg) => println("Error: " ++ msg)
+    Ok(v) => println("Got: ${show(v)}"),
+    Err(msg) => println("Error: ${msg}")
   };
 
   match r2 {
-    Ok(v) => println("Got: " ++ show(v)),
-    Err(msg) => println("Error: " ++ msg)
+    Ok(v) => println("Got: ${show(v)}"),
+    Err(msg) => println("Error: ${msg}")
   }
 }
 ```
@@ -1154,7 +1186,7 @@ export func main() -> () ! {IO} {
   let nums = [1, 3, 4, 7, 8];
   let found = findFirst(isEven, nums);
   let doubled = mapOption(double, found);
-  print(match doubled { Some(v) => "Found: " ++ show(v), None => "Not found" })
+  print(match doubled { Some(v) => "Found: ${show(v)}", None => "Not found" })
 }
 ```
 
@@ -1177,9 +1209,9 @@ func transition(state: State, event: Event) -> State =
 
 func showState(s: State) -> string =
   match s {
-    Green(t) => "GREEN(" ++ show(t) ++ ")",
-    Yellow(t) => "YELLOW(" ++ show(t) ++ ")",
-    Red(t) => "RED(" ++ show(t) ++ ")"
+    Green(t) => "GREEN(${show(t)})",
+    Yellow(t) => "YELLOW(${show(t)})",
+    Red(t) => "RED(${show(t)})"
   }
 
 export func main() -> () ! {IO} {
@@ -1232,7 +1264,7 @@ import std/json (decode, Json, JObject, JString)
 let result = decode("{\"name\":\"Alice\"}");
 match result {
   Ok(json) => print(show(json)),
-  Err(msg) => print("Parse error: " ++ msg)
+  Err(msg) => print("Parse error: ${msg}")
 }
 ```
 
@@ -1254,7 +1286,7 @@ export func main() -> () ! {IO} {
       },
       None => println("Not an array")
     },
-    Err(e) => println("Parse error: " ++ e)
+    Err(e) => println("Parse error: ${e}")
   }
 }
 
@@ -1282,7 +1314,7 @@ match decode("{\"name\":\"Alice\",\"age\":30}") {
     -- get(obj, key) -> Option[Json]
     match get(obj, "name") {
       Some(j) => match asString(j) {
-        Some(name) => print("Name: " ++ name),
+        Some(name) => print("Name: ${name}"),
         None => print("name is not a string")
       },
       None => print("no name field")
@@ -1290,13 +1322,13 @@ match decode("{\"name\":\"Alice\",\"age\":30}") {
     -- asNumber returns Option[float]
     match get(obj, "age") {
       Some(j) => match asNumber(j) {
-        Some(age) => print("Age: " ++ show(age)),
+        Some(age) => print("Age: ${show(age)}"),
         None => print("age is not a number")
       },
       None => print("no age field")
     }
   },
-  Err(msg) => print("Parse error: " ++ msg)
+  Err(msg) => print("Parse error: ${msg}")
 }
 ```
 
@@ -1327,8 +1359,8 @@ func getAge(obj: Json) -> int =
 -- Full example
 export func main() -> () ! {IO} =
   match decode("{\"name\":\"Alice\",\"age\":30}") {
-    Ok(obj) => print(getName(obj) ++ " is " ++ intToStr(getAge(obj))),
-    Err(e) => print("Error: " ++ e)
+    Ok(obj) => print("${getName(obj)} is ${intToStr(getAge(obj))}"),
+    Err(e) => print("Error: ${e}")
   }
 ```
 
@@ -1367,9 +1399,9 @@ match decode("{\"tags\": [\"a\", \"b\"]}") {
     -- getStringArrayOrEmpty: returns [] if missing or invalid
     let tags = getStringArrayOrEmpty(obj, "tags");  -- ["a", "b"]
     let missing = getStringArrayOrEmpty(obj, "nope");  -- []
-    print("Got " ++ show(length(tags)) ++ " tags")
+    print("Got ${show(length(tags))} tags")
   },
-  Err(e) => print("Error: " ++ e)
+  Err(e) => print("Error: ${e}")
 }
 ```
 
@@ -1393,7 +1425,7 @@ import std/json (decode)
 let headers = [{name: "Authorization", value: "Bearer token"}];
 match httpRequest("POST", url, headers, body) {
   Ok(resp) => decode(resp.body),          -- resp.body is the string
-  Err(Transport(msg)) => Err("Error: " ++ msg),
+  Err(Transport(msg)) => Err("Error: ${msg}"),
   Err(_) => Err("Other error")
 }
 ```
@@ -1423,7 +1455,7 @@ func ask_person(prompt: string) -> string ! {AI} =
 let raw = callJsonSimple("Return a JSON array");
 match decode(raw) {
   Ok(json) => println("Valid JSON!")
-  Err(msg) => println("Parse error: " ++ msg)
+  Err(msg) => println("Parse error: ${msg}")
 }
 ```
 
@@ -1507,8 +1539,8 @@ func readBinary(path: string, entry: string) -> Result[string, string] ! {FS} =
 
 export func main() -> () ! {IO, FS} {
   match _zip_listEntries("document.docx") {
-    Ok(entries) => println("Found " ++ show(length(entries)) ++ " entries"),
-    Err(msg) => println("Error: " ++ msg)
+    Ok(entries) => println("Found ${show(length(entries))} entries"),
+    Err(msg) => println("Error: ${msg}")
   }
 }
 ```
@@ -1526,13 +1558,13 @@ import std/gzip (decompress, decompressFile)
 -- Pull one file straight from a .tar.gz (primary use: arXiv bundles)
 match readFromGzip("paper.tar.gz", "main.tex") {
   Ok(tex) => println(tex),
-  Err(msg) => println("read failed: " ++ msg)
+  Err(msg) => println("read failed: ${msg}")
 }
 
 -- Safe extraction: rejects ../ entries, symlinks, absolute paths
 match extractAll("archive.tar", "./dest") {
-  Ok(paths) => println("wrote " ++ show(length(paths)) ++ " files"),
-  Err(msg) => println("blocked: " ++ msg)
+  Ok(paths) => println("wrote ${show(length(paths))} files"),
+  Err(msg) => println("blocked: ${msg}")
 }
 ```
 
@@ -1560,17 +1592,17 @@ export func main() -> () ! {IO} {
       -- Find first match
       match _xml_findFirst(doc, "item") {
         Some(item) => {
-          println("Tag: " ++ _xml_getTag(item));
-          println("Text: " ++ _xml_getText(item));
+          println("Tag: ${_xml_getTag(item)}");
+          println("Text: ${_xml_getText(item)}");
           match _xml_getAttr(item, "id") {
-            Some(id) => println("ID: " ++ id),
+            Some(id) => println("ID: ${id}"),
             None => ()
           }
         },
         None => println("No items found")
       }
     },
-    Err(msg) => println("Parse error: " ++ msg)
+    Err(msg) => println("Parse error: ${msg}")
   }
 }
 ```
@@ -1593,11 +1625,11 @@ match _zip_readEntry("report.docx", "word/document.xml") {
   Ok(xml) => match _xml_parse(xml) {
     Ok(doc) => {
       let paragraphs = _xml_findAll(doc, "w:p");
-      println("Found " ++ show(length(paragraphs)) ++ " paragraphs")
+      println("Found ${show(length(paragraphs))} paragraphs")
     },
-    Err(e) => println("XML error: " ++ e)
+    Err(e) => println("XML error: ${e}")
   },
-  Err(e) => println("ZIP error: " ++ e)
+  Err(e) => println("ZIP error: ${e}")
 }
 ```
 
@@ -1680,13 +1712,13 @@ import std/jwt (decodeJWT, verifyRS256, verifyWithKid, isExpired, checkIssuer)
 -- Decode without verification (for inspection)
 match decodeJWT(token) {
   Ok({header, payload, signature}) => println(payload),
-  Err(msg) => println("decode failed: " ++ msg)
+  Err(msg) => println("decode failed: ${msg}")
 }
 
 -- Verify RS256 signature against a PEM public key
 match verifyRS256(token, pemPublicKey) {
   Ok(claims) => if isExpired(claims, nowUnix) then "expired" else "valid",
-  Err(msg)   => "invalid: " ++ msg
+  Err(msg)   => "invalid: ${msg}"
 }
 
 -- Firebase/OAuth pattern: select key by 'kid' header
@@ -1730,7 +1762,7 @@ export func main() -> () ! {IO} {
   match validate(args) {
     Ok(())   => println("ok"),
     Err(msg) => {
-      println("error: " ++ msg);
+      println("error: ${msg}");
       exit(1)
     }
   }
@@ -1777,13 +1809,13 @@ let xs = [10, 20, 30];
 
 -- nth: get element by index (0-based)
 match nth(xs, 1) {
-  Some(x) => print("Element at 1: " ++ show(x)),  -- 20
+  Some(x) => print("Element at 1: ${show(x)}"),  -- 20
   None => print("Index out of bounds")
 };
 
 -- last: get last element
 match last(xs) {
-  Some(x) => print("Last: " ++ show(x)),  -- 30
+  Some(x) => print("Last: ${show(x)}"),  -- 30
   None => print("Empty list")
 };
 
@@ -1792,7 +1824,7 @@ let hasEven = any(\x. x % 2 == 0, xs);  -- true (20 is even)
 
 -- findIndex: find index of first matching element
 match findIndex(\x. x > 15, xs) {
-  Some(i) => print("First > 15 at index: " ++ show(i)),  -- 1
+  Some(i) => print("First > 15 at index: ${show(i)}"),  -- 1
   None => print("Not found")
 }
 ```
@@ -1889,7 +1921,7 @@ ailang run --verify-contracts --caps IO --entry main file.ail
 - Types: `int`, `bool`, `string`, enum ADT, record, `[int]` lists
 - Arithmetic (`+`, `-`, `*`, `/`), comparison (`>=`, `<=`, `==`, `!=`), logical (`&&`, `||`), bitwise (`&`, `^`, `~`, `<<`, `>>`)
 - `if`/`else`, `let` bindings, `match` on enums/ADTs
-- String ops (use `std/string`): `length`, `startsWith`, `endsWith`, `find`, `substring`, `contains`, concat (`++`)
+- String ops (use `std/string`): `length`, `startsWith`, `endsWith`, `find`, `substring`, `contains`; `concat` (list of strings); `"${expr}"` interpolation
 - List ops: `length` (from `std/list`), `_list_head`, `_list_nth`, cons (`::`), concat (`++`), literals
 - Records: field access (`r.field`), construction (`{x: 1, y: 2}`), ensures with `result.x`
 - Cross-function calls: Z3 inlines callees to reason about full call chains
