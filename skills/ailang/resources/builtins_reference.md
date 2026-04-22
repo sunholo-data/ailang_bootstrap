@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.10.0. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.14.1. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (19)
@@ -36,7 +36,9 @@
   _ai_call_json_simple           [ai]
   _ollama_embed                  [io]
 
-# std/array (7)
+# std/array (9)
+  _array_append                  [pure]
+  _array_empty                   [pure]
   _array_from_list               [pure]
   _array_get                     [pure]
   _array_length                  [pure]
@@ -111,11 +113,17 @@
   _game_frame_count              [clock]
   _game_total_time               [clock]
 
+# std/gzip (3)
+  _gzip_compress                 [pure]
+  _gzip_decompress               [pure]
+  _gzip_decompressFile           [fs]
+
 # std/http (2)
   _get_header                    [pure]
   _has_header                    [pure]
 
-# std/io (4)
+# std/io (5)
+  _io_exit                       [io]
   _io_print                      [io]
   _io_println                    [io]
   _io_readLine                   [io]
@@ -130,7 +138,19 @@
   ::                             [pure]
   concat_List                    [pure]
 
-# std/math (32)
+# std/map (10)
+  _map_empty                     [pure]
+  _map_from_list                 [pure]
+  _map_insert                    [pure]
+  _map_keys                      [pure]
+  _map_lookup                    [pure]
+  _map_member                    [pure]
+  _map_remove                    [pure]
+  _map_size                      [pure]
+  _map_to_list                   [pure]
+  _map_values                    [pure]
+
+# std/math (38)
   _math_E                        [pure]
   _math_PI                       [pure]
   _math_abs_Float                [pure]
@@ -152,6 +172,10 @@
   _math_tan                      [pure]
   add_Float                      [pure]
   add_Int                        [pure]
+  bitwiseAnd_Int                 [pure]
+  bitwiseNot_Int                 [pure]
+  bitwiseOr_Int                  [pure]
+  bitwiseXor_Int                 [pure]
   div_Float                      [pure]
   div_Int                        [pure]
   double_Int                     [pure]
@@ -161,6 +185,8 @@
   mul_Int                        [pure]
   neg_Float                      [pure]
   neg_Int                        [pure]
+  shiftLeft_Int                  [pure]
+  shiftRight_Int                 [pure]
   sub_Float                      [pure]
   sub_Int                        [pure]
 
@@ -246,22 +272,28 @@
   _stream_status                 [stream]
   _stream_transmit_binary        [stream]
 
-# std/string (24)
+# std/string (30)
   _str_charAt                    [pure]
+  _str_charCode                  [pure]
   _str_chars                     [pure]
   _str_compare                   [pure]
+  _str_decodeQP                  [pure]
   _str_endsWith                  [pure]
   _str_eq                        [pure]
   _str_find                      [pure]
   _str_foldChars                 [pure]
+  _str_foldSlices                [pure]
   _str_join                      [pure]
   _str_len                       [pure]
   _str_lower                     [pure]
+  _str_mapSlicesJoin             [pure]
   _str_replace                   [pure]
+  _str_replaceMany               [pure]
   _str_slice                     [pure]
   _str_split                     [pure]
   _str_splitAny                  [pure]
   _str_startsWith                [pure]
+  _str_startsWithIC              [pure]
   _str_trim                      [pure]
   _str_upper                     [pure]
   _str_words                     [pure]
@@ -272,10 +304,23 @@
   _string_reverse                [pure]
   concat_String                  [pure]
 
+# std/tar (6)
+  _tar_extractAll                [fs]
+  _tar_listEntries               [fs]
+  _tar_readEntry                 [fs]
+  _tar_readEntryBytes            [fs]
+  _tar_readFromGzip              [fs]
+  _tar_readFromGzipBytes         [fs]
+
+# std/trace (3)
+  _trace_event                   [trace]
+  _trace_span_end                [trace]
+  _trace_span_start              [trace]
+
 # std/trace_test (1)
   _trace_check                   [pure]
 
-# std/xml (17)
+# std/xml (19)
   _escapeXml                     [pure]
   _xmlComment                    [pure]
   _xmlElement                    [pure]
@@ -290,15 +335,19 @@
   _xml_getText                   [pure]
   _xml_parse                     [pure]
   _xml_parseElements             [pure]
+  _xml_parseFold                 [pure]
+  _xml_parseFoldStep             [pure]
   _xml_parseWithLimit            [pure]
   _xml_serialize                 [pure]
   _xml_serializeWithDecl         [pure]
 
-# std/zip (5)
+# std/zip (7)
   _zip_createArchive             [fs]
   _zip_createArchiveWithBytes    [fs]
   _zip_listEntries               [fs]
   _zip_readEntry                 [fs]
   _zip_readEntryBytes            [fs]
+  _zip_xml_scanFold              [fs]
+  _zip_xml_scanFoldStep          [fs]
 
 ```
