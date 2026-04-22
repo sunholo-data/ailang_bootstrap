@@ -66,6 +66,29 @@ Each release includes the AILANG binary pre-bundled.
 | `/ailang-builtins [search]` | List builtin functions |
 | `/ailang-editor <editor>` | Install syntax highlighting |
 
+### Hooks (Claude Code)
+
+| Hook | Event | Purpose |
+|------|-------|---------|
+| `session_start.sh` | SessionStart | Inbox check + brain context |
+| `brain_session.sh` | SessionStart | Inject relevant brain knowledge |
+| `git_guard.sh` | PreToolUse(Bash) | Block destructive git ops |
+| `microrag_context.sh` | PreToolUse(Edit\|Write\|Read\|MultiEdit) | JIT μRAG knowledge injection — surfaces AILANG syntax/builtin docs at tool-call time |
+| `microrag_lint.sh` | PostToolUse(Edit\|Write\|MultiEdit) | First-use builtin nudge for `*.ail` edits |
+| `brain_resolution.sh` | PostToolUse(Bash) | Capture command resolutions |
+| `observatory_hook.sh` | All events | OTEL telemetry for AILANG Observatory |
+
+**Disable μRAG**: `export AILANG_MICRORAG_ENABLED=0`. Requires `ailang` and `jq` on PATH; degrades silently if either is missing.
+
+**μRAG brain corpus auto-bootstrap**: `install.sh` runs `ailang micro-rag init && ailang micro-rag bootstrap --scope user --no-embed` after the binary lands. This populates the brain DB at `~/.ailang/state/brain.db` with the `ailang-syntax` (~50 frames) and `ailang-builtins` (~280 frames) namespaces using only resources embedded in the binary — no source repo required. Works on Windows / minimal Docker images / anywhere `awk` and `python3` are absent.
+
+Re-run manually after `install.sh` to upgrade the corpus to embedding-backed retrieval (requires Ollama):
+
+```bash
+ailang micro-rag bootstrap --scope user           # add embeddings on top of SimHash/FTS
+ailang micro-rag bootstrap --scope user --reset   # full rebuild (use after AILANG version bump)
+```
+
 ### MCP Server (Claude Code)
 
 Exposes AILANG tools for direct AI interaction:

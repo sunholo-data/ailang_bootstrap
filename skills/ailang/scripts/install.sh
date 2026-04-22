@@ -73,3 +73,19 @@ echo ""
 echo "AILANG installed successfully!"
 echo "Version: $(ailang --version 2>/dev/null || echo 'unknown')"
 echo "Location: $(which ailang)"
+
+# --- μRAG bootstrap ---------------------------------------------------------
+# Populate the user-scope brain DB so the μRAG hooks have content to inject
+# from the very first edit. Uses ONLY resources embedded in the binary (no
+# source repo required). Graceful no-op on any failure — installs that
+# pre-date this subcommand still succeed.
+if command -v ailang >/dev/null 2>&1; then
+    echo ""
+    echo "Populating μRAG brain corpus (syntax + builtins)..."
+    ailang micro-rag init >/dev/null 2>&1 || true
+    if ailang micro-rag bootstrap --scope user --no-embed 2>/dev/null | tail -3; then
+        echo "μRAG bootstrap complete (run 'ailang micro-rag bootstrap' again with Ollama for embeddings)."
+    else
+        echo "μRAG bootstrap skipped (subcommand unavailable in this binary version)."
+    fi
+fi

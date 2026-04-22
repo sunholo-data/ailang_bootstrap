@@ -43,6 +43,16 @@
         ]
       },
       {
+        "matcher": "Edit|Write|Read|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/microrag_context.sh\"",
+            "timeout": 4
+          }
+        ]
+      },
+      {
         "matcher": "*",
         "hooks": [
           {
@@ -61,6 +71,16 @@
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/brain_resolution.sh\"",
             "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/hooks/microrag_lint.sh\"",
+            "timeout": 4
           }
         ]
       },
