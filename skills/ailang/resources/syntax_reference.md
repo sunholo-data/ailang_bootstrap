@@ -1,4 +1,4 @@
-# AILANG v0.8.2 - AI Teaching Prompt
+# AILANG v0.11.4 - AI Teaching Prompt
 
 AILANG is a **pure functional language** with Hindley-Milner type inference and algebraic effects. Write code using **recursion** (no loops), **pattern matching**, and **explicit effect declarations**.
 
@@ -106,9 +106,9 @@ export func main() -> () ! {IO} {
   let person = {name: "Alice", age: 30, city: "NYC"};
   let older = {person | age: person.age + 1};         -- Update one field
   let moved = {older | city: "SF"};                   -- Chain updates
-  println(person.name ++ ", " ++ show(person.age) ++ ", " ++ person.city);
-  println(older.name ++ ", " ++ show(older.age) ++ ", " ++ older.city);
-  println(moved.name ++ ", " ++ show(moved.age) ++ ", " ++ moved.city)
+  println("${person.name}, ${show(person.age)}, ${person.city}");
+  println("${older.name}, ${show(older.age)}, ${older.city}");
+  println("${moved.name}, ${show(moved.age)}, ${moved.city}")
 }
 ```
 
@@ -162,7 +162,8 @@ export func main() -> () ! {IO, AI} = println(call("What is 2+2?"))
 | `\(a, b). body` pair syntax | Use `func(a: T, b: U) -> R { body }` |
 | nested `func f(...) =` | Use `let f = \x. body` for nested functions |
 | `!condition` | Both `!x` and `not x` work — prefer `not` for readability |
-| `concat(a, b)` | `a ++ b` - use `++` for string/list concatenation |
+| `concat(a, b)` for strings | `"${a}${b}"` interpolation — `++` is list-only in v0.13.0+ |
+| `concat(a, b)` for lists | `a ++ b` |
 
 ## Let Bindings: Block Style vs Expression Style
 
@@ -351,7 +352,7 @@ func twice(f: int -> int, x: int) -> int = f(f(x))
 pure func add(x: int, y: int) -> int = x + y
 
 -- IO effect - for print/println/readLine
-func greet(name: string) -> () ! {IO} = println("Hello " ++ name)
+func greet(name: string) -> () ! {IO} = println("Hello ${name}")
 
 -- Single effect with return value
 func ask(prompt: string) -> string ! {IO} {
@@ -368,6 +369,13 @@ func process(path: string) -> () ! {IO, FS} {
 -- Main function typically needs effects
 export func main() -> () ! {IO} {
   println("Hello, World!")
+}
+
+-- Exit with explicit code (for CLI tools)
+import std/io (println, exit)
+export func main() -> () ! {IO} {
+  println("error: invalid argument");
+  exit(1)
 }
 
 -- Main with file system access
@@ -401,7 +409,7 @@ func loop() -> () ! {IO} {
   let line = readLine();
   if line == "" then ()
   else {
-    println("Got: " ++ line);
+    println("Got: ${line}");
     loop()
   }
 }
@@ -418,6 +426,7 @@ func loop() -> () ! {IO} {
 | Read from stdin | `! {IO}` (use `readLine()` from `std/io`) |
 | AI calls | `! {AI}` |
 | Run external commands | `! {Process}` or `! {IO, Process}` |
+| Exit with code | `! {IO}` (use `exit(code)` from `std/io`) |
 | Full program | `! {IO, FS, Net}` as needed |
 
 **Effect errors and how to fix:**
@@ -439,7 +448,7 @@ export func main() -> () ! {IO} { println("hi") }
 
 | Effect | Functions | Import |
 |--------|-----------|--------|
-| `IO` | `print`, `println`, `readLine` | `std/io` (print is builtin) |
+| `IO` | `print`, `println`, `readLine`, `exit` | `std/io` (print is builtin) |
 | `FS` | `readFile`, `writeFile`, `fileExists`, `listDir`, `mkdir`, `mkdirAll`, `isDir`, `isFile`, `removeFile`, `_zip_*` | `std/fs`, `std/zip` |
 | `Net` | `httpGet`, `httpPost`, `httpRequest` | `std/net` |
 | `Env` | `getArgs`, `getEnv`, `getEnvOr` | `std/env` |
@@ -458,9 +467,9 @@ import std/debug (log, check)
 
 -- No ! {Debug} needed — ghost effect is invisible to callers
 func process(data: string) -> string ! {Net} {
-  log("processing: " ++ data);
+  log("processing: ${data}");
   check(length(data) > 0, "data must not be empty");
-  httpGet("https://example.com/" ++ data)
+  httpGet("https://example.com/${data}")
 }
 ```
 
@@ -471,7 +480,7 @@ import std/json (kv, js, jnum)
 
 func handleRequest(path: string) -> Response ! {Net} {
   infoWith("Request", [kv("path", js(path))]);
-  httpGet("https://api.example.com" ++ path)
+  httpGet("https://api.example.com${path}")
 }
 ```
 
@@ -552,8 +561,8 @@ let evens = filter(\x. x % 2 == 0, [1, 2, 3, 4])  -- [2, 4]
 let sum = foldl(func(acc: int, x: int) -> int { acc + x }, 0, [1, 2, 3])  -- 6
 
 -- Effectful: use mapE/filterE/foldlE (replaces hand-rolled recursion!)
-let results = mapE(\x. { println("processing " ++ show(x)); x * 2 }, [1, 2, 3]);
-let checked = filterE(\x. { println("checking " ++ show(x)); x > 2 }, [1, 2, 3, 4]);
+let results = mapE(\x. { println("processing ${show(x)}"); x * 2 }, [1, 2, 3]);
+let checked = filterE(\x. { println("checking ${show(x)}"); x > 2 }, [1, 2, 3, 4]);
 let total = foldlE(func(acc: int, x: int) -> int ! {IO} { println("fold"); acc + x }, 0, [10, 20]);
 ```
 
@@ -630,8 +639,8 @@ export func main() -> unit ! {Stream, Process, IO} {
   let proc = asyncExecProcess("echo", ["hello"], "echo", 5, 4096);
   let stdin = asyncReadStdinLines("stdin", 10);
   selectEvents([proc, stdin], \event. match event {
-    SourceBytes(src, data) => { println("[" ++ src ++ "] " ++ toString(data)); true },
-    SourceText(src, text)  => { println("[" ++ src ++ "] " ++ text); false },
+    SourceBytes(src, data) => { println("[${src}] ${toString(data)}"); true },
+    SourceText(src, text)  => { println("[${src}] ${text}"); false },
     _ => true
   })
 }
@@ -647,7 +656,7 @@ export func main() -> () ! {Process, IO} {
   let handle = spawnProcess("cat", []);
   match writeProcessStdin(handle, fromString("hello\n")) {
     Ok(_) => println("wrote line"),
-    Err(e) => println("write error: " ++ e)
+    Err(e) => println("write error: ${e}")
   };
   closeProcessStdin(handle)
 }
@@ -668,7 +677,7 @@ import std/string (stringToInt)
 
 export func main() -> () ! {IO} {
   match stringToInt("42") {
-    Some(n) => println("Parsed: " ++ show(n)),
+    Some(n) => println("Parsed: ${show(n)}"),
     None => println("Invalid number")
   }
 }
@@ -682,7 +691,7 @@ import std/string (stringToInt)
 
 -- Pure function (no effects)
 pure func formatMessage(name: string, count: int) -> string =
-  "User " ++ name ++ " has " ++ show(count) ++ " items"
+  "User ${name} has ${show(count)} items"
 
 -- FS effect only
 func readCount(filename: string) -> int ! {FS} {
@@ -751,8 +760,8 @@ pure func parseAndDivide(s: string, divisor: int) -> Result[int] =
 -- Format Result for output
 pure func showResult(r: Result[int]) -> string =
   match r {
-    Ok(v) => "Result: " ++ show(v),
-    Err(msg) => "Error: " ++ msg
+    Ok(v) => "Result: ${show(v)}",
+    Err(msg) => "Error: ${msg}"
   }
 
 export func main() -> () ! {IO} {
@@ -820,6 +829,58 @@ export func main() -> () ! {IO} {
 
 **Note:** `chars` is Unicode-aware - emoji and accented characters are handled correctly.
 
+## High-Performance String Builtins (v0.10.4)
+
+For email/HTML/CSV-style processing where naive accumulation is O(n²),
+prefer these single-pass O(n) builtins from `std/string`:
+
+| Function | Use case |
+|----------|----------|
+| `decodeQuotedPrintable(s)` | RFC 2045 §6.7 decode (`=20` → space, soft-line-breaks) |
+| `replaceMany(s, pairs)` | Multi-pattern replace, e.g. HTML entity decode in one pass |
+| `foldSlices(s, delim, acc, f)` | Fold over `split(s, delim)` without allocating the list |
+| `mapSlicesJoin(s, delim, f)` | `split → map → join` in O(n), no intermediate list |
+| `startsWithIgnoreCase(s, p)` | Case-insensitive prefix check (header parsing) |
+
+```ailang
+import std/string (replaceMany, foldSlices, mapSlicesJoin)
+
+-- Decode 23 HTML entities in one pass
+let html = replaceMany(raw, [("&amp;", "&"), ("&lt;", "<"), ("&gt;", ">")])
+
+-- Sum line lengths without materializing the list of lines
+let total = foldSlices(text, "\n", 0, \acc line. acc + length(line))
+
+-- Uppercase each CSV field
+let upper = mapSlicesJoin(csv, ",", \field. toUpper(field))
+```
+
+`substring`/`find` have an ASCII fast-path: 24× faster on pure-ASCII input
+(common for headers, JSON, XML).
+
+## Polymorphic Comparison Lambdas (v0.11.4)
+
+Let-bound lambdas using only `<`/`>`/`<=`/`>=`/`==`/`!=` are now properly
+polymorphic — they no longer monomorphize to `Int`. This works:
+
+```ailang
+let max = \x. \y. if x > y then x else y in {
+  let a = max(3.14)(2.71);   -- Float
+  let b = max(10)(20);        -- Int
+  let c = max("foo")("bar");  -- String
+  ...
+}
+```
+
+Before v0.11.4, calling `max(3.14)(2.71)` crashed with `gt_Int: expected
+IntValue, got *eval.FloatValue` because the lambda was prematurely defaulted
+to `Int`. The constraint is now preserved through generalization, so the
+correct dictionary (`gt_Int` / `gt_Float` / `gt_String`) is selected at
+each call site.
+
+`Num`/`Fractional` defaulting is unchanged — only `Ord`-only / `Eq`-only /
+`Show`-only constraints stay polymorphic.
+
 ## Operators
 
 | Type | Operators |
@@ -827,8 +888,33 @@ export func main() -> () ! {IO} {
 | Arithmetic | `+`, `-`, `*`, `/`, `%`, `**` |
 | Comparison | `<`, `>`, `<=`, `>=`, `==`, `!=` |
 | Logical | `&&`, `\|\|`, `not` |
-| String/List | `++` (concatenation) |
-| List | `::` (cons/prepend) |
+| Bitwise | `&` (AND), `^` (XOR), `~` (NOT), `<<` (shift left), `>>` (shift right) |
+| List | `++` (concatenation, list-only); `::` (cons/prepend) |
+| String | `"${expr}"` interpolation; `concat([parts])`; `join(sep, parts)` |
+
+**Bitwise operators** (int only, C-standard precedence bands):
+```ailang
+-- AND, XOR, shifts, complement
+println(show(12 & 10))   -- 8
+println(show(12 ^ 10))   -- 6
+println(show(1 << 4))    -- 16
+println(show(16 >> 2))   -- 4
+println(show(~0))         -- -1
+
+-- XOR is self-inverse (encryption pattern)
+let encrypted = 42 ^ 137
+let decrypted = encrypted ^ 137  -- 42
+
+-- Note: bitwise OR (|) is not an operator (conflicts with ADT syntax).
+-- Use bitwiseOr(a, b) from std/math instead.
+```
+
+**Bitwise precedence** (loosest → tightest): `|| && ^ & == < << + *`
+- `&` and `^` bind LOOSER than `==` (C convention: use parens in `(x & mask) == 0`)
+- `<<`/`>>` bind LOOSER than `+` (C convention: use parens in `1 << (n + 1)`)
+- `~` is prefix (same level as unary `-`)
+
+**Signed hash semantics**: AILANG integers are signed 64-bit values. Bitwise and shift operations act on the 64-bit bit pattern. Hash functions may print negative int results even when the underlying bit pattern matches unsigned reference implementations.
 
 ## Boolean Operations
 
@@ -845,19 +931,68 @@ if not isEmpty(list) then process(list) else []
 if !done then retry() else finish()
 ```
 
-## String and List Concatenation
-
-**Use `++` for concatenation (NOT `concat()`):**
+**Short-circuit evaluation (v0.11.3):** `&&` and `||` are lazy — the RHS is NOT
+evaluated when the LHS determines the result. This makes guarded expressions safe:
 
 ```ailang
--- String concatenation
-let greeting = "Hello" ++ " " ++ "World"   -- "Hello World"
+-- SAFE: charAt(s, i-1) is only called when i > 0
+if i > 0 && charAt(s, i - 1) == "\\" then "escaped" else "normal"
 
--- List concatenation
+-- SAFE: lookup never runs when key is missing
+if member(key, m) && lookup(key, m) == target then "match" else "no"
+
+-- || short-circuits: the RHS effect runs only if LHS is false
+if cached || expensiveFetch() then "ok" else "fail"
+```
+
+`&&` and `||` desugar to `if`: `a && b` → `if a then b else false`,
+`a || b` → `if a then true else b`. Both are equivalent to nested `if` but
+much more readable.
+
+## String Interpolation (v0.12.1+, PREFERRED)
+
+**Use `"${expr}"` for building strings with embedded values. This is the preferred, idiomatic form.**
+
+```ailang
+-- Basic substitution: any expression inside ${...}
+let name = "Alice" in
+let age = 30 in
+println("Hello, ${name}! You are ${age} years old.")
+-- → Hello, Alice! You are 30 years old.
+
+-- Arithmetic and function calls inside ${...}
+println("Next year: ${age + 1}, square: ${age * age}")
+println("First letter: ${substring(name, 0, 1)}")
+
+-- Nested braces work (record literals, field access, let-blocks)
+println("Point: ${show({x: 1, y: 2}.x)}")
+println("Squared: ${let sq = age * age in sq}")
+
+-- Escape with backslash to get a literal ${
+println("Use \${var} to interpolate.")
+-- → Use ${var} to interpolate.
+```
+
+**How it works:** `"Hello, ${x}!"` desugars to `concat_String(concat_String("Hello, ", show(x)), "!")`.
+`show_String` is identity, so string-typed values are spliced without quoting. Any `Show`-able type
+works automatically (int, float, bool, records, ADTs).
+
+## String and List Concatenation
+
+**`++` is for lists only (v0.13.0+). For strings, use `"${...}"` interpolation,
+`concat([parts])` from `std/string`, or `join(sep, parts)`.**
+
+```ailang
+-- Strings: use interpolation
+let msg = "Count: ${length(items)}"
+let greeting = "Hello ${name}"
+
+-- Strings: concat a list of parts
+import std/string (concat)
+let s = concat(["Hello", " ", "World"])
+
+-- Lists: ++ concatenates
 let combined = [1, 2] ++ [3, 4]            -- [1, 2, 3, 4]
-
--- Mixed in expressions
-let msg = "Count: " ++ show(length(items))
 ```
 
 ## Pattern Matching
@@ -912,12 +1047,12 @@ match result {
 **On Records (destructuring):**
 ```ailang
 match person {
-  {name, age} => name ++ " is " ++ show(age)
+  {name, age} => "${name} is ${show(age)}"
 }
 
 -- Record with renaming
 match config {
-  {host, port: p} => host ++ ":" ++ show(p)
+  {host, port: p} => "${host}:${show(p)}"
 }
 
 -- Nested record patterns
@@ -951,8 +1086,8 @@ export func main() -> () ! {IO} {
   let diffColor = Red != Blue;          -- true
   let sameShape = Circle(5) == Circle(5);     -- true
   let diffShape = Circle(5) != Rectangle(5, 10);  -- true
-  print("Color test: " ++ show(sameColor));
-  print("Shape test: " ++ show(sameShape))
+  print("Color test: ${show(sameColor)}");
+  print("Shape test: ${show(sameShape)}")
 }
 ```
 
@@ -1008,13 +1143,13 @@ export func main() -> () ! {IO} {
   let r2 = safeDivide(10, 0);  -- Err("division by zero")
 
   match r1 {
-    Ok(v) => println("Got: " ++ show(v)),
-    Err(msg) => println("Error: " ++ msg)
+    Ok(v) => println("Got: ${show(v)}"),
+    Err(msg) => println("Error: ${msg}")
   };
 
   match r2 {
-    Ok(v) => println("Got: " ++ show(v)),
-    Err(msg) => println("Error: " ++ msg)
+    Ok(v) => println("Got: ${show(v)}"),
+    Err(msg) => println("Error: ${msg}")
   }
 }
 ```
@@ -1051,7 +1186,7 @@ export func main() -> () ! {IO} {
   let nums = [1, 3, 4, 7, 8];
   let found = findFirst(isEven, nums);
   let doubled = mapOption(double, found);
-  print(match doubled { Some(v) => "Found: " ++ show(v), None => "Not found" })
+  print(match doubled { Some(v) => "Found: ${show(v)}", None => "Not found" })
 }
 ```
 
@@ -1074,9 +1209,9 @@ func transition(state: State, event: Event) -> State =
 
 func showState(s: State) -> string =
   match s {
-    Green(t) => "GREEN(" ++ show(t) ++ ")",
-    Yellow(t) => "YELLOW(" ++ show(t) ++ ")",
-    Red(t) => "RED(" ++ show(t) ++ ")"
+    Green(t) => "GREEN(${show(t)})",
+    Yellow(t) => "YELLOW(${show(t)})",
+    Red(t) => "RED(${show(t)})"
   }
 
 export func main() -> () ! {IO} {
@@ -1129,7 +1264,7 @@ import std/json (decode, Json, JObject, JString)
 let result = decode("{\"name\":\"Alice\"}");
 match result {
   Ok(json) => print(show(json)),
-  Err(msg) => print("Parse error: " ++ msg)
+  Err(msg) => print("Parse error: ${msg}")
 }
 ```
 
@@ -1151,7 +1286,7 @@ export func main() -> () ! {IO} {
       },
       None => println("Not an array")
     },
-    Err(e) => println("Parse error: " ++ e)
+    Err(e) => println("Parse error: ${e}")
   }
 }
 
@@ -1179,7 +1314,7 @@ match decode("{\"name\":\"Alice\",\"age\":30}") {
     -- get(obj, key) -> Option[Json]
     match get(obj, "name") {
       Some(j) => match asString(j) {
-        Some(name) => print("Name: " ++ name),
+        Some(name) => print("Name: ${name}"),
         None => print("name is not a string")
       },
       None => print("no name field")
@@ -1187,13 +1322,13 @@ match decode("{\"name\":\"Alice\",\"age\":30}") {
     -- asNumber returns Option[float]
     match get(obj, "age") {
       Some(j) => match asNumber(j) {
-        Some(age) => print("Age: " ++ show(age)),
+        Some(age) => print("Age: ${show(age)}"),
         None => print("age is not a number")
       },
       None => print("no age field")
     }
   },
-  Err(msg) => print("Parse error: " ++ msg)
+  Err(msg) => print("Parse error: ${msg}")
 }
 ```
 
@@ -1224,8 +1359,8 @@ func getAge(obj: Json) -> int =
 -- Full example
 export func main() -> () ! {IO} =
   match decode("{\"name\":\"Alice\",\"age\":30}") {
-    Ok(obj) => print(getName(obj) ++ " is " ++ intToStr(getAge(obj))),
-    Err(e) => print("Error: " ++ e)
+    Ok(obj) => print("${getName(obj)} is ${intToStr(getAge(obj))}"),
+    Err(e) => print("Error: ${e}")
   }
 ```
 
@@ -1264,9 +1399,9 @@ match decode("{\"tags\": [\"a\", \"b\"]}") {
     -- getStringArrayOrEmpty: returns [] if missing or invalid
     let tags = getStringArrayOrEmpty(obj, "tags");  -- ["a", "b"]
     let missing = getStringArrayOrEmpty(obj, "nope");  -- []
-    print("Got " ++ show(length(tags)) ++ " tags")
+    print("Got ${show(length(tags))} tags")
   },
-  Err(e) => print("Error: " ++ e)
+  Err(e) => print("Error: ${e}")
 }
 ```
 
@@ -1290,7 +1425,7 @@ import std/json (decode)
 let headers = [{name: "Authorization", value: "Bearer token"}];
 match httpRequest("POST", url, headers, body) {
   Ok(resp) => decode(resp.body),          -- resp.body is the string
-  Err(Transport(msg)) => Err("Error: " ++ msg),
+  Err(Transport(msg)) => Err("Error: ${msg}"),
   Err(_) => Err("Other error")
 }
 ```
@@ -1320,7 +1455,7 @@ func ask_person(prompt: string) -> string ! {AI} =
 let raw = callJsonSimple("Return a JSON array");
 match decode(raw) {
   Ok(json) => println("Valid JSON!")
-  Err(msg) => println("Parse error: " ++ msg)
+  Err(msg) => println("Parse error: ${msg}")
 }
 ```
 
@@ -1404,13 +1539,38 @@ func readBinary(path: string, entry: string) -> Result[string, string] ! {FS} =
 
 export func main() -> () ! {IO, FS} {
   match _zip_listEntries("document.docx") {
-    Ok(entries) => println("Found " ++ show(length(entries)) ++ " entries"),
-    Err(msg) => println("Error: " ++ msg)
+    Ok(entries) => println("Found ${show(length(entries))} entries"),
+    Err(msg) => println("Error: ${msg}")
   }
 }
 ```
 
 Run: `ailang run --entry main --caps IO,FS file.ail`
+
+## Tar + Gzip (std/tar, std/gzip) — v0.12.0+
+
+Native reading of `.tar`, `.tar.gz`, and raw gzip streams. No shell-out, no temp files. Matches `std/zip` conventions: binary data crosses as base64.
+
+```ailang
+import std/tar (readFromGzip, extractAll)
+import std/gzip (decompress, decompressFile)
+
+-- Pull one file straight from a .tar.gz (primary use: arXiv bundles)
+match readFromGzip("paper.tar.gz", "main.tex") {
+  Ok(tex) => println(tex),
+  Err(msg) => println("read failed: ${msg}")
+}
+
+-- Safe extraction: rejects ../ entries, symlinks, absolute paths
+match extractAll("archive.tar", "./dest") {
+  Ok(paths) => println("wrote ${show(length(paths))} files"),
+  Err(msg) => println("blocked: ${msg}")
+}
+```
+
+- `std/gzip`: `decompress(b64)`, `compress(b64, level)` — **pure**; `decompressFile(path) ! {FS}`
+- `std/tar`: `listEntries`, `readEntry`, `readEntryBytes`, `extractAll`, `readFromGzip`, `readFromGzipBytes` — all `! {FS}`
+- Caps: 10K entries, 100MB decompressed per entry (bomb defence). Respects `AILANG_FS_SANDBOX`.
 
 ## XML Parsing (std/xml)
 
@@ -1432,17 +1592,17 @@ export func main() -> () ! {IO} {
       -- Find first match
       match _xml_findFirst(doc, "item") {
         Some(item) => {
-          println("Tag: " ++ _xml_getTag(item));
-          println("Text: " ++ _xml_getText(item));
+          println("Tag: ${_xml_getTag(item)}");
+          println("Text: ${_xml_getText(item)}");
           match _xml_getAttr(item, "id") {
-            Some(id) => println("ID: " ++ id),
+            Some(id) => println("ID: ${id}"),
             None => ()
           }
         },
         None => println("No items found")
       }
     },
-    Err(msg) => println("Parse error: " ++ msg)
+    Err(msg) => println("Parse error: ${msg}")
   }
 }
 ```
@@ -1465,13 +1625,151 @@ match _zip_readEntry("report.docx", "word/document.xml") {
   Ok(xml) => match _xml_parse(xml) {
     Ok(doc) => {
       let paragraphs = _xml_findAll(doc, "w:p");
-      println("Found " ++ show(length(paragraphs)) ++ " paragraphs")
+      println("Found ${show(length(paragraphs))} paragraphs")
     },
-    Err(e) => println("XML error: " ++ e)
+    Err(e) => println("XML error: ${e}")
   },
-  Err(e) => println("ZIP error: " ++ e)
+  Err(e) => println("ZIP error: ${e}")
 }
 ```
+
+## Streaming XML / Bounded Folds (v0.10.1, v0.11.3)
+
+For large XML (multi-MB) inside ZIP archives, `parseFold` and `scanFold`
+fold over `<tag>` elements **without materializing the whole document**:
+
+```ailang
+import std/xml (parseFold, getText, getAttr)
+import std/zip (scanFold)
+import std/iter (FoldStep, Continue, Stop)
+import std/option (Some, None)
+
+-- Pure: fold over rows in an XML string
+let total = parseFold(xml, "row", 0, \acc node.
+  acc + 1
+)
+
+-- Effectful: fold over rows directly from a ZIP entry (never materializes XML)
+let count = scanFold("data.xlsx", "xl/sharedStrings.xml", "si", 0,
+  \acc node. acc + 1
+)
+```
+
+**Bounded prefix scans (v0.11.3):** When you only need the first N rows of a
+50K-row sheet, return `Stop(acc)` to halt the scan immediately:
+
+```ailang
+import std/xml (parseFoldStep)
+import std/iter (FoldStep, Continue, Stop)
+
+-- Take first 5000 rows then stop — the rest of the document isn't scanned
+let first5k = parseFoldStep(xml, "row", [], \acc node.
+  if length(acc) >= 5000
+    then Stop(acc)
+    else Continue(acc ++ [getText(node)])
+)
+```
+
+`parseFoldStep` and `scanFoldStep` mirror `parseFold`/`scanFold` but the
+handler returns `FoldStep[a] = Continue(a) | Stop(a)`. Use them whenever
+the document is much larger than what you need.
+
+## Maps (std/map, v0.10.1)
+
+`Map[k, v]` — immutable hash map, O(1) lookup, copy-on-write inserts:
+
+```ailang
+import std/map as M
+
+let m0 = M.empty()
+let m1 = M.insert(m0, "alice", 30)
+let m2 = M.insert(m1, "bob", 25)
+
+match M.lookup(m2, "alice") {
+  Some(age) => println(show(age)),  -- 30
+  None      => println("missing")
+}
+
+println(show(M.size(m2)))          -- 2
+println(show(M.member(m2, "bob")))  -- true
+
+-- Iteration is sorted (deterministic)
+let xs = M.toList(m2)               -- [("alice", 30), ("bob", 25)]
+let m3 = M.fromList([("c", 1), ("d", 2)])
+```
+
+Builtins: `empty`, `insert`, `lookup`, `member`, `remove`, `size`,
+`keys`, `values`, `fromList`, `toList`. Keys can be int/string/bool —
+keys use canonical encoding internally.
+
+## JWT Verification (std/jwt, v0.10.0)
+
+Pure JWT parsing and RS256 signature verification (e.g., Firebase ID tokens):
+
+```ailang
+import std/jwt (decodeJWT, verifyRS256, verifyWithKid, isExpired, checkIssuer)
+
+-- Decode without verification (for inspection)
+match decodeJWT(token) {
+  Ok({header, payload, signature}) => println(payload),
+  Err(msg) => println("decode failed: ${msg}")
+}
+
+-- Verify RS256 signature against a PEM public key
+match verifyRS256(token, pemPublicKey) {
+  Ok(claims) => if isExpired(claims, nowUnix) then "expired" else "valid",
+  Err(msg)   => "invalid: ${msg}"
+}
+
+-- Firebase/OAuth pattern: select key by 'kid' header
+verifyWithKid(token, \kid. lookupKey(kid, jwks))
+```
+
+Backed by `rsaVerifyPKCS1v15(message, signature, publicKeyPEM)` in
+`std/crypto`, plus `fromBase64URL` in `std/bytes` (RFC 4648 §5, no padding).
+JWT functions are pure — fetch keys yourself via `std/net`.
+
+## Custom Tracing (std/trace, v0.11.1)
+
+Emit OTEL-compatible spans and events from AILANG code. Requires `Trace` effect:
+
+```ailang
+import std/trace (spanStart, spanEnd, event)
+
+export func processBatch(items: [Item]) -> int ! {Trace, IO} {
+  spanStart("batch.process");
+  event("batch.size", show(length(items)));
+  let n = doWork(items);
+  spanEnd("batch.process");
+  n
+}
+```
+
+Run: `ailang run --caps IO,Trace --emit-trace jsonl --entry main file.ail`
+
+In WASM, register a JS callback via `ailangSetTraceHandler` to receive
+events live (function_enter/exit, effect, contract_check, budget_delta).
+
+## Process Exit (v0.10.1)
+
+`exit(code: int) -> ()` in `std/io` terminates the process with a specific
+exit code. Required for CLI tools that need to signal failure:
+
+```ailang
+import std/io (println, exit)
+
+export func main() -> () ! {IO} {
+  match validate(args) {
+    Ok(())   => println("ok"),
+    Err(msg) => {
+      println("error: ${msg}");
+      exit(1)
+    }
+  }
+}
+```
+
+Telemetry/traces are flushed before the process exits.
 
 ## Arrays (O(1) indexed access)
 
@@ -1511,13 +1809,13 @@ let xs = [10, 20, 30];
 
 -- nth: get element by index (0-based)
 match nth(xs, 1) {
-  Some(x) => print("Element at 1: " ++ show(x)),  -- 20
+  Some(x) => print("Element at 1: ${show(x)}"),  -- 20
   None => print("Index out of bounds")
 };
 
 -- last: get last element
 match last(xs) {
-  Some(x) => print("Last: " ++ show(x)),  -- 30
+  Some(x) => print("Last: ${show(x)}"),  -- 30
   None => print("Empty list")
 };
 
@@ -1526,7 +1824,7 @@ let hasEven = any(\x. x % 2 == 0, xs);  -- true (20 is even)
 
 -- findIndex: find index of first matching element
 match findIndex(\x. x > 15, xs) {
-  Some(i) => print("First > 15 at index: " ++ show(i)),  -- 1
+  Some(i) => print("First > 15 at index: ${show(i)}"),  -- 1
   None => print("Not found")
 }
 ```
@@ -1621,9 +1919,9 @@ ailang run --verify-contracts --caps IO --entry main file.ail
 
 **What can be verified** (decidable fragment):
 - Types: `int`, `bool`, `string`, enum ADT, record, `[int]` lists
-- Arithmetic (`+`, `-`, `*`, `/`), comparison (`>=`, `<=`, `==`, `!=`), logical (`&&`, `||`)
+- Arithmetic (`+`, `-`, `*`, `/`), comparison (`>=`, `<=`, `==`, `!=`), logical (`&&`, `||`), bitwise (`&`, `^`, `~`, `<<`, `>>`)
 - `if`/`else`, `let` bindings, `match` on enums/ADTs
-- String ops (use `std/string`): `length`, `startsWith`, `endsWith`, `find`, `substring`, `contains`, concat (`++`)
+- String ops (use `std/string`): `length`, `startsWith`, `endsWith`, `find`, `substring`, `contains`; `concat` (list of strings); `"${expr}"` interpolation
 - List ops: `length` (from `std/list`), `_list_head`, `_list_nth`, cons (`::`), concat (`++`), literals
 - Records: field access (`r.field`), construction (`{x: 1, y: 2}`), ensures with `result.x`
 - Cross-function calls: Z3 inlines callees to reason about full call chains
@@ -1824,3 +2122,20 @@ ailang repl                                           # Interactive REPL
 ```
 
 **Flags must come BEFORE the filename!**
+
+### FS Sandbox
+
+Restrict all file system operations to a directory with `AILANG_FS_SANDBOX`:
+
+```bash
+AILANG_FS_SANDBOX=/tmp/work ailang run --entry main --caps IO,FS file.ail
+```
+
+When set, all paths are resolved relative to the sandbox root:
+- `readFile("data.txt")` reads `/tmp/work/data.txt`
+- `writeFile("out.txt", s)` writes `/tmp/work/out.txt`
+- `_zip_listEntries("archive.zip")` opens `/tmp/work/archive.zip`
+
+Applies to **all FS builtins**: `readFile`, `writeFile`, `readFileBytes`, `writeFileBytes`, `appendFile`, `appendFileBytes`, `fileExists`, `listDir`, `mkdir`, `mkdirAll`, `isDir`, `isFile`, `removeFile`, and all `std/zip` operations. Also sets the working directory for `std/process` `exec`.
+
+If unset (default), paths resolve normally from the process working directory.
