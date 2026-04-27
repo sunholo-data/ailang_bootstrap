@@ -89,13 +89,30 @@ ailang micro-rag bootstrap --scope user           # add embeddings on top of Sim
 ailang micro-rag bootstrap --scope user --reset   # full rebuild (use after AILANG version bump)
 ```
 
-### MCP Server (Claude Code)
+### MCP Servers (TWO complementary servers)
 
-Exposes AILANG tools for direct AI interaction:
+**1. Local stdio MCP** (auto-installed by this plugin) — wraps the local AILANG CLI for actually running/checking code:
 - `ailang_check` - Type-check files
 - `ailang_run` - Run programs
-- `ailang_prompt` - Get teaching prompt
+- `ailang_prompt` - Get teaching prompt (embedded copy)
 - `ailang_builtins` - List builtins
+
+**2. Remote HTTP MCP at `mcp.ailang.sunholo.com`** — version-locked live docs, stdlib, examples, design docs, benchmarks. Available to any agent harness that supports remote MCP (Claude Desktop, Cursor, Cline, Continue, Claude Code).
+
+```json
+{
+  "mcpServers": {
+    "ailang-docs": {
+      "url": "https://mcp.ailang.sunholo.com/mcp/",
+      "transport": "streamable-http"
+    }
+  }
+}
+```
+
+Tools include `prompt_get`, `stdlib_modules`, `stdlib_search`, `examples_for_concept`, `limitations_list`, `effects_catalog`, and `submit_feedback` (for filing AILANG bugs from inside an agent session). Use these to **avoid stale embedded knowledge** — the snapshot is rebuilt and redeployed on every AILANG release.
+
+See [docs/guides/agent-mcp](https://ailang.sunholo.com/docs/guides/agent-mcp) for the full tool catalog.
 
 ### Extension Features (Gemini CLI)
 

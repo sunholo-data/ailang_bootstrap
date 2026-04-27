@@ -5,247 +5,160 @@ description: Write AILANG code. ALWAYS run 'ailang prompt' first - it contains t
 
 # AILANG
 
-## BEFORE YOU WRITE ANY CODE
+## Source of Truth — TWO MCP Servers
 
-**Run this command first** - it outputs the current syntax rules and templates:
+**1. Local stdio MCP** (auto-installed by this plugin) — wraps the local AILANG CLI.
+Tools: `ailang_check`, `ailang_run`, `ailang_repl`, etc. Use these to type-check
+and run the user's code.
 
-```bash
-ailang prompt
+**2. Remote HTTP MCP at `mcp.ailang.sunholo.com`** — version-locked live docs,
+stdlib, examples, design docs, benchmarks. **Prefer this for any reference
+question** so you never get stale content.
+
+If your harness supports remote MCP, the user can add it via the one-click
+buttons at [ailang.sunholo.com](https://ailang.sunholo.com/), or paste:
+
+```json
+{
+  "mcpServers": {
+    "ailang-docs": {
+      "url": "https://mcp.ailang.sunholo.com/mcp/",
+      "transport": "streamable-http"
+    }
+  }
+}
 ```
 
-This is the source of truth for AILANG syntax. Do not guess at syntax.
+Useful remote tools (call these instead of guessing):
 
-## Session Start
+| Tool | When to call |
+|---|---|
+| `prompt_get(for_version, kind="agent")` | Need full syntax reference |
+| `stdlib_modules(for_version)` | Discover what's in stdlib |
+| `stdlib_module(name, for_version)` | Inspect a specific module's exports |
+| `stdlib_search(query, for_version)` | Find a function by name or keyword |
+| `examples_for_concept(concept, for_version)` | Find a working example for a feature |
+| `limitations_list(for_version)` | Check what AILANG can't do before proposing it |
+| `effects_catalog(for_version)` | Find which capability a function needs |
+| `submit_feedback(...)` | File a bug / feature request mid-session |
+
+If the remote MCP isn't reachable: `ailang prompt`, `ailang docs --list`, and
+`ailang docs std/<module>` all work locally as the offline fallback.
+
+## BEFORE YOU WRITE ANY CODE
 
 ```bash
-# 1. Check for messages from other agents
-ailang messages list --unread
-
-# 2. Load current syntax (CRITICAL!)
-ailang prompt
-
-# 3. Verify AILANG is installed
-ailang --version
-
-# 4. If debugging, tracing, or toolchain help needed:
-#    ailang devtools-prompt
+ailang prompt          # current syntax (or call prompt_get via remote MCP)
+ailang --version       # confirm CLI is installed
+ailang messages list --unread   # any messages from other agents?
 ```
 
 ## Development Workflow
 
 ```
-┌──────────────────────────────────────┐
-│ 1. Run: ailang prompt                │
-│    Read the template and examples    │
-└──────────────────────────────────────┘
-                 ↓
-┌──────────────────────────────────────┐
-│ 2. Write code following template     │
-│    module myproject/mymodule         │
-│    export func main() -> () ! {IO}   │
-└──────────────────────────────────────┘
-                 ↓
-┌──────────────────────────────────────┐
-│ 3. Type-check (fast feedback)        │
-│    ailang check file.ail             │
-└──────────────────────────────────────┘
-                 ↓
-┌──────────────────────────────────────┐
-│ 4. Run with capabilities             │
-│    ailang run --caps IO --entry main │
-└──────────────────────────────────────┘
-                 ↓
-        Fix errors, repeat
+1. ailang prompt           → load syntax (do this once per session)
+2. write code              → follow the template
+3. ailang check file.ail   → type-check (fast feedback)
+4. ailang run --caps IO --entry main file.ail  → run with capabilities
+                             ↓
+                       fix errors, repeat
 ```
 
 ## CLI Quick Reference
 
 | Command | Purpose |
 |---------|---------|
-| `ailang prompt` | **Load syntax (DO THIS FIRST!)** |
-| `ailang devtools-prompt` | **Full toolchain reference (debugging, tracing, eval, chains, coordinator)** |
+| `ailang prompt` | Load syntax (`--source mcp` to force fresh from remote MCP) |
+| `ailang devtools-prompt` | Toolchain reference (debugging, tracing, eval, chains) |
+| `ailang mcp status` | Check remote MCP reachability + drift |
 | `ailang check file.ail` | Type-check without running |
-| `ailang run --caps IO --entry main file.ail` | Run program |
+| `ailang run --caps IO --entry main file.ail` | Run program (flags BEFORE filename!) |
 | `ailang repl` | Interactive testing |
-| `ailang docs --list` | **List all stdlib modules** |
-| `ailang docs std/array` | **Show module exports and signatures** |
-| `ailang builtins list --verbose --by-module` | Full stdlib docs with examples |
-| `ailang examples search "query"` | **Find working code examples (v0.6.2+)** |
-| `ailang examples show NAME` | View example with expected output |
+| `ailang docs --list` | List all stdlib modules (or call `stdlib_modules` via MCP) |
+| `ailang docs std/<module>` | Show exports + signatures (or `stdlib_module` via MCP) |
+| `ailang examples search "query"` | Find working examples (or `examples_for_concept` via MCP) |
+| `ailang examples show NAME --run` | View + run example with expected output |
 | `ailang search "query"` | Search package registry |
 | `ailang install vendor/name` | Install a package |
-| `ailang pkg-docs vendor/name` | View package AI usage guide |
 
-## Exploring the Standard Library
-
-**The CLI is the source of truth.** Use `ailang docs` for module-level docs and `ailang builtins list --verbose` for all builtins:
-
+**Critical:** `ailang run` flags MUST come before the filename:
 ```bash
-# List all available stdlib modules
-ailang docs --list
-
-# Show full exports + signatures for a module (PREFER THIS)
-ailang docs std/string
-ailang docs std/json
-ailang docs std/stream
-
-# Full builtins with examples and signatures
-ailang builtins list --verbose --by-module
-
-# Search for specific function
-ailang builtins list --verbose | grep -A 10 "httpGet"
+ailang run --caps IO --entry main file.ail   # ✓
+ailang run file.ail --caps IO                # ✗ flags ignored silently
 ```
 
-**Key stdlib modules (v0.10.0):**
-| Module | Purpose |
-|--------|---------|
-| `std/ai` | LLM calls via `call(prompt)` |
-| `std/array` | O(1) indexed arrays |
-| `std/bytes` | UTF-8 / base64 operations |
-| `std/clock` | Time and sleep |
-| `std/crypto` | Cryptographic operations |
-| `std/datetime` | Pure date/time manipulation |
-| `std/debug` | Structured tracing and assertions |
-| `std/embedding` | Embedding vectors |
-| `std/env` | Environment variables |
-| `std/fs` | File read/write |
-| `std/io` | Print / stdin |
-| `std/json` | JSON encode/decode |
-| `std/jwt` | JWT parsing and verification |
-| `std/list` | Functional list ops (map, filter, fold) |
-| `std/map` | O(1) key-value maps |
-| `std/math` | Trig, log, rounding |
-| `std/net` | HTTP requests |
-| `std/option` | Optional values |
-| `std/process` | Execute external commands |
-| `std/rand` | Random numbers |
-| `std/result` | Success/failure results |
-| `std/sem` | Semantic frame caching |
-| `std/sharedindex` | Namespace-partitioned similarity indexing |
-| `std/sharedmem` | SharedMem effect wrappers |
-| `std/simhash` | SimHash fingerprinting |
-| `std/stream` | WebSocket / SSE streaming |
+## Capabilities (cheat sheet)
 
-**Note:** This skill provides guidance, but `ailang prompt` and `ailang docs` are always more up-to-date.
-
-## Finding Working Examples (v0.6.2+)
-
-**Search 97 working code examples** directly from the CLI:
-
-```bash
-# Search for examples by keyword (flags BEFORE query!)
-ailang examples search "pattern matching"
-ailang examples search --limit 5 "recursion"
-
-# View a specific example with metadata and expected output
-ailang examples show adt_option
-ailang examples show fold_reduce --expected
-
-# List examples by tag
-ailang examples list --tags adt
-ailang examples list --tags recursion
-
-# See all available tags
-ailang examples tags
-```
-
-**Search scoring:** Tag match (1.0) > Description (0.95) > Content (0.80) > Partial (0.60-0.70)
-
-**When to use:**
-- Learning AILANG patterns: `ailang examples list --tags recursion`
-- Checking syntax: `ailang examples search "match"`
-- Finding working code: `ailang examples show NAME --run`
-
-**Flags MUST come before filename:**
-```bash
-ailang run --caps IO --entry main file.ail   # Correct
-ailang run file.ail --caps IO                # WRONG
-```
-
-## Capabilities
-
-| Cap | Purpose | Example Functions |
-|-----|---------|-------------------|
-| `IO` | Console I/O | `println` (prelude), `print` (needs import) |
+| Cap | Purpose | Example imports |
+|---|---|---|
+| `IO` | Console I/O | `println` (prelude), `print` |
 | `FS` | File system | `readFile`, `writeFile` |
-| `Net` | HTTP requests | `httpGet`, `httpPost`, `httpRequest` |
-| `Clock` | Time functions | `now`, `sleep` |
+| `Net` | HTTP | `httpGet`, `httpPost` |
+| `Clock` | Time | `now`, `sleep` |
 | `AI` | LLM calls | `call(prompt)` |
-| `Rand` | Random numbers | `rand_int`, `rand_float` |
-| `Env` | Environment vars | `getEnv`, `getEnvOr` |
+| `Rand` | Random | `rand_int`, `rand_float` |
+| `Env` | Env vars | `getEnv`, `getEnvOr` |
 | `Debug` | Debug logging | `log`, `check` |
+
+For the canonical list with introduction versions: call `effects_catalog` via remote MCP.
 
 ## Practical Examples
 
-Offer to create these working examples for users:
+Offer to create one of these working examples for the user:
 
-| Example | What It Does | Run Command |
-|---------|--------------|-------------|
-| **AI Debate** | AI models debate a topic | `ailang run --caps IO,Env,AI --ai claude-haiku-4-5 --entry main ai_debate.ail` |
-| **Ask AI** | Simple CLI Q&A tool | `ailang run --caps IO,AI --ai claude-haiku-4-5 --entry demo ask_ai.ail` |
-| **File Summarizer** | Summarize files with AI | `ailang run --caps IO,FS,AI --ai gpt5-mini --entry demo summarize_file.ail` |
+| Example | What | Run command |
+|---|---|---|
+| **AI Debate** | Two LLMs argue a topic | `ailang run --caps IO,Env,AI --ai claude-haiku-4-5 --entry main ai_debate.ail` |
+| **Ask AI** | Simple CLI Q&A | `ailang run --caps IO,AI --ai claude-haiku-4-5 --entry demo ask_ai.ail` |
+| **File Summarizer** | Summarize a file with AI | `ailang run --caps IO,FS,AI --ai gpt5-mini --entry demo summarize_file.ail` |
 | **Game of Life** | Conway's simulation | `ailang run --caps IO --entry main game_of_life.ail` |
 
-### AI Debate Example
+Quick AI Debate template:
+
 ```ailang
 module my_debate
-import std/ai (call)
 import std/ai (call)
 
 export func main() -> () ! {IO, AI} {
   println("=== AI Debate ===");
   let optimist = call("Argue FOR AI benefits in 2 sentences");
-  println("Optimist: " ++ optimist);
+  println("Optimist: ${optimist}");
   let skeptic = call("Argue AGAINST AI risks in 2 sentences");
-  println("Skeptic: " ++ skeptic)
-}
-```
-
-### File Summarizer Example
-```ailang
-module summarizer
-import std/ai (call)
-import std/fs (readFile)
-
-export func main(path: string) -> () ! {IO, FS, AI} {
-  let content = readFile(path);
-  let summary = call("Summarize in 3 bullets: " ++ content);
-  println(summary)
+  println("Skeptic: ${skeptic}")
 }
 ```
 
 ## Packages & Registry
 
-Install and use community packages from the AILANG registry:
-
 ```bash
-# Discover packages
-ailang search "auth"              # Search by keyword
-ailang search --tag gcp           # Browse by tag
-ailang pkg-docs sunholo/auth      # View AI usage guide for a package
-
-# Use a package
-ailang install sunholo/auth@0.1.0
-ailang add --registry sunholo/auth@0.1.0  # Add as dependency
-
-# Publish a package
-ailang init package --name vendor/name    # Create ailang.toml
-ailang publish --dry-run                  # Preview
-ailang publish
+ailang search "auth"                        # discover
+ailang pkg-docs sunholo/auth                # AI usage guide for a package
+ailang install sunholo/auth@0.1.0           # install
+ailang init package --name vendor/name      # create new package
+ailang publish --dry-run                    # preview
+ailang publish                              # ship
 ```
 
 ## When Stuck
 
-- Run `ailang devtools-prompt` for full toolchain reference (debugging, tracing, eval, chains, coordinator)
+- Call `examples_for_concept` via remote MCP, or `ailang examples search`
+- Run `ailang devtools-prompt` for the full toolchain reference
 - Run `ailang repl` for interactive testing
-- See [common_patterns.md](resources/common_patterns.md) for patterns
-- See [cli_reference.md](resources/cli_reference.md) for full CLI docs
-- See [editor_support.md](resources/editor_support.md) for VS Code, Vim, Neovim setup
-- Check the [ailang-debug](../ailang-debug/SKILL.md) skill for error fixes
-- **Docs**: https://ailang.sunholo.com/docs/guides/getting-started
+- Check the [ailang-debug](../ailang-debug/SKILL.md) skill for error diagnosis
+- File a report from inside this session: call `submit_feedback` via remote MCP
+- Docs: https://ailang.sunholo.com/
 
 ## Done? Notify
 
 ```bash
 ailang messages send user "Task completed" --from "my-agent" --title "Status"
 ```
+
+## Migration Note (M-AGENT-MCP)
+
+This skill used to embed a long stdlib module table and version history that
+went stale per release. The remote MCP server (`mcp.ailang.sunholo.com`) is
+now the canonical source for all of that — it ships per-AILANG-release with
+version-locked content. The local stdio MCP server bundled with this plugin
+remains the way to actually run/check the user's code. See
+[docs/guides/agent-mcp.md](https://ailang.sunholo.com/docs/guides/agent-mcp).
