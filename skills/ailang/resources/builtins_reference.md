@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.14.3. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.15.0. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (19)
@@ -28,12 +28,13 @@
   _float_to_int                  [pure]
   _int_to_float                  [pure]
 
-# std/ai (6)
+# std/ai (7)
   _ai_call                       [ai]
   _ai_call_image                 [ai]
   _ai_call_image_base64          [ai]
   _ai_call_json                  [ai]
   _ai_call_json_simple           [ai]
+  _ai_stream_call                [ai]
   _ollama_embed                  [io]
 
 # std/array (9)
