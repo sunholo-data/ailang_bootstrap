@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.15.2. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.16.2. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (19)
@@ -93,25 +93,36 @@
   _debug_check                   [debug]
   _debug_log                     [debug]
 
+# std/deflate (4)
+  _deflate_deflate               [pure]
+  _deflate_deflateZlib           [pure]
+  _deflate_inflate               [pure]
+  _deflate_inflateZlib           [pure]
+
 # std/env (3)
   _env_getArgs                   [env]
   _env_getEnv                    [env]
   _env_hasEnv                    [env]
 
-# std/fs (13)
+# std/fs (18)
   _fs_appendFile                 [fs]
   _fs_appendFileBytes            [fs]
+  _fs_appendFileResult           [fs]
   _fs_exists                     [fs]
   _fs_isDir                      [fs]
   _fs_isFile                     [fs]
   _fs_listDir                    [fs]
   _fs_mkdir                      [fs]
   _fs_mkdirAll                   [fs]
+  _fs_mkdirAllResult             [fs]
   _fs_readFile                   [fs]
   _fs_readFileBytes              [fs]
+  _fs_readFileResult             [fs]
   _fs_removeFile                 [fs]
+  _fs_removeFileResult           [fs]
   _fs_writeFile                  [fs]
   _fs_writeFileBytes             [fs]
+  _fs_writeFileResult            [fs]
 
 # std/game (3)
   _game_delta_time               [clock]
