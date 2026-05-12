@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.18.9. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.18.11. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (19)
@@ -210,6 +210,9 @@
 
 # std/net (1)
   _net_httpRequest               [net]
+
+# std/package (1)
+  _pkg_asset_path                [fs]
 
 # std/prelude (25)
   and_Bool                       [pure]
