@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.18.11. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.19.0. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (19)
@@ -208,8 +208,9 @@
   sub_Float                      [pure]
   sub_Int                        [pure]
 
-# std/net (1)
+# std/net (2)
   _net_httpRequest               [net]
+  _net_httpRequestBytes          [net]
 
 # std/package (1)
   _pkg_asset_path                [fs]
