@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.19.0. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.19.1. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (19)
@@ -135,6 +135,10 @@
   _gzip_compress                 [pure]
   _gzip_decompress               [pure]
   _gzip_decompressFile           [fs]
+
+# std/html (2)
+  _html_parse                    [pure]
+  _html_parseFragment            [pure]
 
 # std/http (2)
   _get_header                    [pure]
