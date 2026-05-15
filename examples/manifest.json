@@ -1472,6 +1472,19 @@
       "description": "XML fold: process elements one-at-a-time via parseFold without building a result list"
     },
     {
+      "path": "runnable/xml_walk_perf.ail",
+      "status": "working",
+      "tags": [
+        "stdlib",
+        "xml",
+        "performance",
+        "foldChildren",
+        "getAttrMap",
+        "std/xml"
+      ],
+      "description": "Wallclock comparison of classic getChildren+getAttr walks vs new foldChildren+getAttrMap walks (M-STDLIB-XML-WALK-PERF)"
+    },
+    {
       "path": "runnable/zip_xml_fold.ail",
       "status": "working",
       "tags": [
@@ -1849,11 +1862,31 @@
         "--entry",
         "main"
       ]
+    },
+    {
+      "path": "runnable/url_encode.ail",
+      "status": "working",
+      "tags": [
+        "stdlib",
+        "url",
+        "encoding",
+        "oauth",
+        "http",
+        "form",
+        "std/net"
+      ],
+      "description": "URL percent-encoding via std/net.urlEncode and form-body construction via std/net.urlEncodeForm (OAuth2 token-exchange pattern)",
+      "run_flags": [
+        "--caps",
+        "IO",
+        "--entry",
+        "main"
+      ]
     }
   ],
   "statistics": {
-    "total": 142,
-    "working": 135,
+    "total": 143,
+    "working": 136,
     "aspirational": 4,
     "broken": 3,
     "coverage": 0.951

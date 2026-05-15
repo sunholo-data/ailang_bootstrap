@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.19.1. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.19.2. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (19)
@@ -212,9 +212,11 @@
   sub_Float                      [pure]
   sub_Int                        [pure]
 
-# std/net (2)
+# std/net (4)
   _net_httpRequest               [net]
   _net_httpRequestBytes          [net]
+  _net_url_encode                [pure]
+  _net_url_encode_form           [pure]
 
 # std/package (1)
   _pkg_asset_path                [fs]
@@ -346,7 +348,7 @@
 # std/trace_test (1)
   _trace_check                   [pure]
 
-# std/xml (19)
+# std/xml (25)
   _escapeXml                     [pure]
   _xmlComment                    [pure]
   _xmlElement                    [pure]
@@ -355,10 +357,16 @@
   _xml_findAllAttrs              [pure]
   _xml_findAllTexts              [pure]
   _xml_findFirst                 [pure]
+  _xml_flatMapChildren           [pure]
+  _xml_foldChildren              [pure]
+  _xml_foldChildrenStep          [pure]
   _xml_getAttr                   [pure]
+  _xml_getAttrMap                [pure]
   _xml_getChildren               [pure]
   _xml_getTag                    [pure]
   _xml_getText                   [pure]
+  _xml_mapChildren               [pure]
+  _xml_nodeKind                  [pure]
   _xml_parse                     [pure]
   _xml_parseElements             [pure]
   _xml_parseFold                 [pure]
