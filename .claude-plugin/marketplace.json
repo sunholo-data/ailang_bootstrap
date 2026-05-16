@@ -36,6 +36,11 @@
       "name": "sprint-executor",
       "source": "./skills/sprint-executor",
       "description": "Execute sprint plans with TDD, progress tracking, and parallel milestones"
+    },
+    {
+      "name": "ailang-lsp",
+      "source": "./plugins/ailang-lsp",
+      "description": "AILANG language server (`ailang lsp --stdio`) for .ail files — diagnostics on save, hover types, go-to-definition, references, document symbols. Requires the `ailang` binary on PATH."
     }
   ]
 }
