@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.19.2. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.20.0. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (19)
