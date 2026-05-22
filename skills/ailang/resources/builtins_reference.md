@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.20.1. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.21.0. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (19)
@@ -54,7 +54,8 @@
   _array_to_list                 [pure]
   _array_unsafe_get              [pure]
 
-# std/bytes (12)
+# std/bytes (13)
+  _bytes_byte_at                 [pure]
   _bytes_concat                  [pure]
   _bytes_concat_list             [pure]
   _bytes_filename                [pure]
@@ -71,6 +72,14 @@
 # std/clock (2)
   _clock_now                     [clock]
   _clock_sleep                   [clock]
+
+# std/cognition (6)
+  _cog_drain                     [cog]
+  _msg_recv                      [msg]
+  _msg_recv_result               [msg]
+  _msg_send                      [msg]
+  _msg_send_result               [msg]
+  _msg_subscribe                 [msg]
 
 # std/crypto (5)
   _crypto_constanttimeequal      [pure]
@@ -100,6 +109,13 @@
   _deflate_deflateZlib           [pure]
   _deflate_inflate               [pure]
   _deflate_inflateZlib           [pure]
+
+# std/dom (5)
+  _dom_apply_batch               [dom]
+  _dom_apply_batch_result        [dom]
+  _dom_apply_patch               [dom]
+  _dom_apply_patch_result        [dom]
+  _dom_subscribe                 [dom]
 
 # std/env (3)
   _env_getArgs                   [env]
@@ -340,7 +356,8 @@
   _tar_readFromGzip              [fs]
   _tar_readFromGzipBytes         [fs]
 
-# std/trace (3)
+# std/trace (4)
+  _trace_emit                    [trace]
   _trace_event                   [trace]
   _trace_span_end                [trace]
   _trace_span_start              [trace]

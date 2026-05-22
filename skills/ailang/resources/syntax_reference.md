@@ -307,6 +307,28 @@ letrec isOdd = \n. if n == 0 then false else isEven(n - 1);
 println(show(isEven(4)))  -- true
 ```
 
+**IMPORTANT — `letrec` requires a `{...}` block body, NOT a `= expression` body:**
+
+```ailang
+-- ❌ WRONG: letrec doesn't work with `= ...` body (parse error)
+export func is_even(n: int) -> bool =
+  letrec is_odd = \m. if m == 0 then false else is_even(m - 1);
+  if n == 0 then true else is_odd(n - 1)
+
+-- ✅ RIGHT: use `{ ... }` block; the `;` separates statements
+export func is_even(n: int) -> bool {
+  letrec is_odd = \m. if m == 0 then false else is_even(m - 1);
+  if n == 0 then true else is_odd(n - 1)
+}
+
+-- ✅ BEST: use top-level mutually-recursive `func` declarations
+func is_odd(n: int) -> bool =
+  if n == 0 then false else is_even(n - 1)
+
+export func is_even(n: int) -> bool =
+  if n == 0 then true else is_odd(n - 1)
+```
+
 ## Type Annotations for Higher-Order Functions
 
 **Annotate function types with parentheses around arrow types:**
@@ -653,6 +675,8 @@ let total = foldlE(func(acc: int, x: int) -> int ! {IO} { println("fold"); acc +
 - `fromBase64(s) -> Option[bytes]` - Base64 decode (None if invalid)
 - `length(b) -> int` - Byte length
 - `slice(b, start, len) -> Option[bytes]` - Extract subsequence (None if out of bounds)
+- `fromInts(xs: [int]) -> bytes` - Construct bytes from list of integers (0-255)
+- `byteAt(b, i) -> Option[int]` - Get byte value (0-255) at index, or None if out of bounds. Use for ASCII char codes: `byteAt(fromString("A"), 0) == Some(65)`
 
 **Streaming functions** (std/stream) — requires `--caps Stream`:
 
