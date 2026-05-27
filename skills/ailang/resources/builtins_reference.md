@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.21.0. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.22.0. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (19)
@@ -301,11 +301,12 @@
   _hamming_distance              [pure]
   _simhash                       [pure]
 
-# std/stream (13)
+# std/stream (14)
   _stream_async_exec_process     [stream]
   _stream_async_read_stdin_lines [stream]
   _stream_close                  [stream]
   _stream_connect                [stream]
+  _stream_ndjson_post            [stream]
   _stream_onEvent                [stream]
   _stream_runEventLoop           [stream]
   _stream_select_events          [stream]
