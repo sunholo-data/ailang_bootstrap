@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.23.0. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.24.0. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (19)
@@ -367,7 +367,7 @@
 # std/trace_test (1)
   _trace_check                   [pure]
 
-# std/xml (25)
+# std/xml (26)
   _escapeXml                     [pure]
   _xmlComment                    [pure]
   _xmlElement                    [pure]
@@ -391,6 +391,7 @@
   _xml_parseFold                 [pure]
   _xml_parseFoldStep             [pure]
   _xml_parseWithLimit            [pure]
+  _xml_sanitize                  [pure]
   _xml_serialize                 [pure]
   _xml_serializeWithDecl         [pure]
 
