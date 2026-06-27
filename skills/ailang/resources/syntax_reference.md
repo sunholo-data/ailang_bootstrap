@@ -1,4 +1,4 @@
-# AILANG v0.16.0 - AI Teaching Prompt (with IFC Labels)
+# AILANG v0.16.2 - AI Teaching Prompt (with IFC Labels + Output Discipline)
 
 AILANG is a **pure functional language** with Hindley-Milner type inference and algebraic effects. Write code using **recursion** (no loops), **pattern matching**, and **explicit effect declarations**.
 
@@ -41,6 +41,25 @@ print("A"); print("B")      -- Output: AB
 ```
 
 **Use `println` for most output.** Use `print` ONLY when building output on one line.
+
+## Output Discipline (stdout is compared byte-for-byte)
+
+Your program's printed output is graded by an **exact match** against the expected
+result. Extra text — even when the computed value is correct — is a failure.
+
+- **Print only what the task asks for, nothing more.** If the task wants `40`, print
+  `40` — never `Result: 40`, `Answer: 40`, or `The result is 40`.
+- **No labels, captions, or prefixes** in front of values. If the task says to print
+  `a = TBool`, that exact string is the whole line — do not add `Types unify!` or any
+  other commentary before or after it.
+- **No status / confirmation lines** ("Done", "Success", "They unify!", "Computing…")
+  unless the task explicitly tells you to print them.
+- **Match the requested format exactly**: same capitalisation, same spacing, one value
+  per line as specified, and no extra trailing or leading blank lines.
+- When the task says *"print the result"* or *"print if they unify"*, it means print
+  the bare value(s) it just defined — not a sentence describing them.
+
+Treat the expected output as a contract: emit exactly those characters and stop.
 
 ## CLI Exploration (USE THIS!)
 

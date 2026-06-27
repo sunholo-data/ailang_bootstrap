@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.25.0. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.26.0. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (19)
@@ -277,6 +277,9 @@
   _rand_int                      [rand]
   _rand_seed                     [rand]
   _uuid4                         [rand]
+
+# std/secret (1)
+  _secret_read                   [secret]
 
 # std/sem (2)
   _embedding_decode              [pure]
