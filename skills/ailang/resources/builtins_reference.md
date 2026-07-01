@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.26.1. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.27.0. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (19)
@@ -161,9 +161,12 @@
   _get_header                    [pure]
   _has_header                    [pure]
 
-# std/io (5)
+# std/io (8)
+  _io_eprintln                   [io]
   _io_exit                       [io]
+  _io_flush                      [io]
   _io_print                      [io]
+  _io_printErr                   [io]
   _io_println                    [io]
   _io_readLine                   [io]
   _io_writeBytes                 [io]
