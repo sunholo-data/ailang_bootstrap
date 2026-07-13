@@ -243,6 +243,48 @@ Both errors were a 10-second `ailang check` away from being caught. The neural r
 search (below) is passive context; THIS gate is the active check. Do not skip it by
 hand-writing content over the scaffold — fill the scaffold, and verify as you fill.
 
+**The same "verify against the code, not your assumption" rule covers three more claim classes
+the Verification Log routinely marks "Confirmed" without actually checking:**
+
+1. **A newly-proposed diagnostic/error code MUST be verified unallocated.** Error codes
+   (`MODxxx`, `PARxxx`, `TCxxx`, `EFF_*`, `Exxx`) are a shared namespace. Before writing
+   `Success: exit ≠ 0 + MODnnn: …` into a doc, grep the codebase:
+   ```bash
+   grep -rn "MOD011" internal/ cmd/   # empty = free; any hit = TAKEN, pick the next free code
+   ```
+   Put the grep result in the Verification Log. The intended code is a *claim* like any other.
+
+2. **A Conflict-Surface routing/mechanism claim MUST be verified by reading the code path, not
+   inferred from observable output.** "Construct X routes to `runSingle`, never reaches
+   `validateModulePath`" is a claim about control flow — confirm it by reading the dispatch, not
+   by observing that `X` produces the right answer. A correct *output* can hide a wrong
+   *mechanism*, and the wrong mechanism yields a wrong guard/fix that the implementer must then
+   override mid-sprint.
+
+3. **Every cited regression fixture MUST exist, and every claim about an existing test's
+   BEHAVIOR must come from reading the test body.** The Conflict Surface's "Programs that MUST
+   still work" list and any "test X asserts Y" statement are claims like the rest:
+   ```bash
+   ls examples/lambdas_higher_order.ail        # cite only files that exist
+   sed -n '/func TestName/,/^}/p' path_test.go # read what it actually asserts
+   ```
+   Case study (2026-07-13, m-arity-style-diagnostic): the doc cited
+   `examples/lambdas_higher_order.ail` + `examples/no_loops_fold.ail` as regression fixtures —
+   neither exists — and claimed `TestCurriedMismatchStillFails` "asserts on the old bare string"
+   requiring "the ONE intentional test-text change"; the test asserts only `err != nil`, so the
+   planned edit was fictional. Both were one `ls`/one read away at doc time; the sprint-planner
+   had to correct the premises mid-loop.
+
+**Case study (2026-07-12, m-module-less-run-fail-loud):** the doc's Verification Log marked two
+things "Confirmed" that a code-check refuted. (a) It proposed error code `MOD011` — already the
+live module-path-collision diagnostic since v0.10.9; the reality-check reassigned it to `MOD014`
+(one `grep` would have caught it). (b) It marked "bare-expr eval unaffected — routes to
+`runSingle`, never reaches `validateModulePath`" Confirmed, on the strength of `1+1 → 2` still
+working; the *mechanism* was false (a bare-expr **file** does reach `validateModulePath`, and the
+parser mirrors the expression into `Statements`+`Decls`), so the doc's proposed 3-way
+`Funcs||Statements||Decls` guard would have broken `ailang run 1+1`. The executor had to override
+it to `Funcs`-only mid-sprint. Both were a one-command code-check away at doc time.
+
 **⚠️ CRITICAL: Conflict Surface Analysis (REQUIRED for parser/typechecker/codegen changes)**
 
 **If the design touches `internal/parser/`, `internal/lexer/`, `internal/ast/`, `internal/types/`, `internal/elaborate/`, `internal/iface/`, `internal/codegen/`, `internal/eval/`, `internal/vm/`, `internal/effects/`, or `cmd/ailang/exec.go`:**
