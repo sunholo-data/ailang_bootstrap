@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.29.2. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.30.0. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (19)
@@ -232,11 +232,13 @@
   sub_Float                      [pure]
   sub_Int                        [pure]
 
-# std/net (4)
+# std/net (6)
   _net_httpRequest               [net]
   _net_httpRequestBytes          [net]
   _net_url_encode                [pure]
   _net_url_encode_form           [pure]
+  _net_url_parse                 [pure]
+  _net_url_parse_query           [pure]
 
 # std/package (1)
   _pkg_asset_path                [fs]
@@ -280,6 +282,14 @@
   _rand_int                      [rand]
   _rand_seed                     [rand]
   _uuid4                         [rand]
+
+# std/regex (6)
+  _regex_compile                 [pure]
+  _regex_find_all                [pure]
+  _regex_find_first              [pure]
+  _regex_is_match                [pure]
+  _regex_replace_all             [pure]
+  _regex_split                   [pure]
 
 # std/secret (1)
   _secret_read                   [secret]
@@ -400,6 +410,9 @@
   _xml_sanitize                  [pure]
   _xml_serialize                 [pure]
   _xml_serializeWithDecl         [pure]
+
+# std/yaml (1)
+  _yaml_to_json                  [pure]
 
 # std/zip (7)
   _zip_createArchive             [fs]
