@@ -1,6 +1,6 @@
 # Branch Management for ailang_bootstrap
 
-This repo uses a three-tier branch structure for Gemini CLI extension distribution:
+This repo uses a three-tier branch structure for plugin distribution:
 
 ## Branch Structure
 

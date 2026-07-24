@@ -22,7 +22,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Uses Gemini CLI naming convention from AILANG releases
+          # Uses the platform naming convention from AILANG releases
           - platform: darwin
             arch: arm64
             ailang_asset: darwin.arm64.ailang.tar.gz
@@ -88,11 +88,11 @@ jobs:
           if [ "$PLATFORM" = "win32" ]; then
             ARCHIVE="dist/${PLATFORM}.${ARCH}.ailang-bootstrap.zip"
             zip -r "$ARCHIVE" \
-              gemini-extension.json \
-              GEMINI.md \
               .claude-plugin/ \
               .codex-plugin/ \
               .mcp.json \
+              mcp-server/ \
+              commands/ \
               skills/ \
               bin/ \
               README.md \
@@ -100,11 +100,11 @@ jobs:
           else
             ARCHIVE="dist/${PLATFORM}.${ARCH}.ailang-bootstrap.tar.gz"
             tar czf "$ARCHIVE" \
-              gemini-extension.json \
-              GEMINI.md \
               .claude-plugin/ \
               .codex-plugin/ \
               .mcp.json \
+              mcp-server/ \
+              commands/ \
               skills/ \
               bin/ \
               README.md \

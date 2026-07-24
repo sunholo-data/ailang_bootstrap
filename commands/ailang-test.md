@@ -19,7 +19,7 @@ Run the full test suite to verify the plugin is working correctly:
 5. **Slash Commands** - Do all commands have proper frontmatter?
 6. **MCP Server** - Can MCP tools execute?
 7. **Plugin Config** - Is plugin.json valid?
-8. **Gemini Extension** - Is gemini-extension.json valid?
+8. **Codex Plugin** - Are the Codex manifest and MCP configuration valid?
 
 ## Manual Verification
 
@@ -45,7 +45,7 @@ Should list builtin functions.
 
 ### 4. Test MCP Server
 ```bash
-./mcp-server/ailang-mcp.sh prompt | head -10
+node --test mcp-server/test
 ```
 Should output AILANG prompt.
 

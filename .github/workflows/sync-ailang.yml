@@ -31,7 +31,7 @@ jobs:
       - name: Get current bootstrap version
         id: current
         run: |
-          CURRENT_VERSION=$(jq -r '.version' gemini-extension.json)
+          CURRENT_VERSION=$(jq -r '.version' .codex-plugin/plugin.json)
           echo "version=v$CURRENT_VERSION" >> $GITHUB_OUTPUT
           echo "Current bootstrap version: v$CURRENT_VERSION"
 
@@ -55,15 +55,15 @@ jobs:
           VERSION="${{ steps.ailang.outputs.version }}"
           VERSION_NUM="${VERSION#v}"  # Remove 'v' prefix
 
-          # Update gemini-extension.json
-          jq --arg v "$VERSION_NUM" '.version = $v' gemini-extension.json > tmp.json && mv tmp.json gemini-extension.json
-
-          # Update plugin.json
+          # Keep host manifests and the MCP server on the AILANG release version.
           jq --arg v "$VERSION_NUM" '.version = $v' .claude-plugin/plugin.json > tmp.json && mv tmp.json .claude-plugin/plugin.json
+          jq --arg v "$VERSION_NUM" '.version = $v' .codex-plugin/plugin.json > tmp.json && mv tmp.json .codex-plugin/plugin.json
+          jq --arg v "$VERSION_NUM" '.version = $v' mcp-server/package.json > tmp.json && mv tmp.json mcp-server/package.json
 
           echo "Updated manifests to version $VERSION_NUM"
-          cat gemini-extension.json
           cat .claude-plugin/plugin.json
+          cat .codex-plugin/plugin.json
+          cat mcp-server/package.json
 
       - name: Download and extract content bundle
         if: steps.check.outputs.needs_update == 'true'
@@ -139,7 +139,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add gemini-extension.json .claude-plugin/plugin.json
+          git add .claude-plugin/plugin.json .codex-plugin/plugin.json
+          git add mcp-server/package.json
           git add skills/ailang/resources/ examples/ || true
           git commit -m "Sync with AILANG $VERSION"
 

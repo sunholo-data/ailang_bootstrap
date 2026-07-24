@@ -1,6 +1,6 @@
 # AGENTS.md — AILANG Cloud Agent Instructions
 
-This file provides cross-platform instructions for AI coding agents (Claude Code, Gemini CLI, Codex, etc.) when working in AILANG-managed workspaces.
+This file provides cross-platform instructions for AI coding agents (Claude Code, Codex, etc.) when working in AILANG-managed workspaces.
 
 ## You Are a Cloud Agent
 

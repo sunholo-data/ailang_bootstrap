@@ -3,6 +3,8 @@
 
 module tests/programs/math
 
+import std/io (print)
+
 export func main() -> () ! {IO} {
   let x = 20;
   let y = 22;

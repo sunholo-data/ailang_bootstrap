@@ -25,6 +25,7 @@ bin/
 # Temporary files
 *.tmp
 *.log
+.ailang/
 
 # Node.js (MCP server)
 node_modules/

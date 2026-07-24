@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "ailang-tools": {
-      "command": "bash",
-      "args": ["mcp-server/start.sh"],
+      "command": "node",
+      "args": ["mcp-server/server.js"],
       "cwd": "."
     }
   }

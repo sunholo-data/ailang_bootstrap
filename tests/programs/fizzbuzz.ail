@@ -7,19 +7,21 @@
 
 module tests/programs/fizzbuzz
 
+import std/io (println)
+
 export func fb(n: int) -> () ! {IO} {
   let m3 = n % 3 == 0;
   let m5 = n % 5 == 0;
   if m3 && m5 then {
-    print("FizzBuzz")
+    println("FizzBuzz")
   } else {
     if m3 then {
-      print("Fizz")
+      println("Fizz")
     } else {
       if m5 then {
-        print("Buzz")
+        println("Buzz")
       } else {
-        print(show(n))
+        println(show(n))
       }
     }
   }

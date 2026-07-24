@@ -49,7 +49,7 @@ skip() {
 section "1. AILANG CLI Availability"
 
 if command -v ailang &> /dev/null; then
-  VERSION=$(ailang --version 2>&1 | head -1)
+  VERSION=$(ailang --version 2>&1 | sed -n '1p')
   pass "ailang installed: $VERSION"
 else
   fail "ailang not found in PATH"
@@ -72,7 +72,7 @@ for prog in "$SCRIPT_DIR/programs"/*.ail; do
     pass "check: $name"
   else
     fail "check: $name"
-    AILANG_RELAX_MODULES=1 ailang check "$prog" 2>&1 | head -5
+    AILANG_RELAX_MODULES=1 ailang check "$prog" 2>&1 | sed -n '1,5p' || true
   fi
 done
 
@@ -93,7 +93,9 @@ for prog in "$SCRIPT_DIR/programs"/*.ail; do
 
   # Run with relaxed modules for test directory
   # Filter out AILANG progress/warning lines (→, ✓, WARNING, Running under, etc.)
-  actual=$(AILANG_RELAX_MODULES=1 ailang run --caps IO --entry main "$prog" 2>&1 | grep -v '^→\|^✓\|^WARNING\|Running under\|^  ' | head -20 || true)
+  actual=$(AILANG_RELAX_MODULES=1 ailang run --caps IO --entry main "$prog" 2>&1 |
+    grep -v -E '^(→|✓|WARNING|Running under|  |[0-9]{4}/[0-9]{2}/[0-9]{2} .* OTLP endpoint|Trace:)' |
+    head -20 || true)
   expected_content=$(cat "$expected")
 
   if [[ "$actual" == "$expected_content" ]]; then
@@ -132,7 +134,7 @@ done
 
 section "5. Slash Command Tests"
 
-COMMANDS_DIR="$ROOT_DIR/.claude/commands"
+COMMANDS_DIR="$ROOT_DIR/commands"
 
 if [[ -d "$COMMANDS_DIR" ]]; then
   for cmd in "$COMMANDS_DIR"/*.md; do
@@ -154,28 +156,14 @@ fi
 
 section "6. MCP Server Tests"
 
-MCP_SCRIPT="$ROOT_DIR/mcp-server/ailang-mcp.sh"
-
-if [[ -x "$MCP_SCRIPT" ]]; then
-  pass "MCP script is executable"
-
-  # Test prompt command
-  if "$MCP_SCRIPT" prompt 2>&1 | grep -q "AILANG"; then
-    pass "MCP: prompt command works"
+if command -v node &> /dev/null; then
+  if (cd "$ROOT_DIR/mcp-server" && node --test); then
+    pass "MCP: dependency-free protocol smoke tests"
   else
-    fail "MCP: prompt command failed"
-  fi
-
-  # Test builtins command (no args = list all)
-  MCP_OUTPUT=$("$MCP_SCRIPT" builtins 2>&1) || true
-  if echo "$MCP_OUTPUT" | grep -q "builtins\|_io"; then
-    pass "MCP: builtins command works"
-  else
-    fail "MCP: builtins command failed"
-    echo "    Output: ${MCP_OUTPUT:0:100}..."
+    fail "MCP: protocol smoke tests failed"
   fi
 else
-  fail "MCP script not executable"
+  fail "MCP: Node.js 18 or newer is required"
 fi
 
 # ═══════════════════════════════════════════════════════════
@@ -205,39 +193,29 @@ else
 fi
 
 # ═══════════════════════════════════════════════════════════
-# Gemini Extension Tests
+# Codex Plugin Tests
 # ═══════════════════════════════════════════════════════════
 
-section "8. Gemini Extension Tests"
+section "8. Codex Plugin Tests"
 
-GEMINI_JSON="$ROOT_DIR/gemini-extension.json"
-GEMINI_MD="$ROOT_DIR/GEMINI.md"
+CODEX_JSON="$ROOT_DIR/.codex-plugin/plugin.json"
+MCP_JSON="$ROOT_DIR/.mcp.json"
 
-if [[ -f "$GEMINI_JSON" ]]; then
-  if python3 -m json.tool "$GEMINI_JSON" &> /dev/null; then
-    pass "gemini-extension.json is valid JSON"
-  else
-    fail "gemini-extension.json is invalid JSON"
-  fi
+if python3 -m json.tool "$CODEX_JSON" &> /dev/null &&
+   python3 -m json.tool "$MCP_JSON" &> /dev/null; then
+  pass "Codex plugin manifests are valid JSON"
 else
-  skip "gemini-extension.json not found"
+  fail "Codex plugin manifests are invalid"
 fi
 
-if [[ -f "$GEMINI_MD" ]]; then
-  if grep -q "ailang prompt" "$GEMINI_MD"; then
-    pass "GEMINI.md mentions ailang prompt"
-  else
-    fail "GEMINI.md missing ailang prompt guidance"
-  fi
-else
-  skip "GEMINI.md not found"
-fi
+CLAUDE_VERSION=$(python3 -c "import json; print(json.load(open('$PLUGIN_JSON'))['version'])")
+CODEX_VERSION=$(python3 -c "import json; print(json.load(open('$CODEX_JSON'))['version'])")
+MCP_VERSION=$(python3 -c "import json; print(json.load(open('$ROOT_DIR/mcp-server/package.json'))['version'])")
 
-# Check if Gemini CLI is available
-if command -v gemini &> /dev/null; then
-  pass "Gemini CLI installed"
+if [[ "$CLAUDE_VERSION" = "$CODEX_VERSION" && "$CODEX_VERSION" = "$MCP_VERSION" ]]; then
+  pass "Claude, Codex, and MCP versions match ($CODEX_VERSION)"
 else
-  skip "Gemini CLI not installed (install later)"
+  fail "Version mismatch: Claude=$CLAUDE_VERSION Codex=$CODEX_VERSION MCP=$MCP_VERSION"
 fi
 
 # ═══════════════════════════════════════════════════════════

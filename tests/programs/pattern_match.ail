@@ -3,6 +3,8 @@
 
 module tests/programs/pattern_match
 
+import std/io (print)
+
 type Option[a] = Some(a) | None
 
 export func getOr[a](opt: Option[a], default: a) -> a {
@@ -15,5 +17,5 @@ export func getOr[a](opt: Option[a], default: a) -> a {
 export func main() -> () ! {IO} {
   let value = Some(42);
   let result = getOr(value, 0);
-  print("found: " ++ show(result))
+  print("found: ${show(result)}")
 }

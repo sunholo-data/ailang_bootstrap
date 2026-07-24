@@ -5,9 +5,9 @@
   "author": "Holosun ApS",
   "mcpServers": {
     "ailang-tools": {
-      "command": "bash",
+      "command": "node",
       "args": [
-        "mcp-server/start.sh"
+        "server.js"
       ],
       "cwd": "mcp-server"
     }

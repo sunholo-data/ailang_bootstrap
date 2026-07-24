@@ -3,6 +3,8 @@
 
 module tests/programs/hello
 
+import std/io (print)
+
 export func main() -> () ! {IO} {
   print("Hello, AILANG!")
 }

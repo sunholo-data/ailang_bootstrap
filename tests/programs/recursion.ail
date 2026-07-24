@@ -3,6 +3,8 @@
 
 module tests/programs/recursion
 
+import std/io (print)
+
 export func sum(xs: [int]) -> int {
   match xs {
     [] => 0,

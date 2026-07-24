@@ -1,132 +1,353 @@
 #!/usr/bin/env node
 /**
- * AILANG MCP Server
- * Provides AILANG tools via the Model Context Protocol
+ * Dependency-free stdio MCP server for the local AILANG CLI.
+ *
+ * Codex installs plugins directly from their Git source. Keeping this server on
+ * Node's standard library avoids a hidden network-dependent `npm install` on
+ * first launch.
  */
 
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { z } from 'zod';
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import { spawn } from 'node:child_process';
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { createInterface } from 'node:readline';
+import { fileURLToPath } from 'node:url';
 
-const execAsync = promisify(exec);
+const packageJson = JSON.parse(
+  readFileSync(new URL('./package.json', import.meta.url), 'utf8'),
+);
 
-// Create the MCP server
-const server = new McpServer({
-  name: 'ailang-tools',
-  version: '0.5.6',
-});
+const PROTOCOL_VERSION = '2025-03-26';
+const DEFAULT_TIMEOUT_MS = 30_000;
+const packageRoot = fileURLToPath(new URL('..', import.meta.url));
+const bundledAilang = resolve(
+  packageRoot,
+  'bin',
+  process.platform === 'win32' ? 'ailang.exe' : 'ailang',
+);
+const ailangCommand =
+  process.env.AILANG_BIN || (existsSync(bundledAilang) ? bundledAilang : 'ailang');
 
-// Helper to run AILANG CLI commands
-async function runAilang(args) {
-  try {
-    const { stdout, stderr } = await execAsync(`ailang ${args}`, {
-      timeout: 30000,
-      maxBuffer: 1024 * 1024,
-    });
-    return stdout || stderr;
-  } catch (error) {
-    return error.stderr || error.message;
+const tools = [
+  {
+    name: 'ailang_prompt',
+    description:
+      'Get the AILANG teaching prompt with current syntax rules and templates. This is the source of truth for AILANG syntax; call it before writing AILANG code.',
+    inputSchema: {
+      type: 'object',
+      properties: {},
+      additionalProperties: false,
+    },
+  },
+  {
+    name: 'ailang_check',
+    description: 'Type-check an AILANG file without running it.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', description: 'Path to the .ail file to check' },
+      },
+      required: ['file'],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: 'ailang_run',
+    description: 'Run an AILANG program with specified capabilities.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        file: { type: 'string', description: 'Path to the .ail file to run' },
+        caps: {
+          type: 'string',
+          default: 'IO',
+          description: 'Comma-separated capabilities: IO,FS,Net,Clock,AI',
+        },
+        entry: {
+          type: 'string',
+          default: 'main',
+          description: 'Entry point function name',
+        },
+        ai_stub: {
+          type: 'boolean',
+          default: false,
+          description: 'Use the AI stub for testing',
+        },
+      },
+      required: ['file'],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: 'ailang_builtins',
+    description:
+      'List AILANG builtin functions with their current documentation.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        search: {
+          type: 'string',
+          description: 'Optional case-insensitive term used to filter output',
+        },
+        by_module: {
+          type: 'boolean',
+          default: true,
+          description: 'Group builtins by module',
+        },
+        verbose: {
+          type: 'boolean',
+          default: true,
+          description: 'Show full builtin documentation',
+        },
+      },
+      additionalProperties: false,
+    },
+  },
+  {
+    name: 'ailang_eval',
+    description: 'Evaluate one expression in a non-interactive AILANG REPL.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        expression: {
+          type: 'string',
+          description: 'AILANG expression to evaluate',
+        },
+      },
+      required: ['expression'],
+      additionalProperties: false,
+    },
+  },
+];
+
+class AilangCommandError extends Error {
+  constructor(message, output = '') {
+    super(message);
+    this.name = 'AilangCommandError';
+    this.output = output;
   }
 }
 
-// Tool: Get the teaching prompt (SOURCE OF TRUTH for syntax)
-server.tool(
-  'ailang_prompt',
-  'Get the AILANG teaching prompt with current syntax rules and templates. This is the SOURCE OF TRUTH for AILANG syntax - ALWAYS call this before writing ANY AILANG code. Do not guess at syntax.',
-  {},
-  async () => {
-    const result = await runAilang('prompt');
-    return {
-      content: [{ type: 'text', text: result }],
-    };
-  }
-);
+function commandOutput(stdout, stderr) {
+  return [stderr.trim(), stdout.trim()].filter(Boolean).join('\n');
+}
 
-// Tool: Type-check a file
-server.tool(
-  'ailang_check',
-  'Type-check an AILANG file without running it. Returns any type errors found.',
-  {
-    file: z.string().describe('Path to the .ail file to check'),
-  },
-  async ({ file }) => {
-    const result = await runAilang(`check "${file}"`);
-    return {
-      content: [{ type: 'text', text: result }],
-    };
-  }
-);
+function runAilang(args, { input, timeoutMs = DEFAULT_TIMEOUT_MS } = {}) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(ailangCommand, args, {
+      cwd: process.cwd(),
+      env: process.env,
+      stdio: ['pipe', 'pipe', 'pipe'],
+    });
 
-// Tool: Run a program
-server.tool(
-  'ailang_run',
-  'Run an AILANG program with specified capabilities.',
-  {
-    file: z.string().describe('Path to the .ail file to run'),
-    caps: z.string().optional().default('IO').describe('Comma-separated capabilities: IO,FS,Net,Clock,AI'),
-    entry: z.string().optional().default('main').describe('Entry point function name'),
-    ai_stub: z.boolean().optional().default(false).describe('Use AI stub for testing'),
-  },
-  async ({ file, caps, entry, ai_stub }) => {
-    const stubFlag = ai_stub ? '--ai-stub' : '';
-    const result = await runAilang(`run --caps ${caps} --entry ${entry} ${stubFlag} "${file}"`);
-    return {
-      content: [{ type: 'text', text: result }],
-    };
-  }
-);
+    let stdout = '';
+    let stderr = '';
+    let timedOut = false;
 
-// Tool: List builtins (SOURCE OF TRUTH for stdlib documentation)
-server.tool(
-  'ailang_builtins',
-  'List AILANG builtin functions with full documentation. This is the SOURCE OF TRUTH for stdlib - always use this for accurate, current documentation including parameters, return types, and examples.',
-  {
-    search: z.string().optional().describe('Optional search term to filter builtins (e.g., "httpGet", "array")'),
-    by_module: z.boolean().optional().default(true).describe('Group by module (default: true)'),
-    verbose: z.boolean().optional().default(true).describe('Show full documentation with examples (default: true)'),
-  },
-  async ({ search, by_module, verbose }) => {
-    let cmd = 'builtins list';
-    if (verbose) cmd += ' --verbose';
-    if (by_module) cmd += ' --by-module';
-    if (search) cmd += ` | grep -A 15 -i "${search}"`;
-    const result = await runAilang(cmd);
-    return {
-      content: [{ type: 'text', text: result || 'No matches found' }],
-    };
-  }
-);
+    const timer = setTimeout(() => {
+      timedOut = true;
+      child.kill('SIGTERM');
+    }, timeoutMs);
 
-// Tool: Evaluate expression in REPL
-server.tool(
-  'ailang_eval',
-  'Evaluate a single expression in the AILANG REPL context.',
-  {
-    expression: z.string().describe('AILANG expression to evaluate'),
-  },
-  async ({ expression }) => {
-    try {
-      const { stdout, stderr } = await execAsync(`echo '${expression.replace(/'/g, "\\'")}' | ailang repl --non-interactive`, {
-        timeout: 10000,
+    child.stdout.setEncoding('utf8');
+    child.stderr.setEncoding('utf8');
+    child.stdout.on('data', (chunk) => {
+      stdout += chunk;
+    });
+    child.stderr.on('data', (chunk) => {
+      stderr += chunk;
+    });
+
+    child.on('error', (error) => {
+      clearTimeout(timer);
+      if (error.code === 'ENOENT') {
+        reject(
+          new AilangCommandError(
+            'AILANG CLI not found on PATH. Install it with: curl -fsSL https://ailang.sunholo.com/install.sh | bash',
+          ),
+        );
+        return;
+      }
+      reject(new AilangCommandError(error.message));
+    });
+
+    child.on('close', (code) => {
+      clearTimeout(timer);
+      const output = commandOutput(stdout, stderr);
+      if (timedOut) {
+        reject(
+          new AilangCommandError(
+            `ailang command timed out after ${timeoutMs}ms`,
+            output,
+          ),
+        );
+      } else if (code !== 0) {
+        reject(
+          new AilangCommandError(
+            `ailang exited with status ${code}`,
+            output,
+          ),
+        );
+      } else {
+        resolve(output);
+      }
+    });
+
+    if (input !== undefined) {
+      child.stdin.end(input);
+    } else {
+      child.stdin.end();
+    }
+  });
+}
+
+function requireString(args, name) {
+  if (typeof args?.[name] !== 'string' || args[name].length === 0) {
+    throw new AilangCommandError(`Missing required string argument: ${name}`);
+  }
+  return args[name];
+}
+
+function filterOutput(text, search) {
+  if (!search) return text;
+  const query = search.toLocaleLowerCase();
+  const matches = text
+    .split('\n')
+    .filter((line) => line.toLocaleLowerCase().includes(query));
+  return matches.join('\n') || 'No matches found';
+}
+
+async function callTool(name, args = {}) {
+  switch (name) {
+    case 'ailang_prompt':
+      return runAilang(['prompt']);
+
+    case 'ailang_check':
+      return runAilang(['check', requireString(args, 'file')]);
+
+    case 'ailang_run': {
+      const commandArgs = [
+        'run',
+        '--caps',
+        typeof args.caps === 'string' ? args.caps : 'IO',
+        '--entry',
+        typeof args.entry === 'string' ? args.entry : 'main',
+      ];
+      if (args.ai_stub === true) commandArgs.push('--ai-stub');
+      commandArgs.push(requireString(args, 'file'));
+      return runAilang(commandArgs);
+    }
+
+    case 'ailang_builtins': {
+      const commandArgs = ['builtins', 'list'];
+      if (args.verbose !== false) commandArgs.push('--verbose');
+      if (args.by_module !== false) commandArgs.push('--by-module');
+      const output = await runAilang(commandArgs);
+      return filterOutput(output, args.search);
+    }
+
+    case 'ailang_eval':
+      return runAilang(['repl', '--non-interactive'], {
+        input: `${requireString(args, 'expression')}\n`,
+        timeoutMs: 10_000,
       });
-      return {
-        content: [{ type: 'text', text: stdout || stderr || 'No output' }],
-      };
+
+    default:
+      throw new AilangCommandError(`Unknown tool: ${name}`);
+  }
+}
+
+function success(id, result) {
+  return { jsonrpc: '2.0', id, result };
+}
+
+function failure(id, code, message, data) {
+  return {
+    jsonrpc: '2.0',
+    id,
+    error: {
+      code,
+      message,
+      ...(data ? { data } : {}),
+    },
+  };
+}
+
+async function handleRequest(message) {
+  if (message.method === 'initialize') {
+    return success(message.id, {
+      protocolVersion: PROTOCOL_VERSION,
+      capabilities: { tools: { listChanged: false } },
+      serverInfo: {
+        name: 'ailang-tools',
+        version: packageJson.version,
+      },
+    });
+  }
+
+  if (message.method === 'tools/list') {
+    return success(message.id, { tools });
+  }
+
+  if (message.method === 'tools/call') {
+    try {
+      const text = await callTool(
+        message.params?.name,
+        message.params?.arguments,
+      );
+      return success(message.id, {
+        content: [{ type: 'text', text: text || 'No output' }],
+      });
     } catch (error) {
-      return {
-        content: [{ type: 'text', text: `Error: ${error.message}` }],
-      };
+      const messageText =
+        error instanceof Error ? error.message : String(error);
+      const detail =
+        error instanceof AilangCommandError && error.output
+          ? `${messageText}\n${error.output}`
+          : messageText;
+      return success(message.id, {
+        content: [{ type: 'text', text: detail }],
+        isError: true,
+      });
     }
   }
-);
 
-// Start the server
-async function main() {
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
-  console.error('AILANG MCP Server running');
+  if (message.id === undefined) return null;
+  return failure(message.id, -32601, `Method not found: ${message.method}`);
 }
 
-main().catch(console.error);
+async function main() {
+  const lines = createInterface({
+    input: process.stdin,
+    crlfDelay: Infinity,
+  });
+
+  console.error('AILANG MCP Server running');
+  for await (const line of lines) {
+    if (!line.trim()) continue;
+    let response;
+    try {
+      response = await handleRequest(JSON.parse(line));
+    } catch (error) {
+      response = failure(
+        null,
+        -32700,
+        'Parse error',
+        error instanceof Error ? error.message : String(error),
+      );
+    }
+    if (response) process.stdout.write(`${JSON.stringify(response)}\n`);
+  }
+}
+
+if (
+  process.argv[1] &&
+  resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+) {
+  main().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}
+
+export { callTool, handleRequest, tools };

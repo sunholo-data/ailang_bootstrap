@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Purpose
 
-This repository serves as a bootstrap/plugin package for AILANG, enabling AI coding agents (Claude Code, Gemini CLI, Codex CLI) to easily import and use AILANG capabilities.
+This repository serves as a bootstrap/plugin package for AILANG, enabling Claude Code and OpenAI Codex to import and use AILANG capabilities.
 
 ## Structure
 
@@ -16,11 +16,8 @@ ailang_bootstrap/
 ├── .codex-plugin/
 │   └── plugin.json         # Codex CLI plugin manifest
 ├── .mcp.json               # MCP server config for Codex (shared JSON format)
-├── gemini-extension.json   # Gemini CLI extension manifest
-├── GEMINI.md               # Gemini CLI context file
 ├── commands/               # Slash commands (DISTRIBUTED with plugin)
-│   ├── *.md                # Claude Code commands (markdown)
-│   └── *.toml              # Gemini CLI commands (TOML)
+│   └── *.md                # Claude Code commands (markdown)
 ├── skills/
 │   ├── ailang/             # Main AILANG skill
 │   │   ├── SKILL.md        # Skill definition
@@ -46,7 +43,6 @@ ailang_bootstrap/
 | Location | Purpose | Distributed? |
 |----------|---------|--------------|
 | `commands/*.md` | User-facing slash commands | **YES** - installed with plugin |
-| `commands/*.toml` | Gemini CLI commands | **YES** - installed with extension |
 | `.claude/commands/` | Dev-only commands for this repo | **NO** - local only |
 
 When users install this plugin, they get:
@@ -58,9 +54,8 @@ They do NOT get `.claude/commands/` - those are for repo maintainers only.
 
 ## Distribution Targets
 
-This repo supports three AI coding agent platforms:
+This repo supports two AI coding agent platforms:
 - **Claude Code Plugin**: Via `.claude-plugin/plugin.json` and `skills/` directory
-- **Gemini CLI Extension**: Via `gemini-extension.json` manifest with platform-specific binary bundles
 - **OpenAI Codex CLI Plugin**: Via `.codex-plugin/plugin.json` with shared `skills/` and `.mcp.json`
 
 ## Release Process
@@ -97,13 +92,13 @@ Cross-agent messaging for autonomous agent workflows. Features:
 
 ## Branch Workflow
 
-This repo uses a three-tier branch structure for Gemini CLI distribution:
+This repo uses a three-tier branch structure for plugin distribution:
 
-| Branch | Purpose | Install Command |
-|--------|---------|-----------------|
-| `dev` | Active development | `gemini extensions install ... --ref=dev` |
-| `preview` | Testing/staging | `gemini extensions install ... --ref=preview` |
-| `stable` | **Production (default)** | `gemini extensions install ...` |
+| Branch | Purpose |
+|--------|---------|
+| `dev` | Active development |
+| `preview` | Testing/staging |
+| `stable` | **Production (default)** |
 
 **Workflow:** `dev` → `preview` → `stable`
 

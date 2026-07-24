@@ -1,3 +1,11 @@
+---
+description: "Load and run an AILANG coding challenge"
+arguments:
+  - name: challenge
+    description: Challenge ID
+    required: true
+---
+
 # AILANG Challenge
 
 Load and run an AILANG coding challenge.

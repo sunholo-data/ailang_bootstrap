@@ -1,18 +1,20 @@
 # AILANG Bootstrap
 
-Quick start package for using AILANG with AI coding agents (Claude Code, Gemini CLI).
+Quick start package for using AILANG with Claude Code and OpenAI Codex.
 
 AILANG is a deterministic programming language designed for AI code synthesis and reasoning.
 
 ## Installation
 
-### Gemini CLI
+Install the AILANG CLI before installing either agent integration:
 
 ```bash
-gemini extensions install sunholo-data/ailang_bootstrap
+curl -fsSL https://ailang.sunholo.com/install.sh | bash
+ailang --version
 ```
 
-The extension automatically downloads the correct AILANG binary for your platform.
+The plugins invoke the local `ailang` executable, so it must be available on
+`PATH`.
 
 ### Claude Code
 
@@ -25,11 +27,31 @@ The extension automatically downloads the correct AILANG binary for your platfor
 ```
 
 Or clone and add locally:
+
 ```bash
 git clone https://github.com/sunholo-data/ailang_bootstrap
 /plugin marketplace add ./ailang_bootstrap
 /plugin install ailang@ailang_bootstrap
 ```
+
+### OpenAI Codex
+
+Codex requires Node.js 18 or newer for the local MCP server:
+
+```bash
+node --version
+codex plugin marketplace add sunholo-data/ailang_bootstrap --ref stable
+codex plugin add ailang@ailang-marketplace
+codex plugin list
+```
+
+Start a new Codex session after installation. Alternatively, add the marketplace
+with the CLI, then install AILANG through `/plugins` or the Codex desktop
+Plugins directory.
+
+Codex loads the shared skills and five local MCP tools:
+`ailang_prompt`, `ailang_check`, `ailang_run`, `ailang_builtins`, and
+`ailang_eval`.
 
 ### Manual Installation
 
@@ -46,7 +68,7 @@ Each release includes the AILANG binary pre-bundled.
 
 ## What's Included
 
-### Skills (Claude Code)
+### Skills
 
 | Skill | Purpose |
 |-------|---------|
@@ -96,6 +118,7 @@ ailang micro-rag bootstrap --scope user --reset   # full rebuild (use after AILA
 - `ailang_run` - Run programs
 - `ailang_prompt` - Get teaching prompt (embedded copy)
 - `ailang_builtins` - List builtins
+- `ailang_eval` - Evaluate an expression in the non-interactive REPL
 
 **2. Remote HTTP MCP at `mcp.ailang.sunholo.com`** — version-locked live docs, stdlib, examples, design docs, benchmarks. Available to any agent harness that supports remote MCP (Claude Desktop, Cursor, Cline, Continue, Claude Code).
 
@@ -113,11 +136,6 @@ ailang micro-rag bootstrap --scope user --reset   # full rebuild (use after AILA
 Tools include `prompt_get`, `stdlib_modules`, `stdlib_search`, `examples_for_concept`, `limitations_list`, `effects_catalog`, and `submit_feedback` (for filing AILANG bugs from inside an agent session). Use these to **avoid stale embedded knowledge** — the snapshot is rebuilt and redeployed on every AILANG release.
 
 See [docs/guides/agent-mcp](https://ailang.sunholo.com/docs/guides/agent-mcp) for the full tool catalog.
-
-### Extension Features (Gemini CLI)
-
-- AILANG syntax guidance via `GEMINI.md` playbook
-- Pre-bundled `ailang` binary (platform-specific)
 
 ## Quick Start
 
@@ -173,16 +191,17 @@ ailang_bootstrap/
 ├── .claude-plugin/
 │   ├── plugin.json         # Claude Code plugin manifest
 │   └── marketplace.json    # Skills marketplace
+├── .codex-plugin/
+│   └── plugin.json         # Codex plugin manifest
+├── .mcp.json               # Codex MCP configuration
 ├── .claude/commands/       # Slash commands
 │   ├── ailang-run.md
 │   ├── ailang-check.md
 │   ├── ailang-new.md
 │   └── ...
 ├── mcp-server/             # MCP server for AILANG tools
-│   ├── ailang-server.json
-│   └── ailang-mcp.sh
-├── gemini-extension.json   # Gemini CLI extension manifest
-├── GEMINI.md               # Gemini CLI playbook
+│   ├── server.js
+│   └── package.json
 ├── skills/
 │   ├── ailang/             # Main AILANG skill
 │   │   ├── SKILL.md
