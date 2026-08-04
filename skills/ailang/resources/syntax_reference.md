@@ -337,21 +337,18 @@ letrec isOdd = \n. if n == 0 then false else isEven(n - 1);
 println(show(isEven(4)))  -- true
 ```
 
-**IMPORTANT — `letrec` requires a `{...}` block body, NOT a `= expression` body:**
+**Where to put a `letrec`:** it needs a statement sequence, and both a `{...}`
+block body and a `= ...` equation body give it one. Prefer the block — it is what
+`ailang fmt` emits, so formatting will not rewrite what you wrote.
 
 ```ailang
--- ❌ WRONG: letrec doesn't work with `= ...` body (parse error)
-export func is_even(n: int) -> bool =
-  letrec is_odd = \m. if m == 0 then false else is_even(m - 1);
-  if n == 0 then true else is_odd(n - 1)
-
--- ✅ RIGHT: use `{ ... }` block; the `;` separates statements
+-- ✅ PREFERRED: `{ ... }` block; the `;` separates statements
 export func is_even(n: int) -> bool {
   letrec is_odd = \m. if m == 0 then false else is_even(m - 1);
   if n == 0 then true else is_odd(n - 1)
 }
 
--- ✅ BEST: use top-level mutually-recursive `func` declarations
+-- ✅ BEST for mutual recursion: top-level `func` declarations
 func is_odd(n: int) -> bool =
   if n == 0 then false else is_even(n - 1)
 
@@ -1600,12 +1597,12 @@ export func main() -> () ! {IO} =
 - `getNumber(obj, key)` -> `Option[float]` - Get float value directly
 - `getInt(obj, key)` -> `Option[int]` - Get int value (truncates float)
 - `getBool(obj, key)` -> `Option[bool]` - Get boolean value directly
-- `getArray(obj, key)` -> `Option[List[Json]]` - Get array value by key
+- `getArray(obj, key)` -> `Option[[Json]]` - Get array value by key
 - `getObject(obj, key)` -> `Option[Json]` - Get nested object directly
 - `asString(j)` -> `Option[string]` - Convert Json to string
 - `asNumber(j)` -> `Option[float]` - Convert Json to number
 - `asBool(j)` -> `Option[bool]` - Convert Json to bool
-- `asArray(j)` -> `Option[List[Json]]` - Convert Json to array (USE THIS for top-level arrays!)
+- `asArray(j)` -> `Option[[Json]]` - Convert Json to array (USE THIS for top-level arrays!)
 
 **JSON array type extraction:**
 
@@ -1650,7 +1647,7 @@ let resp = httpPost("https://api.example.com", jsonData)  -- returns string
 import std/net (httpRequest)
 import std/json (decode)
 -- httpRequest returns Result[HttpResponse, NetError]
--- HttpResponse = {status: int, headers: List[...], body: string, ok: bool}
+-- HttpResponse = {status: int, headers: [...], body: string, ok: bool}
 -- IMPORTANT: Ok(resp) captures the FULL HttpResponse record
 -- Use resp.body to get the body string, NOT resp directly
 let headers = [{name: "Authorization", value: "Bearer token"}];
@@ -1763,7 +1760,7 @@ module benchmark/solution
 import std/result (Result, Ok, Err)
 
 -- List entries in a ZIP archive
-func listEntries(path: string) -> Result[List[string], string] ! {FS} =
+func listEntries(path: string) -> Result[[string], string] ! {FS} =
   _zip_listEntries(path)
 
 -- Read text content (UTF-8) from a ZIP entry
