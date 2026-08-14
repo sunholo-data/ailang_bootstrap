@@ -632,7 +632,7 @@ import std/ai (call, callJson, callJsonSimple)
 import std/sem (make_frame_at, store_frame, load_frame, update_frame)
 import std/option (Option, Some, None)
 import std/result (Result, Ok, Err)
-import std/bytes (fromString, toString, toBase64, fromBase64, length, slice)
+import std/bytes (fromString, toString, toBase64, fromBase64, length, slice, fromInts, toInts, byteAt)
 import std/stream (connect, transmit, transmitBinary, onEvent, runEventLoop, disconnect, sseConnect, ssePost, withSSE, sourceOfConn, asyncReadStdinLines, asyncExecProcess, selectEvents, StreamConn, StreamSource, StreamEvent, Message, Binary, Opened, Closed, StreamError, Ping, SSEData, SourceText, SourceBytes)
 import std/process (exec, spawnProcess, writeProcessStdin, closeProcessStdin, ProcessHandle)
 import std/zip (_zip_listEntries, _zip_readEntry, _zip_readEntryBytes)
@@ -732,6 +732,7 @@ let total = foldlE(func(acc: int, x: int) -> int ! {IO} { println("fold"); acc +
 - `slice(b, start, len) -> Option[bytes]` - Extract subsequence (None if out of bounds)
 - `fromInts(xs: [int]) -> bytes` - Construct bytes from list of integers (0-255)
 - `byteAt(b, i) -> Option[int]` - Get byte value (0-255) at index, or None if out of bounds. Use for ASCII char codes: `byteAt(fromString("A"), 0) == Some(65)`
+- `toInts(b) -> [int]` - All byte values as a list, the inverse of `fromInts`. Use this (not `byteAt` in a loop) to walk bytes with `map`/`filter`/`foldl`. NOTE: to inspect the raw bytes behind a string, go through `fromString` — `toInts(fromString(s))`. `charCode`/string indexing give codepoints and return U+FFFD for bytes that are not valid UTF-8 on their own; `toInts` is the only way to reach those bytes (needed for charset transcoding, e.g. Latin-1 -> UTF-8)
 - `concat(a, b) -> bytes` - Concatenate two byte slices
 - `concatList(xs: [bytes]) -> bytes` - Concatenate a list of byte slices (single allocation)
 - `fromBase64URL(s) -> Option[bytes]` - Base64url decode (JWT-style, no padding)
@@ -2347,6 +2348,13 @@ let data = readFile("other.txt")  -- Works!
 **Rule: Import everything you directly use in your module.**
 
 ## Common Mistakes
+
+### Strict `take` after `flatMap` or allocating `map`
+- `take(n, flatMap(f, xs))` materialises every output under strict evaluation.
+- Use `takeFlatMap(n, f, xs)` to skip unvisited inputs' outputs.
+- It does not shrink the source list or a single `f(x)`; bound a huge `f(x)` inside `f`.
+- Likewise, when `f` allocates, replace `take(n, map(f, xs))`
+  with `takeMap(n, f, xs)`.
 
 | Mistake | Fix |
 |---------|-----|
