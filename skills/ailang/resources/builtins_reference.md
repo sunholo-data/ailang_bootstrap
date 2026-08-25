@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.33.1. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.33.2. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (19)
@@ -416,7 +416,9 @@
 # std/yaml (1)
   _yaml_to_json                  [pure]
 
-# std/zip (7)
+# std/zip (9)
+  _zip_buildArchive              [pure]
+  _zip_buildArchiveWithBytes     [pure]
   _zip_createArchive             [fs]
   _zip_createArchiveWithBytes    [fs]
   _zip_listEntries               [fs]
