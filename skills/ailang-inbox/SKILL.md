@@ -498,9 +498,41 @@ github:
   auto_import: true                    # Import on session start
 ```
 
-## Storage
+## Storage — two stores, and the default is the private one
 
-- **Database**: `~/.ailang/state/collaboration.db` (SQLite)
+| Store | Selected by | Who sees it |
+|---|---|---|
+| **Canonical** (prod Firestore, `ailang-multivac`) | `AILANG_MESSAGES_STORE=gcp` + `AILANG_MESSAGES_PROJECT=ailang-multivac` | AILANG core and every other machine |
+| Local SQLite (`~/.ailang/state/collaboration.db`) | default | only this machine |
+
+**A message sent to the local store is not queued — it is invisible.** Reports from several
+projects sat unread in private local databases for months because this was the default.
+
+Add these to your shell profile so `ailang messages` reaches AILANG core:
+
+```bash
+export AILANG_MESSAGES_STORE=gcp
+export AILANG_MESSAGES_PROJECT=ailang-multivac
+```
+
+Safe to export: they are scoped to messaging, so local eval and `ailang chains` are
+untouched (`ailang storage status` should still say `Mode: local`).
+
+**Verify before trusting a send.** A non-local listing names its store in the header:
+
+```
+  store: gcp (Firestore, project ailang-multivac)
+```
+
+No `store:` line means local. If the vars ARE set and the line is still missing, your
+`ailang` predates v0.34.0 and ignores them silently — control with an invalid value,
+which a current binary must refuse:
+
+```bash
+AILANG_MESSAGES_STORE=not-a-real-store ailang messages list --unread
+# current: errors "unknown message store mode"   old: lists normally
+```
+
 - **Shared with**: Collaboration Hub dashboard
 - **Message statuses**: `unread`, `read`, `archived`, `deleted`
 
