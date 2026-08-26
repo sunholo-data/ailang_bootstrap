@@ -25,7 +25,7 @@ That's it! The simplest AI integration possible.
 ailang builtins list --verbose --by-module | grep -A 20 "std/ai"
 ```
 
-Or view the source on GitHub: https://github.com/sunholo-data/ailang/blob/main/std/ai.ail
+Or view the source on GitHub: https://github.com/sunholo-data/ailang/blob/dev/std/ai.ail
 
 ### Step 2: Load the Syntax Reference
 

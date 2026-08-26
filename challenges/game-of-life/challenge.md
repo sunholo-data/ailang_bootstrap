@@ -35,7 +35,7 @@ ailang builtins list --verbose --by-module | head -80
 ailang builtins list --verbose --by-module | grep -A 50 "std/array"
 ```
 
-Or view the stdlib on GitHub: https://github.com/sunholo-data/ailang/tree/main/std
+Or view the stdlib on GitHub: https://github.com/sunholo-data/ailang/tree/dev/std
 
 ### Step 2: Load the Syntax Reference
 

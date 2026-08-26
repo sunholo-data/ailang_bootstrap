@@ -182,7 +182,7 @@ ailang run --caps IO --entry main hello.ail
 
 - [AILANG Website](https://sunholo-data.github.io/ailang/)
 - [AILANG GitHub](https://github.com/sunholo-data/ailang)
-- [Examples](https://github.com/sunholo-data/ailang/tree/main/examples)
+- [Examples](https://github.com/sunholo-data/ailang/tree/dev/examples)
 
 ## Repository Structure
 

@@ -30,7 +30,7 @@ This is a genuinely useful tool! You could use it to:
 ailang builtins list --verbose --by-module | grep -A 30 "std/fs"
 ```
 
-Or view the source on GitHub: https://github.com/sunholo-data/ailang/blob/main/std/fs.ail
+Or view the source on GitHub: https://github.com/sunholo-data/ailang/blob/dev/std/fs.ail
 
 Key function: `readFile(path: string) -> string`
 

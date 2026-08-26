@@ -36,7 +36,7 @@ ailang builtins list --verbose --by-module | grep -A 20 "std/env"
 ailang builtins list --verbose --by-module | grep -A 20 "std/ai"
 ```
 
-Or view the stdlib on GitHub: https://github.com/sunholo-data/ailang/tree/main/std
+Or view the stdlib on GitHub: https://github.com/sunholo-data/ailang/tree/dev/std
 
 ### Step 2: Understand Records
 
