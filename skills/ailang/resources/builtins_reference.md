@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.34.0. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.35.0. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (19)
@@ -125,7 +125,7 @@
   _env_getEnv                    [env]
   _env_hasEnv                    [env]
 
-# std/fs (18)
+# std/fs (20)
   _fs_appendFile                 [fs]
   _fs_appendFileBytes            [fs]
   _fs_appendFileResult           [fs]
@@ -141,6 +141,8 @@
   _fs_readFileResult             [fs]
   _fs_removeFile                 [fs]
   _fs_removeFileResult           [fs]
+  _fs_rename                     [fs]
+  _fs_renameResult               [fs]
   _fs_writeFile                  [fs]
   _fs_writeFileBytes             [fs]
   _fs_writeFileResult            [fs]

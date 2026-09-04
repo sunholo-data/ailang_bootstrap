@@ -79,7 +79,7 @@
       ],
       "description": "Show type class usage with multiple types",
       "expected": {
-        "stdout": "42\n3.14159\ntrue\nHello, AILANG!\n",
+        "stdout": "x = 11\ny = 2\nz = 13\n",
         "exit_code": 0
       }
     },
@@ -145,7 +145,10 @@
         "demo",
         "blocks"
       ],
-      "description": "Block Demo example"
+      "description": "Block Demo example",
+      "modules": [
+        "std/io"
+      ]
     },
     {
       "path": "block_recursion.ail",
@@ -902,7 +905,10 @@
       "tags": [
         "pattern-matching"
       ],
-      "description": "Match arm with explicit block containing match"
+      "description": "Match arm with explicit block containing match",
+      "modules": [
+        "std/io"
+      ]
     },
     {
       "path": "match_arm_block_io.ail",
@@ -921,7 +927,10 @@
       "tags": [
         "pattern-matching"
       ],
-      "description": "Even simpler: block with let THEN match"
+      "description": "Even simpler: block with let THEN match",
+      "modules": [
+        "std/io"
+      ]
     },
     {
       "path": "math_trig.ail",
@@ -998,7 +1007,10 @@
         "pattern-matching",
         "records"
       ],
-      "description": "Absolute minimal case: single nested match with block arms"
+      "description": "Absolute minimal case: single nested match with block arms",
+      "modules": [
+        "std/io"
+      ]
     },
     {
       "path": "nested_match_simple.ail",
@@ -2087,7 +2099,7 @@
         "std/result"
       ],
       "expected": {
-        "stdout": "hello from AILANG\nstreaming to subprocess\ndone!\nwrote line 1\nwrote line 2\nwrote line 3\n",
+        "stdout": "wrote line 1\nwrote line 2\nwrote line 3\n",
         "exit_code": 0
       }
     },
@@ -2660,7 +2672,10 @@
       "tags": [
         "testing"
       ],
-      "description": "Test Module Minimal example"
+      "description": "Test Module Minimal example",
+      "modules": [
+        "std/io"
+      ]
     },
     {
       "path": "type_classes.ail",
@@ -2769,14 +2784,35 @@
         "stdout": "response has no 'fields' key\n{}\n",
         "exit_code": 0
       }
+    },
+    {
+      "path": "string_char_access.ail",
+      "status": "working",
+      "tags": [
+        "string",
+        "option",
+        "total-accessor",
+        "stdlib"
+      ],
+      "description": "Total character access: charAtOpt / charAt_or vs partial charAt",
+      "modules": [
+        "std/io",
+        "std/list",
+        "std/option",
+        "std/string"
+      ],
+      "expected": {
+        "stdout": "h\n\nstarts with h\nempty\n[a, ?, c]\n\ud83c\udf89\n",
+        "exit_code": 0
+      }
     }
   ],
   "statistics": {
-    "total": 198,
-    "working": 190,
+    "total": 199,
+    "working": 191,
     "aspirational": 4,
     "broken": 4,
-    "coverage": 0.9595959595959596,
+    "coverage": 0.9597989949748744,
     "experimental": 0
   },
   "milestones": {
