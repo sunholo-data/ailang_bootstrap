@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.35.2. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.35.4. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (19)
@@ -56,7 +56,7 @@
   _array_to_list                 [pure]
   _array_unsafe_get              [pure]
 
-# std/bytes (14)
+# std/bytes (15)
   _bytes_byte_at                 [pure]
   _bytes_concat                  [pure]
   _bytes_concat_list             [pure]
@@ -69,6 +69,7 @@
   _bytes_mime_type               [pure]
   _bytes_slice                   [pure]
   _bytes_to_base64               [pure]
+  _bytes_to_base64url            [pure]
   _bytes_to_ints                 [pure]
   _bytes_to_string               [pure]
 
