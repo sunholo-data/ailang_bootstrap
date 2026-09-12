@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.37.2. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.38.2. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (19)
@@ -121,12 +121,13 @@
   _dom_apply_patch_result        [dom]
   _dom_subscribe                 [dom]
 
-# std/env (3)
+# std/env (4)
   _env_getArgs                   [env]
   _env_getEnv                    [env]
+  _env_getPid                    [env]
   _env_hasEnv                    [env]
 
-# std/fs (20)
+# std/fs (22)
   _fs_appendFile                 [fs]
   _fs_appendFileBytes            [fs]
   _fs_appendFileResult           [fs]
@@ -137,9 +138,11 @@
   _fs_mkdir                      [fs]
   _fs_mkdirAll                   [fs]
   _fs_mkdirAllResult             [fs]
+  _fs_mkdirResult                [fs]
   _fs_readFile                   [fs]
   _fs_readFileBytes              [fs]
   _fs_readFileResult             [fs]
+  _fs_removeDirResult            [fs]
   _fs_removeFile                 [fs]
   _fs_removeFileResult           [fs]
   _fs_rename                     [fs]
