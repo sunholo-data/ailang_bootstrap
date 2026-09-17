@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.38.9. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.39.4. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (19)
@@ -390,6 +390,10 @@
 
 # std/trace_test (1)
   _trace_check                   [pure]
+
+# std/web (2)
+  _web_fetch                     [net]
+  _web_search                    [net]
 
 # std/xml (26)
   _escapeXml                     [pure]
