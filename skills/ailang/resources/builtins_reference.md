@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.43.1. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.44.1. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (19)
@@ -55,6 +55,9 @@
   _array_set                     [pure]
   _array_to_list                 [pure]
   _array_unsafe_get              [pure]
+
+# std/audio (1)
+  _audio_encode_ogg_opus         [pure]
 
 # std/bytes (15)
   _bytes_byte_at                 [pure]
@@ -341,6 +344,9 @@
   _stream_sse_post               [stream]
   _stream_status                 [stream]
   _stream_transmit_binary        [stream]
+
+# std/stream/bridge (1)
+  _stream_bridge                 [stream]
 
 # std/string (30)
   _str_charAt                    [pure]
