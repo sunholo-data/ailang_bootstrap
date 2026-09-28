@@ -498,6 +498,23 @@
       }
     },
     {
+      "path": "runnable/contracts/nullary_constant_verify.ail",
+      "status": "working",
+      "tags": [
+        "contracts",
+        "smt-verification",
+        "ailang-verify",
+        "named-constants",
+        "m-smt-nullary-callee"
+      ],
+      "description": "Named constants in verified contracts \u2014 a zero-argument pure function encodes as a nullary SMT define-fun, so spend bounds (in the body or the ensures clause, chained or not) verify instead of skipping",
+      "modules": [],
+      "expected": {
+        "stdout": "bound(5) = 1005\nturnBound(10) = 513530\nwithChained(1) = 34001\n",
+        "exit_code": 0
+      }
+    },
+    {
       "path": "runnable/contracts/list_recursive_verify.ail",
       "status": "working",
       "tags": [
@@ -2241,6 +2258,27 @@
       ]
     },
     {
+      "path": "runnable/array_float_kernels.ail",
+      "status": "working",
+      "tags": [
+        "stdlib",
+        "std/array",
+        "vectors",
+        "numeric",
+        "pure"
+      ],
+      "description": "Array[float]: unboxed float arrays, native kernels (dot/axpy/argmax), updateMany/scatterAdd bulk updates, decodeFloatArray and F64 binary ingest",
+      "modules": [
+        "std/array",
+        "std/json",
+        "std/list"
+      ],
+      "expected": {
+        "stdout": "prediction: 2.9999999999999996\nhistogram: #[1.0, 0.0, 2.0, 5.0], argmax = 3\nupdated: #[1.5, 0.0, 2.5]\njson: #[0.5, 1.5, 2.5]\nf64: #[1.0, 2.0, 0.5]\nbad json: error: decodeFloatArray: expected a number at offset 4\n",
+        "exit_code": 0
+      }
+    },
+    {
       "path": "runnable/stdlib_embedding.ail",
       "status": "working",
       "tags": [
@@ -2967,11 +3005,11 @@
     }
   ],
   "statistics": {
-    "total": 206,
-    "working": 198,
+    "total": 208,
+    "working": 200,
     "aspirational": 4,
     "broken": 4,
-    "coverage": 0.9611650485436893,
+    "coverage": 0.9615384615384616,
     "experimental": 0
   },
   "milestones": {
