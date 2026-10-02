@@ -1,4 +1,4 @@
-# AILANG v0.16.2 - AI Teaching Prompt (with IFC Labels + Output Discipline)
+# AILANG v0.16.6 - AI Teaching Prompt (with IFC Labels + Output Discipline)
 
 AILANG is a **pure functional language** with Hindley-Milner type inference and algebraic effects. Write code using **recursion** (no loops), **pattern matching**, and **explicit effect declarations**.
 
@@ -193,7 +193,7 @@ export func main() -> () ! {IO, AI} = println(call("What is 2+2?"))
 | `if x { ... }` | `if x then ... else ...` - NO braces! |
 | mixing `let x = e in` with `;` | Use ONE style consistently |
 | `let (x, y) = tuple` | Use `match tuple { (x, y) => ... }` |
-| `\(a, b). body` pair syntax | Use `func(a: T, b: U) -> R { body }` |
+| `\(a, b). body` or `\a, b. body` | Inline: **curry** — `\a. \b. body`. Named: `func(a: T, b: U) -> R { body }` |
 | nested `func f(...) =` | Use `let f = \x. body` for nested functions |
 | `!condition` | Both `!x` and `not x` work — prefer `not` for readability |
 | `concat(a, b)` for strings | `"${a}${b}"` interpolation — `++` is list-only in v0.13.0+ |
@@ -389,6 +389,8 @@ func twice(f: int -> int, x: int) -> int = f(f(x))
 | Pattern match | `match x { 0 => a, n => b }` (use `=>`, commas between arms) |
 | ADT | `type Tree = Leaf(int) \| Node(Tree, int, Tree)` |
 | ADT with Eq | `type Color = Red \| Green \| Blue deriving (Eq)` |
+| Record with Eq | `type Point = {x: int, y: int} deriving (Eq)` (anonymous records have no `==`) |
+| `==` / `!=` support | int, float, string, bool, and any list, `Option`, `Result` or tuple whose parts support it (`xs == []`, `o == Some(3)`, `(a, b) == (1, "x")`), plus types declared `deriving (Eq)`. Functions have no `==`. Float `==` is IEEE: NaN is never equal to anything, itself included; test with `isNaN(x)` from `std/math` |
 | Record | `{name: "A", age: 30}` |
 | Record update | `{base \| field: val}` |
 | Open record type | `{name: string \| r}` or `{name: string, ...}` |
@@ -502,7 +504,7 @@ export func main() -> () ! {IO} { println("hi") }
 | Effect | Functions | Import |
 |--------|-----------|--------|
 | `IO` | `print`, `println`, `readLine`, `writeBytes`, `exit` | `std/io` (print is builtin) |
-| `FS` | `readFile`, `writeFile`, `fileExists`, `listDir`, `mkdir`, `mkdirAll`, `isDir`, `isFile`, `removeFile`, `_zip_*` | `std/fs`, `std/zip` |
+| `FS` | `readFile`, `writeFile`, `fileExists`, `listDir`, `walk`, `glob`, `mkdir`, `mkdirAll`, `isDir`, `isFile`, `removeFile`, `_zip_*` | `std/fs`, `std/zip` |
 | `Net` | `httpGet`, `httpPost`, `httpRequest` | `std/net` |
 | `Env` | `getArgs`, `getEnv`, `getEnvOr`, `hasEnv` | `std/env` |
 | `Clock` | `now`, `sleep` | `std/clock` |
@@ -620,19 +622,26 @@ func handleRequest(path: string) -> Response ! {Net} {
 **Common imports:**
 ```ailang
 import std/io (println, readLine)
-import std/fs (readFile, writeFile, fileExists, listDir, mkdir, mkdirAll, isDir, isFile, removeFile)
+import std/fs (readFile, writeFile, fileExists, listDir, walk, glob, mkdir, mkdirAll, isDir, isFile, removeFile)
+-- walk(root) -> [string] ! {FS}: every file under root, recursively, sorted, paths prefixed with root.
+-- glob(root, ".ail") -> [string] ! {FS}: walk filtered by suffix. Never hand-roll a recursive listDir/isDir walker.
 import std/env (getArgs, getEnv, getEnvOr)
 import std/net (httpGet, httpPost, httpRequest)
 import std/json (encode, decode, get, getString, getNumber, getInt, getBool, getArray, getObject, asString, asNumber, asArray)
-import std/json (filterStrings, filterNumbers, allStrings, allNumbers, getStringArrayOrEmpty)
-import std/list (map, filter, foldl, length, concat, sortBy, take, drop, nth, last, any, findIndex, flatMap, zipWith, mapE, filterE, foldlE, flatMapE, forEachE)
+import std/json (filterStrings, filterNumbers, allStrings, allNumbers, getStringArrayOrEmpty, decodeFloatArray)
+import std/list (map, filter, foldl, length, concat, sortBy, take, drop, range, nth, last, any, findIndex, flatMap, zipWith, mapE, filterE, foldlE, flatMapE, forEachE)
+-- [float] vector math, native loops (never foldl(zipWith(...)) for a dot product):
+import std/embedding (dot, cosine, magnitude, normalize, scale, add_vectors, axpy, euclidean_distance)
+-- Array[float] when memory or bulk updates matter: unboxed (8 B/element), strict-length kernels, one-copy batched writes.
+-- Its dot/axpy/scale clash with std/embedding's: import one module qualified (import std/array as A).
+import std/array (make, fromList, toList, get, getOpt, set, length, dot, axpy, scale, add, sub, mul, sum, argmax, updateMany, scatterAdd, encodeF64LE, decodeF64LE)
 import std/string (split, chars, trim, stringToInt, stringToFloat, contains, find, substring, intToStr, floatToStr, join, startsWith, endsWith, length, toUpper, toLower, compare, repeat)
 import std/math (floatToInt, intToFloat, floor, ceil, round, sqrt, pow, abs_Float, abs_Int)
 import std/ai (call, callJson, callJsonSimple)
 import std/sem (make_frame_at, store_frame, load_frame, update_frame)
 import std/option (Option, Some, None)
 import std/result (Result, Ok, Err)
-import std/bytes (fromString, toString, toBase64, fromBase64, length, slice, fromInts, toInts, byteAt)
+import std/bytes (fromString, toString, toBase64, fromBase64, toBase64URL, fromBase64URL, length, slice, fromInts, toInts, byteAt)
 import std/stream (connect, transmit, transmitBinary, onEvent, runEventLoop, disconnect, sseConnect, ssePost, withSSE, sourceOfConn, asyncReadStdinLines, asyncExecProcess, selectEvents, StreamConn, StreamSource, StreamEvent, Message, Binary, Opened, Closed, StreamError, Ping, SSEData, SourceText, SourceBytes)
 import std/process (exec, spawnProcess, writeProcessStdin, closeProcessStdin, ProcessHandle)
 import std/zip (_zip_listEntries, _zip_readEntry, _zip_readEntryBytes)
@@ -726,8 +735,10 @@ let total = foldlE(func(acc: int, x: int) -> int ! {IO} { println("fold"); acc +
 **Bytes functions** (std/bytes) — pure binary data operations:
 - `fromString(s) -> bytes` - UTF-8 encode string to bytes
 - `toString(b) -> string` - Decode bytes to UTF-8 string
-- `toBase64(b) -> string` - Base64 encode
-- `fromBase64(s) -> Option[bytes]` - Base64 decode (None if invalid)
+- `toBase64(b) -> string` - Base64 encode (standard alphabet, padded)
+- `fromBase64(s) -> Option[bytes]` - Base64 decode (None if invalid; REQUIRES padding)
+- `toBase64URL(b) -> string` - base64url encode (RFC 4648 §5: URL-safe alphabet, NO padding). Required by the Gmail API's `raw` field and by JWT segments. Do NOT hand-roll it from `toBase64` + `replaceMany` — a missed substitution still looks like valid base64 and is rejected at the far end: `toBase64(fromString("a+b/c?"))` is `"YStiL2M/"`, `toBase64URL` of the same bytes is `"YStiL2M_"`
+- `fromBase64URL(s) -> Option[bytes]` - base64url decode (None if invalid; REJECTS padding). Exact inverse of `toBase64URL`
 - `length(b) -> int` - Byte length
 - `slice(b, start, len) -> Option[bytes]` - Extract subsequence (None if out of bounds)
 - `fromInts(xs: [int]) -> bytes` - Construct bytes from list of integers (0-255)
@@ -1030,7 +1041,17 @@ In addition to `get`/`set`/`length` already covered above:
 - `empty() -> Array[a]` - Empty array
 - `make(size: int, default: a) -> Array[a]` - Fixed-size array initialized to `default`
 - `append(arr, val) -> Array[a]` - Return new array with `val` appended
-- `unsafeGet(arr, idx) -> a` - Get without bounds check (panics on OOB) — use `getOpt` for safety
+- `unsafeGet(arr, idx) -> a` - Get; out of bounds is a runtime error — use `getOpt` for safety
+- `get`/`set` out of bounds are errors naming the index and length (`set` never returns the array unchanged)
+
+**Float arrays.** An `Array[float]` is stored unboxed (8 bytes per element; a 10M-element array is ~130 MB,
+the same data as `[float]` is ~2.5 GB). Native kernels: `dot`, `axpy`, `scale`, `add`, `sub`, `mul`, `sum`,
+`argmax`; two-array kernels require equal lengths. `set` copies the whole array, so never update weights
+one `set` at a time in a loop: use `axpy` for a whole-vector update, `updateMany(arr, [(i, x), ...])` or
+`scatterAdd(arr, idx, xs)` for many writes with one copy.
+Ingest without a `Json` tree: `std/json.decodeFloatArray(s)` for a flat JSON number array, and
+`decodeF64LE(bytes)` (exact) / `decodeF32LE(bytes)` (**lossy**: float32 precision) from `std/array`,
+all returning `Result[Array[float], string]`.
 
 ## Character Processing
 
@@ -1980,7 +2001,8 @@ verifyWithKid(token, \kid. lookupKey(kid, jwks))
 ```
 
 Backed by `rsaVerifyPKCS1v15(message, signature, publicKeyPEM)` in
-`std/crypto`, plus `fromBase64URL` in `std/bytes` (RFC 4648 §5, no padding).
+`std/crypto`, plus `fromBase64URL`/`toBase64URL` in `std/bytes` (RFC 4648 §5,
+no padding — the pair round-trips exactly).
 JWT functions are pure — fetch keys yourself via `std/net`.
 
 ## Custom Tracing (std/trace, v0.11.1)
@@ -2288,9 +2310,14 @@ Use `pkg/` prefix for external packages:
 ```ailang
 import std/io (println)                            -- Stdlib (bundled)
 import myproject/utils (helper)                    -- Local module
-import pkg/sunholo/gcp-auth/token (getAccessToken) -- External package
-import pkg/sunholo/auth/keys (validateKeyHash)      -- External package
+import pkg/sunholo/gcp_auth/token (getAccessToken) -- External package
+import pkg/sunholo/auth/keys (validateKeyHash)     -- External package
 ```
+
+Package names use **underscores**, never hyphens. A hyphen in an import path parses as
+subtraction and fails with `PAR_HYPHEN_IN_IMPORT`. The registry name is canonical
+(`sunholo/gcp_auth`); the repo directory may be spelled `packages/gcp-auth`, but that is
+a folder name, never an import path.
 
 ### Registry Workflow (recommended)
 
@@ -2320,6 +2347,29 @@ ailang publish                              # Upload to registry (immutable — 
 ```
 
 Include an `AGENT.md` in your package root for AI agent consumers — it's served via `ailang pkg-docs` and indexed in registry search results.
+
+### Shipping a command (`[bin]`)
+
+A package can ship a CLI, not just modules. Declare it in `ailang.toml`; `ailang install`
+then puts a shim on PATH (`~/.ailang/bin`) that runs the module with the package as program
+root — no clone, no wrapper script, no hand-written runtime directory.
+
+```toml
+[bin]
+eparse   = "cli"                                   # module <pkg>/cli, entry main, caps auto (inferred)
+docparse = { module = "docparse/main", caps = "IO,FS,Env,AI", run_flags = ["--max-recursion-depth", "50000"] }
+```
+
+```bash
+ailang install sunholo/email            # library + `eparse` on PATH
+ailang install --path packages/email    # developer loop: shim this checkout without publishing
+ailang bin list                         # installed shims, with package@version
+```
+
+The command reads its arguments with `getArgs()` from `std/env` (`--caps Env`); flag-like
+arguments reach it untouched. `ailang publish` refuses a `[bin]` whose module is missing or
+whose entry is not exported. Do NOT write a `scripts/` launcher that `cd`s into a checkout and
+`ailang run`s a file — that is what `[bin]` replaces.
 
 **Available packages**: `sunholo/gcp-auth` (OAuth2), `sunholo/auth` (API keys), `sunholo/http-helpers` (request builders), `sunholo/logging` (JSON logs), `sunholo/config` (env loading), `sunholo/testing-utils` (assertions).
 
@@ -2437,7 +2487,8 @@ ensures { result == "[sanitized]" }
 ## Label Naming Convention
 
 - **lowercase**, single-word labels: `<email>`, `<pii>`, `<secret>`.
-- **kebab-case** for compounds: `<user-input>`, `<sql-text>`, `<raw-html>`.
+- **snake_case** for compounds: `<user_input>`, `<sql_text>`, `<raw_html>`. A `-` in a label does not parse.
+- One label per value and one `not` per parameter: `string{not email, not web}` does not parse. To forbid several sources at one sink, give them a shared label (`<untrusted>`) and write `{not untrusted}`.
 - Labels are **structural**, not nominal — `<email>` from one module is
   the same label as `<email>` from another module.
 - The bottom label `⊥` (untainted) is implicit on any value with no

@@ -114,7 +114,7 @@ done
 section "4. Skill Structure Tests"
 
 # Check skill files exist
-for skill in ailang ailang-debug ailang-inbox; do
+for skill in ailang ailang-inbox; do
   skill_file="$ROOT_DIR/skills/$skill/SKILL.md"
   if [[ -f "$skill_file" ]]; then
     # Check YAML frontmatter

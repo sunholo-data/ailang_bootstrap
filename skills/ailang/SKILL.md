@@ -150,7 +150,7 @@ ailang publish                              # ship
 - Call `examples_for_concept` via remote MCP, or `ailang examples search`
 - Run `ailang devtools-prompt` for the full toolchain reference
 - Run `ailang repl` for interactive testing
-- Check the [ailang-debug](../ailang-debug/SKILL.md) skill for error diagnosis
+- Read the whole diagnostic: `ailang check` names the missing import or the expected type; `--format agent` gives one line per error
 - File a report from inside this session: call `submit_feedback` via remote MCP
 - Docs: https://ailang.sunholo.com/
 

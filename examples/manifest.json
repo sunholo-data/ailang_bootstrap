@@ -79,7 +79,7 @@
       ],
       "description": "Show type class usage with multiple types",
       "expected": {
-        "stdout": "42\n3.14159\ntrue\nHello, AILANG!\n",
+        "stdout": "x = 11\ny = 2\nz = 13\n",
         "exit_code": 0
       }
     },
@@ -145,7 +145,10 @@
         "demo",
         "blocks"
       ],
-      "description": "Block Demo example"
+      "description": "Block Demo example",
+      "modules": [
+        "std/io"
+      ]
     },
     {
       "path": "block_recursion.ail",
@@ -231,6 +234,25 @@
         "std/io",
         "std/json",
         "std/net"
+      ]
+    },
+    {
+      "path": "runnable/decide_jev.ail",
+      "status": "working",
+      "tags": [
+        "ai",
+        "net",
+        "misc"
+      ],
+      "description": "Typed decisions from a System One model (TypeSafe Jev via OpenRouter /api/alpha/decisions) in pure AILANG \u2014 the M-AI-DECIDE-SYSTEM-ONE Phase-0 spike; without OPENROUTER_API_KEY it reports the missing key and exits 0",
+      "modules": [
+        "std/env",
+        "std/io",
+        "std/json",
+        "std/list",
+        "std/net",
+        "std/option",
+        "std/result"
       ]
     },
     {
@@ -452,6 +474,45 @@
       "modules": [
         "std/list"
       ]
+    },
+    {
+      "path": "runnable/contracts/interpolation_verify.ail",
+      "status": "working",
+      "tags": [
+        "contracts",
+        "smt-verification",
+        "ailang-verify",
+        "string-interpolation",
+        "show-normalization",
+        "header-injection",
+        "m-smt-interp-show"
+      ],
+      "description": "Interpolated string builders under Z3 \u2014 \"${...}\" holes of string, bool and int type now verify, so an RFC 5322 composer's CR/LF injection guard is proved rather than tested",
+      "modules": [
+        "std/io",
+        "std/string"
+      ],
+      "expected": {
+        "stdout": "header/body separator: ok\nverbose=true\nquiet=false\ncount=42\ncount=-7\n",
+        "exit_code": 0
+      }
+    },
+    {
+      "path": "runnable/contracts/nullary_constant_verify.ail",
+      "status": "working",
+      "tags": [
+        "contracts",
+        "smt-verification",
+        "ailang-verify",
+        "named-constants",
+        "m-smt-nullary-callee"
+      ],
+      "description": "Named constants in verified contracts \u2014 a zero-argument pure function encodes as a nullary SMT define-fun, so spend bounds (in the body or the ensures clause, chained or not) verify instead of skipping",
+      "modules": [],
+      "expected": {
+        "stdout": "bound(5) = 1005\nturnBound(10) = 513530\nwithChained(1) = 34001\n",
+        "exit_code": 0
+      }
     },
     {
       "path": "runnable/contracts/list_recursive_verify.ail",
@@ -902,7 +963,10 @@
       "tags": [
         "pattern-matching"
       ],
-      "description": "Match arm with explicit block containing match"
+      "description": "Match arm with explicit block containing match",
+      "modules": [
+        "std/io"
+      ]
     },
     {
       "path": "match_arm_block_io.ail",
@@ -921,7 +985,10 @@
       "tags": [
         "pattern-matching"
       ],
-      "description": "Even simpler: block with let THEN match"
+      "description": "Even simpler: block with let THEN match",
+      "modules": [
+        "std/io"
+      ]
     },
     {
       "path": "math_trig.ail",
@@ -998,7 +1065,10 @@
         "pattern-matching",
         "records"
       ],
-      "description": "Absolute minimal case: single nested match with block arms"
+      "description": "Absolute minimal case: single nested match with block arms",
+      "modules": [
+        "std/io"
+      ]
     },
     {
       "path": "nested_match_simple.ail",
@@ -2071,6 +2141,28 @@
       }
     },
     {
+      "path": "runnable/process_subcmd_allowlist.ail",
+      "status": "working",
+      "tags": [
+        "effects",
+        "process",
+        "exec",
+        "std/process",
+        "security",
+        "allowlist"
+      ],
+      "description": "Narrow a binary to named subcommands with --process-allowlist cmd:sub (M-PROCESS-SUBCMD); header gives the narrowed invocation, verify-examples runs it un-narrowed",
+      "modules": [
+        "std/bytes",
+        "std/io",
+        "std/process"
+      ],
+      "expected": {
+        "stdout": "allowed: hello world\n\nran: no --process-allowlist in effect\nran: no --process-allowlist in effect\n",
+        "exit_code": 0
+      }
+    },
+    {
       "path": "runnable/process_stdin_write.ail",
       "status": "working",
       "tags": [
@@ -2087,7 +2179,7 @@
         "std/result"
       ],
       "expected": {
-        "stdout": "hello from AILANG\nstreaming to subprocess\ndone!\nwrote line 1\nwrote line 2\nwrote line 3\n",
+        "stdout": "wrote line 1\nwrote line 2\nwrote line 3\n",
         "exit_code": 0
       }
     },
@@ -2104,6 +2196,39 @@
       "modules": [
         "std/io"
       ]
+    },
+    {
+      "path": "runnable/std_audio_brief.ail",
+      "status": "working",
+      "tags": [
+        "stdlib",
+        "audio",
+        "wav",
+        "opus",
+        "ogg",
+        "bytes",
+        "std/audio"
+      ],
+      "description": "Raw TTS PCM to WAV (pure AILANG) and deterministic Ogg Opus via std/audio.encode",
+      "modules": [
+        "std/audio",
+        "std/bytes",
+        "std/env",
+        "std/fs",
+        "std/io",
+        "std/option",
+        "std/result"
+      ],
+      "run_flags": [
+        "--caps",
+        "IO",
+        "--entry",
+        "main"
+      ],
+      "expected": {
+        "stdout": "pcm bytes: 48000\nwav bytes: 48044\nduration: 1000 ms\nogg magic: OggS\nogg smaller than wav: true\nrejected: audio.encode: rate 44100 Hz is not supported (want 8000, 12000, 16000, 24000 or 48000; resample first)\n",
+        "exit_code": 0
+      }
     },
     {
       "path": "runnable/std_deflate_pdf_objstm.ail",
@@ -2131,6 +2256,27 @@
         "--entry",
         "main"
       ]
+    },
+    {
+      "path": "runnable/array_float_kernels.ail",
+      "status": "working",
+      "tags": [
+        "stdlib",
+        "std/array",
+        "vectors",
+        "numeric",
+        "pure"
+      ],
+      "description": "Array[float]: unboxed float arrays, native kernels (dot/axpy/argmax), updateMany/scatterAdd bulk updates, decodeFloatArray and F64 binary ingest",
+      "modules": [
+        "std/array",
+        "std/json",
+        "std/list"
+      ],
+      "expected": {
+        "stdout": "prediction: 2.9999999999999996\nhistogram: #[1.0, 0.0, 2.0, 5.0], argmax = 3\nupdated: #[1.5, 0.0, 2.5]\njson: #[0.5, 1.5, 2.5]\nf64: #[1.0, 2.0, 0.5]\nbad json: error: decodeFloatArray: expected a number at offset 4\n",
+        "exit_code": 0
+      }
     },
     {
       "path": "runnable/stdlib_embedding.ail",
@@ -2660,7 +2806,10 @@
       "tags": [
         "testing"
       ],
-      "description": "Test Module Minimal example"
+      "description": "Test Module Minimal example",
+      "modules": [
+        "std/io"
+      ]
     },
     {
       "path": "type_classes.ail",
@@ -2769,14 +2918,126 @@
         "stdout": "response has no 'fields' key\n{}\n",
         "exit_code": 0
       }
+    },
+    {
+      "path": "string_char_access.ail",
+      "status": "working",
+      "tags": [
+        "string",
+        "option",
+        "total-accessor",
+        "stdlib"
+      ],
+      "description": "Total character access: charAtOpt / charAt_or vs partial charAt",
+      "modules": [
+        "std/io",
+        "std/list",
+        "std/option",
+        "std/string"
+      ],
+      "expected": {
+        "stdout": "h\n\nstarts with h\nempty\n[a, ?, c]\n\ud83c\udf89\n",
+        "exit_code": 0
+      }
+    },
+    {
+      "path": "runnable/bytes_base64url.ail",
+      "status": "working",
+      "tags": [
+        "stdlib",
+        "std/bytes",
+        "base64url",
+        "encoding",
+        "jwt",
+        "gmail"
+      ],
+      "description": "base64url (RFC 4648 \u00a75): URL-safe alphabet, no padding, and an exact round-trip with fromBase64URL",
+      "modules": [
+        "std/bytes",
+        "std/io",
+        "std/option"
+      ],
+      "expected": {
+        "stdout": "standard : YStiL2M/\nURL-safe : YStiL2M_\npadded   : SGVsbG8=\nunpadded : SGVsbG8\nroundtrip: Subject: Caf\u00e9 \u2014 \u00fcn\u00efcode\nmismatch : <not valid base64url>\n",
+        "exit_code": 0
+      }
+    },
+    {
+      "path": "runnable/fs_walk_glob.ail",
+      "status": "working",
+      "tags": [
+        "stdlib",
+        "std/fs",
+        "filesystem",
+        "walk",
+        "glob",
+        "effects"
+      ],
+      "description": "std/fs walk (recursive sorted file listing) and glob (suffix filter) over a small /tmp tree",
+      "modules": [
+        "std/fs",
+        "std/io",
+        "std/list"
+      ],
+      "expected": {
+        "stdout": "walk: 5 files\n  /tmp/ailang_walk_glob/README.md\n  /tmp/ailang_walk_glob/src/main.ail\n  /tmp/ailang_walk_glob/src/nested/deep.ail\n  /tmp/ailang_walk_glob/src/notes.txt\n  /tmp/ailang_walk_glob/src/util.ail\nglob .ail: 3 files\n  /tmp/ailang_walk_glob/src/main.ail\n  /tmp/ailang_walk_glob/src/nested/deep.ail\n  /tmp/ailang_walk_glob/src/util.ail\nglob .md: 1 file\n",
+        "exit_code": 0
+      }
+    },
+    {
+      "path": "runnable/web_search.ail",
+      "status": "working",
+      "tags": [
+        "stdlib",
+        "std/web",
+        "web",
+        "search",
+        "network",
+        "effects"
+      ],
+      "description": "std/web webSearch and webFetch with {Net} only \u2014 the API key stays in the runtime; skipped by verify-examples (needs OLLAMA_API_KEY + network), type-check asserted in Go",
+      "modules": [
+        "std/web",
+        "std/io",
+        "std/list",
+        "std/string"
+      ]
+    },
+    {
+      "path": "runnable/vm_strict_pure_builtins.ail",
+      "status": "working",
+      "tags": [
+        "bytecode",
+        "vm",
+        "strict-bytecode",
+        "std/list",
+        "std/string",
+        "std/bytes"
+      ],
+      "description": "Pure std/list, std/string and std/bytes calls run on the bytecode VM with no evaluator fallback: native polymorphic list ops plus the registry adapter (#1447)",
+      "modules": [
+        "std/bytes",
+        "std/io",
+        "std/list",
+        "std/option",
+        "std/string"
+      ],
+      "run_flags": [
+        "--caps",
+        "IO"
+      ],
+      "expected": {
+        "stdout": "[(5, a), (4, b)] true abab aGk= 6\n",
+        "exit_code": 0
+      }
     }
   ],
   "statistics": {
-    "total": 198,
-    "working": 190,
+    "total": 209,
+    "working": 201,
     "aspirational": 4,
     "broken": 4,
-    "coverage": 0.9595959595959596,
+    "coverage": 0.9617224880382775,
     "experimental": 0
   },
   "milestones": {

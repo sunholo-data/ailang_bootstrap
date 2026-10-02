@@ -1,15 +1,16 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.33.2. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.51.0. Run `ailang builtins list --by-module` for latest.
 
 ```
-# $builtin (19)
+# $builtin (23)
   _list_contains                 [pure]
   _list_dedup                    [pure]
   _list_difference               [pure]
   _list_drop                     [pure]
   _list_extract                  [pure]
   _list_filter                   [pure]
+  _list_flatMap                  [pure]
   _list_foldl                    [pure]
   _list_head                     [pure]
   _list_intersect                [pure]
@@ -17,11 +18,14 @@
   _list_map                      [pure]
   _list_member                   [pure]
   _list_nth                      [pure]
+  _list_range                    [pure]
   _list_reverse                  [pure]
+  _list_sortBy                   [pure]
   _list_take                     [pure]
   _list_takeFlatMap              [pure]
   _list_takeMap                  [pure]
   _list_union                    [pure]
+  _list_zip                      [pure]
   show                           [pure]
 
 # core (2)
@@ -45,18 +49,35 @@
   _ai_stream_call                [ai]
   _ollama_embed                  [io]
 
-# std/array (9)
+# std/array (23)
   _array_append                  [pure]
+  _array_decode_f32le            [pure]
+  _array_decode_f64le            [pure]
   _array_empty                   [pure]
+  _array_encode_f32le            [pure]
+  _array_encode_f64le            [pure]
+  _array_f_add                   [pure]
+  _array_f_argmax                [pure]
+  _array_f_axpy                  [pure]
+  _array_f_dot                   [pure]
+  _array_f_mul                   [pure]
+  _array_f_scale                 [pure]
+  _array_f_sub                   [pure]
+  _array_f_sum                   [pure]
   _array_from_list               [pure]
   _array_get                     [pure]
   _array_length                  [pure]
   _array_make                    [pure]
+  _array_scatter_add             [pure]
   _array_set                     [pure]
   _array_to_list                 [pure]
   _array_unsafe_get              [pure]
+  _array_update_many             [pure]
 
-# std/bytes (14)
+# std/audio (1)
+  _audio_encode_ogg_opus         [pure]
+
+# std/bytes (15)
   _bytes_byte_at                 [pure]
   _bytes_concat                  [pure]
   _bytes_concat_list             [pure]
@@ -69,6 +90,7 @@
   _bytes_mime_type               [pure]
   _bytes_slice                   [pure]
   _bytes_to_base64               [pure]
+  _bytes_to_base64url            [pure]
   _bytes_to_ints                 [pure]
   _bytes_to_string               [pure]
 
@@ -120,12 +142,23 @@
   _dom_apply_patch_result        [dom]
   _dom_subscribe                 [dom]
 
-# std/env (3)
+# std/embedding (8)
+  _vec_add                       [pure]
+  _vec_axpy                      [pure]
+  _vec_decode_f32le              [pure]
+  _vec_decode_f64le              [pure]
+  _vec_dot                       [pure]
+  _vec_encode_f64le              [pure]
+  _vec_scale                     [pure]
+  _vec_sub                       [pure]
+
+# std/env (4)
   _env_getArgs                   [env]
   _env_getEnv                    [env]
+  _env_getPid                    [env]
   _env_hasEnv                    [env]
 
-# std/fs (18)
+# std/fs (22)
   _fs_appendFile                 [fs]
   _fs_appendFileBytes            [fs]
   _fs_appendFileResult           [fs]
@@ -136,11 +169,15 @@
   _fs_mkdir                      [fs]
   _fs_mkdirAll                   [fs]
   _fs_mkdirAllResult             [fs]
+  _fs_mkdirResult                [fs]
   _fs_readFile                   [fs]
   _fs_readFileBytes              [fs]
   _fs_readFileResult             [fs]
+  _fs_removeDirResult            [fs]
   _fs_removeFile                 [fs]
   _fs_removeFileResult           [fs]
+  _fs_rename                     [fs]
+  _fs_renameResult               [fs]
   _fs_writeFile                  [fs]
   _fs_writeFileBytes             [fs]
   _fs_writeFileResult            [fs]
@@ -173,8 +210,9 @@
   _io_readLine                   [io]
   _io_writeBytes                 [io]
 
-# std/json (3)
+# std/json (4)
   _json_decode                   [pure]
+  _json_decode_float_array       [pure]
   _json_encode                   [pure]
   _json_repair                   [pure]
 
@@ -336,7 +374,10 @@
   _stream_status                 [stream]
   _stream_transmit_binary        [stream]
 
-# std/string (30)
+# std/stream/bridge (1)
+  _stream_bridge                 [stream]
+
+# std/string (31)
   _str_charAt                    [pure]
   _str_charCode                  [pure]
   _str_chars                     [pure]
@@ -351,6 +392,7 @@
   _str_len                       [pure]
   _str_lower                     [pure]
   _str_mapSlicesJoin             [pure]
+  _str_repeat                    [pure]
   _str_replace                   [pure]
   _str_replaceMany               [pure]
   _str_slice                     [pure]
@@ -384,6 +426,10 @@
 
 # std/trace_test (1)
   _trace_check                   [pure]
+
+# std/web (2)
+  _web_fetch                     [net]
+  _web_search                    [net]
 
 # std/xml (26)
   _escapeXml                     [pure]
