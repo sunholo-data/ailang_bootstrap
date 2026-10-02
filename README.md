@@ -111,6 +111,23 @@ ailang micro-rag bootstrap --scope user           # add embeddings on top of Sim
 ailang micro-rag bootstrap --scope user --reset   # full rebuild (use after AILANG version bump)
 ```
 
+### AILANG lens (Claude Code mod, optional)
+
+A live pane that shows what you're writing as AILANG sees it. After every
+Edit/Write of a `.ail` file it runs `ailang iface` and `ailang check` and draws
+the module's functions, their types and effect rows (`pure` or `!{IO,FS}`),
+plus any type errors — keeping the last good signatures on screen beside a
+broken edit. The status line carries a one-line summary.
+
+```bash
+/plugin install ailang-lens@ailang-marketplace
+/reload-plugins
+/ail-lens [file.ail]     # open the pane, or analyse any file into it
+```
+
+Mods are an early-access Claude Code feature; where they are not enabled the
+plugin installs but does nothing. Requires `ailang` on PATH.
+
 ### MCP Servers (TWO complementary servers)
 
 **1. Local stdio MCP** (auto-installed by this plugin) — wraps the local AILANG CLI for actually running/checking code:

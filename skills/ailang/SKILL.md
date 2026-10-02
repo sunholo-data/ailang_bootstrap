@@ -64,6 +64,12 @@ ailang messages list --unread   # any messages from other agents?
                        fix errors, repeat
 ```
 
+**Live view for the person (Claude Code):** the optional `ailang-lens` plugin
+(`/plugin install ailang-lens@ailang-marketplace`) shows the user a pane, updated
+after every `.ail` edit, with each function's type and effect row and any type
+errors. It is for the human watching; you do not see it, so still run step 3.
+Suggest it when a user is writing or reviewing AILANG with you.
+
 ## CLI Quick Reference
 
 | Command | Purpose |
