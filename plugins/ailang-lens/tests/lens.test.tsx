@@ -55,3 +55,10 @@ test('non-.ail edits are ignored', async ($, on) => {
   await $.tool.call({ tool: 'Write', file_path: 'main.go', content: 'package main' })
   expect(runs).toBe(0)
 })
+
+test('/ail-lens on a missing relative path says so', async ($, on) => {
+  on('fs.stat', async () => ({ deny: 'ENOENT' }))
+  on('session.cwd', async () => ({ value: '/work/repo' }))
+  const { text } = await $.command.run({ command: 'ail-lens', args: 'nope/missing.ail', origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 120 } })
+  expect(text).toContain('/work/repo/nope/missing.ail not found')
+})

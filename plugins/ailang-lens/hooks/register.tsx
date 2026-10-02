@@ -135,14 +135,21 @@ export const register: Register = on => {
   })
 
   on('command.run', { command: 'ail-lens' }, async ($, e) => {
-    const file = e.args.trim()
-    if (!file) await refreshStale($)
-    if (file) {
-      if (!file.endsWith('.ail')) return { text: `ail-lens: ${file} is not a .ail file.` }
-      await refresh($, file)
+    const arg = e.args.trim()
+    if (!arg) {
+      await refreshStale($)
+      await $.ui.open({ id: PANE, title: 'AILANG lens' })
+      return { text: 'AILANG lens opened.' }
     }
+    if (!arg.endsWith('.ail')) return { text: `ail-lens: ${arg} is not a .ail file.` }
+
+    // A relative path is the person's, typed against the session's folder.
+    const file = arg.startsWith('/') ? arg : `${await $.session.cwd()}/${arg.replace(/^\.\//, '')}`
+    if (!(await exists($, file))) return { text: `ail-lens: ${file} not found.` }
+
+    const lens = await refresh($, file)
     await $.ui.open({ id: PANE, title: 'AILANG lens' })
-    return { text: file ? `AILANG lens: ${file}` : 'AILANG lens opened.' }
+    return { text: `AILANG lens: ${lens.module} ${lens.passed ? '✓' : `✗ ${lens.errors.length} error(s)`}` }
   })
 
   // Every successful edit of a .ail file re-reads its interface and type-checks it.

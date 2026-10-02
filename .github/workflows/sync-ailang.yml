@@ -125,6 +125,31 @@ jobs:
             done
             echo "Updated: example files"
 
+            # 6. Claude Code mods (source of truth: ailang tools/claude-mods/).
+            #    Each becomes plugins/<mod>/ with a marketplace entry; mods already
+            #    listed keep their entry. A mod removed upstream is left in place
+            #    (removal is a deliberate marketplace change, not a sync side effect).
+            if [ -d bootstrap-content/claude-mods ]; then
+              for d in bootstrap-content/claude-mods/*/; do
+                mod=$(basename "$d")
+                taken=$(jq -r --arg m "$mod" '.plugins[] | select(.name == $m) | .source' .claude-plugin/marketplace.json)
+                if [ -n "$taken" ] && [ "$taken" != "./plugins/$mod" ]; then
+                  echo "::error::Claude Code mod '$mod' collides with marketplace plugin '$mod' at $taken; rename the mod upstream"
+                  exit 1
+                fi
+                rm -rf "plugins/$mod"
+                mkdir -p "plugins/$mod"
+                cp -R "$d." "plugins/$mod/"
+                if ! jq -e --arg m "$mod" '.plugins[] | select(.name == $m)' .claude-plugin/marketplace.json >/dev/null; then
+                  desc="$(jq -r '.description' "plugins/$mod/.claude-plugin/plugin.json" | sed 's/\. .*//; s/\.$//') (Claude Code mod)"
+                  jq --arg m "$mod" --arg d "$desc" \
+                    '.plugins += [{name: $m, source: ("./plugins/" + $m), description: $d}]' \
+                    .claude-plugin/marketplace.json > marketplace.tmp && mv marketplace.tmp .claude-plugin/marketplace.json
+                fi
+                echo "Updated: plugins/$mod"
+              done
+            fi
+
             # Cleanup
             rm -rf bootstrap-content bootstrap-content.tar.gz
           else
@@ -141,7 +166,7 @@ jobs:
 
           git add .claude-plugin/plugin.json .codex-plugin/plugin.json
           git add mcp-server/package.json
-          git add skills/ailang/resources/ examples/ || true
+          git add skills/ailang/resources/ examples/ plugins/ .claude-plugin/marketplace.json || true
           git commit -m "Sync with AILANG $VERSION"
 
           # Create or update tag (force if exists)
