@@ -41,6 +41,11 @@
       "name": "ailang-lsp",
       "source": "./plugins/ailang-lsp",
       "description": "AILANG language server (`ailang lsp --stdio`) for .ail files — diagnostics on save, hover types, go-to-definition, references, document symbols. Requires the `ailang` binary on PATH."
+    },
+    {
+      "name": "ailang-lens",
+      "source": "./plugins/ailang-lens",
+      "description": "Live pane of AILANG modules as they are written: functions, types, effect rows and type errors after every .ail edit (Claude Code mod)"
     }
   ]
 }
