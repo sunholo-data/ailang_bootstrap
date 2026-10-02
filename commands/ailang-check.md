@@ -12,9 +12,10 @@ Type-check the AILANG file at `$1`:
 ailang check $1
 ```
 
-If there are type errors, explain what they mean and suggest fixes using the ailang-debug skill patterns.
+If there are errors, explain them and fix them. The diagnostics carry their own
+hints (an undefined builtin names the module to import, e.g. `add import std/io
+(print)`); `ailang check --format agent` gives one compact line per error.
 
 Common errors:
-- "undefined variable" → Need to import or define the function
-- "expected }, got let" → Missing semicolon between statements
-- "No instance for Num[string]" → Use `show()` to convert numbers to strings
+- "undefined variable: X" → import it from the module the hint names, or define it
+- "No instance for Num[string]" → a number was given where a string is expected; convert with `show()`

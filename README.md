@@ -73,7 +73,6 @@ Each release includes the AILANG binary pre-bundled.
 | Skill | Purpose |
 |-------|---------|
 | **ailang** | Write, run, and develop with AILANG |
-| **ailang-debug** | Error recovery and debugging help |
 | **ailang-inbox** | Cross-agent messaging with semantic search, deduplication, and GitHub sync |
 
 ### Slash Commands (Claude Code)
@@ -204,9 +203,6 @@ ailang_bootstrap/
 │   └── package.json
 ├── skills/
 │   ├── ailang/             # Main AILANG skill
-│   │   ├── SKILL.md
-│   │   └── resources/
-│   ├── ailang-debug/       # Debug skill
 │   │   ├── SKILL.md
 │   │   └── resources/
 │   └── ailang-inbox/       # Agent messaging skill
