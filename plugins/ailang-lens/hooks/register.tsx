@@ -58,8 +58,17 @@ async function projectRoot($: EngineInterface, file: string): Promise<string> {
   return dirs[0] ?? '.'
 }
 
+async function mtime($: EngineInterface, file: string): Promise<number> {
+  try {
+    return (await $.fs.stat(file)).mtimeMs
+  } catch {
+    return 0
+  }
+}
+
 async function analyse($: EngineInterface, file: string, previous?: LensModule): Promise<LensModule> {
   const started = Date.now()
+  const mtimeMs = await mtime($, file)
   const cwd = file.startsWith('/') ? await projectRoot($, file) : undefined
   const rel = cwd ? file.slice(cwd.length + 1) : file
   const [iface, check] = await Promise.all([
@@ -88,6 +97,7 @@ async function analyse($: EngineInterface, file: string, previous?: LensModule):
     passed: errors.length === 0 && check.exitCode === 0,
     errors,
     ms: Date.now() - started,
+    mtimeMs,
   }
 }
 
@@ -105,6 +115,15 @@ async function refresh($: EngineInterface, file: string): Promise<LensModule> {
   return lens
 }
 
+// Edit/Write are seen directly; anything else that touches a tracked file
+// (Bash, the person's editor) is caught by its mtime after a Bash call and
+// at the end of each turn.
+async function refreshStale($: EngineInterface): Promise<void> {
+  for (const known of await read($, modules)) {
+    if ((await mtime($, known.file)) !== known.mtimeMs) await refresh($, known.file)
+  }
+}
+
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await $.command.register({
@@ -117,6 +136,7 @@ export const register: Register = on => {
 
   on('command.run', { command: 'ail-lens' }, async ($, e) => {
     const file = e.args.trim()
+    if (!file) await refreshStale($)
     if (file) {
       if (!file.endsWith('.ail')) return { text: `ail-lens: ${file} is not a .ail file.` }
       await refresh($, file)
@@ -128,6 +148,10 @@ export const register: Register = on => {
   // Every successful edit of a .ail file re-reads its interface and type-checks it.
   on('tool.call', async ($, e, next) => {
     const ran = await next(e)
+    if (e.tool === 'Bash') {
+      await refreshStale($).catch(() => undefined)
+      return ran
+    }
     const file = (e.tool === 'Edit' || e.tool === 'Write') ? e.file_path : undefined
     if (!file?.endsWith('.ail') || ran.deny !== undefined || ran.isError) return ran
 
@@ -138,6 +162,12 @@ export const register: Register = on => {
       $.ui.status(`ail lens: ${String(err).slice(0, 60)}`)
     }
     return ran
+  })
+
+  on('turn.complete', async ($, e, next) => {
+    const done = await next(e)
+    await refreshStale($).catch(() => undefined)
+    return done
   })
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {

@@ -8,6 +8,7 @@ export type LensModule = {
   passed: boolean
   errors: string[]
   ms: number
+  mtimeMs: number
 }
 
 declare module 'claude-code' {
