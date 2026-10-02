@@ -1,6 +1,8 @@
 {
   "name": "ailang-marketplace",
-  "owner": "Holosun ApS",
+  "owner": {
+    "name": "Holosun ApS"
+  },
   "plugins": [
     {
       "name": "ailang",
