@@ -1,21 +1,25 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.51.0. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.52.1. Run `ailang builtins list --by-module` for latest.
 
 ```
-# $builtin (23)
+# $builtin (27)
+  _list_any                      [pure]
   _list_contains                 [pure]
   _list_dedup                    [pure]
   _list_difference               [pure]
   _list_drop                     [pure]
   _list_extract                  [pure]
   _list_filter                   [pure]
+  _list_findIndex                [pure]
   _list_flatMap                  [pure]
   _list_foldl                    [pure]
+  _list_foldr                    [pure]
   _list_head                     [pure]
   _list_intersect                [pure]
   _list_length                   [pure]
   _list_map                      [pure]
+  _list_mapAccumL                [pure]
   _list_member                   [pure]
   _list_nth                      [pure]
   _list_range                    [pure]
@@ -32,15 +36,18 @@
   _float_to_int                  [pure]
   _int_to_float                  [pure]
 
-# std/ai (15)
+# std/ai (18)
   _ai_call                       [ai]
   _ai_call_image                 [ai]
   _ai_call_image_base64          [ai]
+  _ai_call_image_base64_with_refs [ai]
+  _ai_call_image_with_refs       [ai]
   _ai_call_json                  [ai]
   _ai_call_json_result           [ai]
   _ai_call_json_simple           [ai]
   _ai_call_json_simple_result    [ai]
   _ai_call_result                [ai]
+  _ai_call_speech                [ai]
   _ai_call_stream                [ai]
   _ai_step                       [ai]
   _ai_step_with_cache            [ai]
@@ -158,7 +165,7 @@
   _env_getPid                    [env]
   _env_hasEnv                    [env]
 
-# std/fs (22)
+# std/fs (24)
   _fs_appendFile                 [fs]
   _fs_appendFileBytes            [fs]
   _fs_appendFileResult           [fs]
@@ -172,6 +179,7 @@
   _fs_mkdirResult                [fs]
   _fs_readFile                   [fs]
   _fs_readFileBytes              [fs]
+  _fs_readFileRaw                [fs]
   _fs_readFileResult             [fs]
   _fs_removeDirResult            [fs]
   _fs_removeFile                 [fs]
@@ -180,6 +188,7 @@
   _fs_renameResult               [fs]
   _fs_writeFile                  [fs]
   _fs_writeFileBytes             [fs]
+  _fs_writeFileBytesResult       [fs]
   _fs_writeFileResult            [fs]
 
 # std/game (3)
@@ -232,7 +241,7 @@
   _map_to_list                   [pure]
   _map_values                    [pure]
 
-# std/math (38)
+# std/math (39)
   _math_E                        [pure]
   _math_PI                       [pure]
   _math_abs_Float                [pure]
@@ -268,6 +277,7 @@
   neg_Float                      [pure]
   neg_Int                        [pure]
   shiftLeft_Int                  [pure]
+  shiftRightLogical_Int          [pure]
   shiftRight_Int                 [pure]
   sub_Float                      [pure]
   sub_Int                        [pure]

@@ -18,6 +18,36 @@
       "name": "ailang-lens",
       "source": "./plugins/ailang-lens",
       "description": "Live pane of AILANG modules as they are written: functions, types, effect rows and type errors after every .ail edit (Claude Code mod)"
+    },
+    {
+      "name": "ailang-brand",
+      "source": "./plugins/ailang-brand",
+      "description": "AILANG look for Claude Code: the AILANG version beside the prompt hint, compiler-flavoured spinner words (Unifying…, Inferring effects…), and /ailang for a pane with the logo (Claude Code mod)"
+    },
+    {
+      "name": "ailang-check-on-edit",
+      "source": "./plugins/ailang-check-on-edit",
+      "description": "After Claude edits or writes a .ail file, runs `ailang check` from the project root and adds any errors to what the model reads after the tool result, so it sees its own type errors without spending a turn (Claude Code mod)"
+    },
+    {
+      "name": "ailang-inbox-band",
+      "source": "./plugins/ailang-inbox-band",
+      "description": "Unread AILANG fleet messages above the prompt: a band with the count and newest title, an /ail-inbox pane with Ack, a toast when one arrives (Claude Code mod)"
+    },
+    {
+      "name": "prepush-gate",
+      "source": "./plugins/prepush-gate",
+      "description": "Runs the repo's CI gates (gofmt on tracked Go roots, make lint, make check-file-sizes when defined) before `git push` / `gh pr create|merge`, and denies the push with the failing output (Claude Code mod)"
+    },
+    {
+      "name": "sprint-status",
+      "source": "./plugins/sprint-status",
+      "description": "Status line for AILANG sprint work: the most recently touched in-progress sprint under .ailang/state/sprints, its milestones passed and the next one (Claude Code mod)"
+    },
+    {
+      "name": "unowned-dirty",
+      "source": "./plugins/unowned-dirty",
+      "description": "Warns when a git add/stash/checkout/restore/reset may sweep dirty files this session did not write (shared checkouts have several agents) (Claude Code mod)"
     }
   ]
 }
