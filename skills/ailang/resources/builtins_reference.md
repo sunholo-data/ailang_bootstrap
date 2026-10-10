@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.52.5. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.53.5. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (27)
@@ -470,7 +470,8 @@
   _xml_serialize                 [pure]
   _xml_serializeWithDecl         [pure]
 
-# std/yaml (1)
+# std/yaml (2)
+  _yaml_encode                   [pure]
   _yaml_to_json                  [pure]
 
 # std/zip (9)

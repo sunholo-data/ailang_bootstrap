@@ -402,6 +402,11 @@ func twice(f: int -> int, x: int) -> int = f(f(x))
 
 **Every function performing I/O must declare effects in the signature!**
 
+Calling a function-valued record field performs its annotated effects. Passing a
+function to a higher-order function with an unannotated or effect-polymorphic
+callback parameter also requires the caller to declare the callback’s effects.
+Constructing a record that stores a callback does not perform those effects.
+
 ```ailang
 -- Pure (no effects) - use `pure func` or omit effect annotation
 pure func add(x: int, y: int) -> int = x + y
@@ -985,7 +990,7 @@ export func main() -> () ! {IO} {
 ## Time and Dates (std/clock, std/datetime)
 
 **std/clock** — current time + sleep, requires `--caps Clock`:
-- `now() -> int ! {Clock}` - Current Unix timestamp (seconds since epoch)
+- `now() -> int ! {Clock}` - Current Unix timestamp (milliseconds since epoch)
 - `sleep(ms: int) -> () ! {Clock}` - Sleep for N milliseconds
 
 ```ailang
@@ -999,7 +1004,7 @@ export func main() -> () ! {Clock, IO} {
 }
 ```
 
-**std/datetime** — pure date arithmetic on Unix timestamps (int seconds). Pure (no effect needed):
+**std/datetime** — pure date arithmetic on Unix timestamps (int milliseconds). Pure (no effect needed):
 - Accessors: `year(ts)`, `month(ts)`, `day(ts)`, `weekday(ts)`, `hour(ts)`, `minute(ts)`, `second(ts)` — all return `int`
 - Arithmetic: `addDays(ts, n)`, `addMonths(ts, n)`, `addYears(ts, n)`, `diffDays(a, b)` — all return `int`
 - Boundaries: `startOfDay(ts)`, `startOfWeek(ts)`, `startOfMonth(ts)` — return `int`
