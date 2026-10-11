@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.53.5. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.54.4. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (27)
@@ -210,7 +210,7 @@
   _get_header                    [pure]
   _has_header                    [pure]
 
-# std/io (8)
+# std/io (9)
   _io_eprintln                   [io]
   _io_exit                       [io]
   _io_flush                      [io]
@@ -218,6 +218,7 @@
   _io_printErr                   [io]
   _io_println                    [io]
   _io_readLine                   [io]
+  _io_readLineOpt                [io]
   _io_writeBytes                 [io]
 
 # std/json (4)
@@ -321,7 +322,8 @@
   not_Bool                       [pure]
   or_Bool                        [pure]
 
-# std/process (4)
+# std/process (5)
+  _process_cancel                [process]
   _process_close_stdin           [process]
   _process_exec                  [process]
   _process_spawn_process         [process]
@@ -369,9 +371,10 @@
   _hamming_distance              [pure]
   _simhash                       [pure]
 
-# std/stream (14)
+# std/stream (15)
   _stream_async_exec_process     [stream]
   _stream_async_read_stdin_lines [stream]
+  _stream_cancel_process_source  [stream]
   _stream_close                  [stream]
   _stream_connect                [stream]
   _stream_ndjson_post            [stream]
@@ -428,6 +431,11 @@
   _tar_readEntryBytes            [fs]
   _tar_readFromGzip              [fs]
   _tar_readFromGzipBytes         [fs]
+
+# std/terminal (3)
+  _terminal_info                 [io]
+  _terminal_readEvent            [io]
+  _terminal_withTerminal         [io]
 
 # std/trace (4)
   _trace_emit                    [trace]

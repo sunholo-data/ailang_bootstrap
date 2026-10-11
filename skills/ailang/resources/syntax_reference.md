@@ -1,4 +1,4 @@
-# AILANG v0.16.6 - AI Teaching Prompt (with IFC Labels + Output Discipline)
+# AILANG v0.16.7 - AI Teaching Prompt (with IFC Labels + Output Discipline)
 
 AILANG is a **pure functional language** with Hindley-Milner type inference and algebraic effects. Write code using **recursion** (no loops), **pattern matching**, and **explicit effect declarations**.
 
@@ -52,6 +52,36 @@ print("\r\x1b[92m50%\x1b[0m");  -- \x1b = ESC (ANSI colour); "\x1b[2J" clears th
 flush()                          -- force it to the screen NOW (no /dev/tty hack needed)
 ```
 Runs under `--caps IO,Clock` — no `FS`. `printErr`/`eprintln` (std/io) write to stderr (unbuffered).
+
+## Line input and native terminals (supporting runtime required)
+
+Use `import std/io (readLineOpt)` for loops that must distinguish a blank line
+from EOF: `readLineOpt() -> Option[string] ! {IO}` returns `Some("")` for a blank
+line, `Some(text)` for a final unterminated line, then sticky `None` at EOF.
+Legacy `readLine() -> string` returns `""` for both EOF and blank input; do not
+use that equality to terminate a line service.
+
+```ailang
+module line_echo
+import std/io (readLineOpt, println)
+import std/option (Some, None)
+func loop() -> () ! {IO} {
+  match readLineOpt() {
+    None => (),
+    Some(line) => { println(line); loop() }
+  }
+}
+export func main() -> () ! {IO} = loop()
+```
+
+Native immediate keys/resize use `std/terminal` under `IO`: `info()` queries
+configured TTY endpoints, `withTerminal(options, body)` owns restoration, and
+`readEvent(session, timeout_ms)` returns `Result[TerminalEvent, TerminalError]`.
+Timeouts: `-1` blocks, `0` polls, `1..60000` waits in milliseconds. `Idle` is
+separate from `EndOfInput`. Callback effects propagate as `{IO, e}`. Native
+scopes require macOS/Linux and host signal lifecycle integration; other hosts
+return `Unsupported`. Handle errors explicitly. Widgets and normalized replay
+belong in `sunholo/terminal_ui`; no shell or `/dev/tty` workaround is required.
 
 ## Output Discipline (stdout is compared byte-for-byte)
 
