@@ -1,7 +1,7 @@
 {
   "name": "ailang",
   "description": "AILANG - A deterministic programming language designed for AI code synthesis and reasoning",
-  "version": "0.54.6",
+  "version": "0.54.7",
   "author": {
     "name": "Holosun ApS"
   },
