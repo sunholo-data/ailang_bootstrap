@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.54.9. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.54.12. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (27)
@@ -322,11 +322,12 @@
   not_Bool                       [pure]
   or_Bool                        [pure]
 
-# std/process (5)
+# std/process (6)
   _process_cancel                [process]
   _process_close_stdin           [process]
   _process_exec                  [process]
   _process_spawn_process         [process]
+  _process_spawn_result          [process]
   _process_write_stdin           [process]
 
 # std/rand (5)
