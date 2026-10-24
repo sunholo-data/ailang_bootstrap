@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.54.17. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.54.18. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (27)
@@ -82,8 +82,14 @@
   _array_unsafe_get              [pure]
   _array_update_many             [pure]
 
-# std/audio (1)
+# std/audio (7)
   _audio_encode_ogg_opus         [pure]
+  _audio_floats_to_pcm16         [pure]
+  _audio_pcm16_to_floats         [pure]
+  _audio_wav_from_pcm            [pure]
+  _audio_wav_from_pcm_checked    [pure]
+  _audio_wav_header              [pure]
+  _audio_wav_header_checked      [pure]
 
 # std/bytes (15)
   _bytes_byte_at                 [pure]
@@ -392,7 +398,7 @@
 # std/stream/bridge (1)
   _stream_bridge                 [stream]
 
-# std/string (31)
+# std/string (32)
   _str_charAt                    [pure]
   _str_charCode                  [pure]
   _str_chars                     [pure]
@@ -403,6 +409,7 @@
   _str_find                      [pure]
   _str_foldChars                 [pure]
   _str_foldSlices                [pure]
+  _str_formatFixed               [pure]
   _str_join                      [pure]
   _str_len                       [pure]
   _str_lower                     [pure]
