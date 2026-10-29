@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.54.19. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.55.0. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (27)
@@ -57,7 +57,8 @@
   _ollama_embed                  [io]
   _ollama_embed_media            [io]
 
-# std/array (23)
+# std/array (24)
+  _array_accumulate              [pure]
   _array_append                  [pure]
   _array_decode_f32le            [pure]
   _array_decode_f64le            [pure]
