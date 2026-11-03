@@ -5,6 +5,73 @@
   "generator": "auto-metadata-v0.6.2",
   "examples": [
     {
+      "path": "runnable/explicit_empty_callback_contracts.ail",
+      "status": "working",
+      "tags": ["effects", "callbacks", "pure", "regression"],
+      "description": "Closed empty callback contracts allow pure storage of mixed callbacks and reject effectful values in pure slots.",
+      "modules": ["std/io"],
+      "expected": {"stdout": "42\n", "exit_code": 0}
+    },
+    {
+      "path": "runnable/ai_streaming_effect_rows.ail",
+      "status": "working",
+      "tags": [
+        "effects",
+        "ai",
+        "streaming",
+        "row-polymorphism"
+      ],
+      "description": "Pure streaming callbacks require only AI; renderer effects propagate through both streaming APIs.",
+      "modules": [
+        "std/ai",
+        "std/io"
+      ]
+    },
+    {
+      "path": "runnable/secrets/sink_function_value_ok.ail",
+      "status": "working",
+      "tags": [
+        "ifc",
+        "labels",
+        "higher-order",
+        "m-ifc-function-value-sinks"
+      ],
+      "description": "A {not email} sink used as a value: alias, HOF, map and record field, with clean or declassified data",
+      "modules": [
+        "std/io",
+        "std/list",
+        "std/string"
+      ],
+      "run_flags": [
+        "--caps",
+        "IO,Declassify",
+        "--entry",
+        "main"
+      ],
+      "expected": {
+        "stdout": "sent:hello\nsent:status ok\nsent:a,sent:b\nsent:[redacted]\n",
+        "exit_code": 0
+      }
+    },
+    {
+      "path": "runnable/secrets/sink_function_value.ail",
+      "status": "working",
+      "tags": [
+        "ifc",
+        "labels",
+        "higher-order",
+        "expected-fail",
+        "m-ifc-function-value-sinks"
+      ],
+      "description": "EXPECTED TO FAIL ailang check: <email> reaching a {not email} sink through an alias, a HOF and a wrapper lambda (#1719)",
+      "modules": [],
+      "expected": {
+        "exit_code": 1,
+        "error_pattern": "information-flow violation"
+      },
+      "skip_reason": "intentionally fails `ailang check`; asserted in TestSecretExamples_IFC"
+    },
+    {
       "path": "runnable/contracts/result_error_guard.ail",
       "status": "working",
       "tags": ["contracts", "smt-verification", "result", "parametric-adts"],
@@ -3619,14 +3686,33 @@
         "stdout": "maxSlice = 6\n",
         "exit_code": 0
       }
+    },
+    {
+      "path": "runnable/effect_latent_nested_callbacks.ail",
+      "status": "working",
+      "tags": [
+        "effects",
+        "higher-order",
+        "regression"
+      ],
+      "description": "Effects of callbacks nested in tuple/list/Option arguments are declared on the caller; concrete ! {IO} callback through mapE (#1718, #1826)",
+      "modules": [
+        "std/io",
+        "std/list",
+        "std/option"
+      ],
+      "expected": {
+        "stdout": "logged 1\nlogged 2\nlogged 3\ntotal 6\nitem a\nitem b\nmapped [true, true]\n",
+        "exit_code": 0
+      }
     }
   ],
   "statistics": {
-    "total": 247,
-    "working": 239,
+    "total": 252,
+    "working": 244,
     "aspirational": 4,
     "broken": 4,
-    "coverage": 0.9676113360323887,
+    "coverage": 0.9682539682539683,
     "experimental": 0
   },
   "milestones": {

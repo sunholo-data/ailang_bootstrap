@@ -1,4 +1,4 @@
-# AILANG v0.16.8 - AI Teaching Prompt (with IFC Labels + Output Discipline)
+# AILANG v0.16.11 - AI Teaching Prompt (with IFC Labels + Output Discipline)
 
 AILANG is a **pure functional language** with Hindley-Milner type inference and algebraic effects. Write code using **recursion** (no loops), **pattern matching**, and **explicit effect declarations**.
 
@@ -437,7 +437,22 @@ func twice(f: int -> int, x: int) -> int = f(f(x))
 Calling a function-valued record field performs its annotated effects. Passing a
 function to a higher-order function with an unannotated or effect-polymorphic
 callback parameter also requires the caller to declare the callback’s effects.
+This includes a function stored in a list, tuple, Option or record argument.
 Constructing a record that stores a callback does not perform those effects.
+
+Callback **function types** distinguish these contracts:
+
+| Callback type | Contract |
+|---|---|
+| `T -> U` | Implicit open row; hand-off charges the caller, including nested callback data |
+| `T -> U ! {}` | Closed pure callback; an effectful value is rejected even if its caller declares that effect |
+| `T -> U ! {IO}` | Concrete IO callback contract; the callee declares IO when it invokes it |
+| `T -> U ! {e}` | Explicit row polymorphism; share `e` with the enclosing caller row |
+
+For a store-only helper taking a mixed record of pure and effectful callbacks,
+write `! {}` on pure callback fields and concrete rows on effectful fields.
+Direct record/list/tuple literals still only store callback values.
+
 
 ```ailang
 -- Pure (no effects) - use `pure func` or omit effect annotation
@@ -2627,7 +2642,7 @@ pure func sneakySanitize(raw: string<email>) -> string<sanitized> ! {}
 
 A function parameter typed `T{not LABEL}` REJECTS any argument carrying
 the `<LABEL>` annotation in its type. This is how you build sinks that
-provably refuse tainted input.
+provably refuse tainted input. Within one module, sink requirements follow function values through aliases, higher-order calls and wrappers.
 
 ```ailang
 -- A network sink that refuses anything carrying <email>
