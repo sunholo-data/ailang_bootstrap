@@ -1,9 +1,9 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.60.1. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.60.4. Run `ailang builtins list --by-module` for latest.
 
 ```
-# $builtin (27)
+# $builtin (28)
   _list_any                      [pure]
   _list_contains                 [pure]
   _list_dedup                    [pure]
@@ -31,6 +31,7 @@
   _list_union                    [pure]
   _list_zip                      [pure]
   show                           [pure]
+  unreachable                    [pure]
 
 # core (2)
   _float_to_int                  [pure]
@@ -399,7 +400,8 @@
 # std/stream/bridge (1)
   _stream_bridge                 [stream]
 
-# std/string (32)
+# std/string (33)
+  _show_preview                  [pure]
   _str_charAt                    [pure]
   _str_charCode                  [pure]
   _str_chars                     [pure]
