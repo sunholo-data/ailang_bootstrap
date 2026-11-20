@@ -1,6 +1,6 @@
 {
   "name": "ailang-mcp-server",
-  "version": "0.60.6",
+  "version": "null",
   "description": "MCP server for AILANG tools",
   "type": "module",
   "main": "server.js",
