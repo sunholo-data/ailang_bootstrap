@@ -1,6 +1,6 @@
 # AILANG Builtins Reference
 
-> Auto-synced from AILANG v0.60.6. Run `ailang builtins list --by-module` for latest.
+> Auto-synced from AILANG v0.61.1. Run `ailang builtins list --by-module` for latest.
 
 ```
 # $builtin (28)
@@ -37,7 +37,7 @@
   _float_to_int                  [pure]
   _int_to_float                  [pure]
 
-# std/ai (19)
+# std/ai (20)
   _ai_call                       [ai]
   _ai_call_image                 [ai]
   _ai_call_image_base64          [ai]
@@ -47,6 +47,7 @@
   _ai_call_json_result           [ai]
   _ai_call_json_simple           [ai]
   _ai_call_json_simple_result    [ai]
+  _ai_call_media_result          [ai]
   _ai_call_result                [ai]
   _ai_call_speech                [ai]
   _ai_call_stream                [ai]

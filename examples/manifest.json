@@ -1814,10 +1814,27 @@
         "vision",
         "multimodal"
       ],
-      "description": "Demonstrates image (vision) INPUT on std/ai.step via Message.images / ImagePart (M-STD-AI-VISION-INPUT v0.30.0)",
+      "description": "Demonstrates image (vision) INPUT on std/ai.step via Message.media / MediaPart (M-STD-AI-VISION-INPUT v0.30.0, migrated v0.60.7)",
       "modules": [
         "std/ai",
         "std/io"
+      ]
+    },
+    {
+      "path": "runnable/ai_file_slicing.ail",
+      "status": "working",
+      "tags": [
+        "effects",
+        "ai",
+        "media",
+        "multimodal",
+        "slicing"
+      ],
+      "description": "Demonstrates std/ai.callMediaResult and typed MediaPart slicing controls (page_options, spreadsheet, resolution, usage metering, #2458)",
+      "modules": [
+        "std/ai",
+        "std/io",
+        "std/result"
       ]
     },
     {
@@ -1997,10 +2014,7 @@
         "cross-function-calls",
         "unencodable-type"
       ],
-      "description": "Cross-function contract with a callee returning Option[float] \u2014 ailang verify skips gracefully (UNENCODABLE_TYPE) instead of crashing Z3",
-      "modules": [
-        "std/option"
-      ]
+      "description": "Cross-function contract with a callee returning a tuple \u2014 ailang verify skips gracefully (UNENCODABLE_TYPE) instead of crashing Z3"
     },
     {
       "path": "runnable/contracts/cross_module_functions.ail",
@@ -4452,11 +4466,11 @@
     }
   ],
   "statistics": {
-    "total": 332,
-    "working": 324,
+    "total": 333,
+    "working": 325,
     "aspirational": 4,
     "broken": 4,
-    "coverage": 0.9759036144578314,
+    "coverage": 0.975975975975976,
     "experimental": 0
   },
   "milestones": {
