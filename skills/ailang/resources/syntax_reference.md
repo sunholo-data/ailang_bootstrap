@@ -1,4 +1,4 @@
-# AILANG v0.16.19 - AI Teaching Prompt (with IFC Labels + Output Discipline)
+# AILANG v0.16.20 - AI Teaching Prompt (with IFC Labels + Output Discipline)
 
 AILANG is a **pure functional language** with Hindley-Milner type inference and algebraic effects. Write code using **recursion** (no loops), **pattern matching**, and **explicit effect declarations**.
 
@@ -120,7 +120,8 @@ ailang docs --list              # List all stdlib modules
 ailang docs std/string          # Show ALL exports with signatures
 ailang docs std/list            # Show list operations
 ailang builtins list            # All registered builtins
-ailang check file.ail           # Type-check without running
+ailang check file.ail           # Type-check without running (use _? or ?name holes to query expected type + locals)
+ailang check --fix file.ail     # Auto-apply safe mechanical fixes (trailing ';', '=' before '{', TC_MATCH_002 stubs; also exposed via LSP codeAction)
 ailang examples search "recursion"  # Find working code examples
 ```
 
@@ -133,7 +134,7 @@ import std/io (println)
 export func main() -> () ! {IO} = println(show(5 % 3))
 ```
 
-**If-then-else (NO braces!):**
+**If-then-else** (always use `then`/`else`, not C-style `if x { ... }`; unbraced multi-statement `let` branches are accepted and `ailang fmt` normalizes them to `{ ... }`):
 ```ailang
 module benchmark/solution
 import std/io (println)
@@ -231,10 +232,11 @@ export func main() -> () ! {IO, AI} = println(call("What is 2+2?"))
 | `import "std/io"` | `import std/io (println)` |
 | `{"key": "val"}` | `jo([kv("key", js("val"))])` |
 | `f(a)(b)` for multi-arg func | `f(a, b)` - multi-arg funcs use commas |
-| `if x { ... }` | `if x then ... else ...` - NO braces! |
+| `if x { ... }` | `if x then ... else ...` (wrap multi-statement `then`/`else` bodies in `{ ... }`: `if x then { let a = 1; a } else 0`) |
+| `func f[a: Ord](...)` | `func f[a](...)` — typeclass constraints (`Eq`, `Ord`, `Num`) are inferred automatically |
 | mixing `let x = e in` with `;` | Use ONE style consistently |
-| `let Some(x) = opt` (refutable `let`) | Use `match opt { Some(x) => ..., None => ... }` (tuple `let (a, b) = pair` IS supported) |
-| `\(a, b). body` or `\a, b. body` | Inline: `\a b. body` (space-separated, called `f(a, b)`). Named: `func(a: T, b: U) -> R { body }` |
+| `let Some(x) = opt` (refutable `let`) | Use `match opt { Some(x) => ..., None => ... }` (irrefutable `let (a, b) = pair` and `let { name, age } = r` / `let { port: p, ... } = cfg` ARE supported) |
+| `\a, b. body` (unparenthesized commas) | Multi-arg: `\a b. body` (space-separated, called `f(a, b)`). Tuple param destructuring: `\(a, b). body`. Record param destructuring: `\{ x, y }. body`. Named: `func(a: T, b: U) -> R { body }` |
 | nested `func f(...) =` | Use `let f = \x. body` for nested functions |
 | `!condition` | Both `!x` and `not x` work — prefer `not` for readability |
 | `concat(a, b)` for strings | `"${a}${b}"` interpolation — `++` is list-only in v0.13.0+ |
@@ -290,6 +292,21 @@ export func main() -> () ! {IO} {
 ```
 
 **Simple rule: See `{` -> one `let` per line, no `in`. See `=` -> use `in`.**
+**Multi-statement `match` arms and `if`/`else` branches** work either wrapped in `{ ... }` (canonical `ailang fmt` form) or as unbraced `let ...; ...` / newline-separated statements:
+```ailang
+-- ✅ Multi-statement match arm and if branch
+pure func adjust(opt: Option[int], flag: bool) -> int =
+  match opt {
+    Some(x) => {
+      let doubled = x * 2
+      if flag then {
+        let bumped = doubled + 1
+        bumped
+      } else doubled
+    },
+    None => 0
+  }
+```
 
 ## Function Calls: Multi-arg vs Curried (CRITICAL)
 
@@ -361,6 +378,15 @@ pure func sumOptions(xs: [int]) -> (int, int, int) {
 
 **For callbacks passed to `foldl`, `sortBy`, `zipWith`, `foldlE`, etc., write `\a b. body`**
 (one lambda, several params): it is the simplest form. Curried `\a. \b. body` also works.
+Irrefutable tuple and record destructuring work directly in lambda parameters (`\(k, v). ...`, `\acc (k, v). acc + v`, `\{ age, ... }. age`).
+
+**Pipe operator (`|>`):** `x |> f` passes `x` to **unary** function `f` (left-associative, lowest precedence). Wrap multi-arg calls or inline lambdas in parens (e.g. `opt |> (\v. getOrElse(v, 0))`):
+```ailang
+import std/list (filter, map)
+
+pure func pipeDemo(xs: [int]) -> [int] =
+  xs |> (\ys. filter(\x. x > 0, ys)) |> (\ys. map(\x. x * 2, ys))
+```
 
 **Sorting with sortBy:**
 ```ailang
@@ -463,6 +489,8 @@ func twice(f: int -> int, x: int) -> int = f(f(x))
 | Open record type | `{name: string \| r}` or `{name: string, ...}` |
 | List cons | `x :: xs` or `::(x, xs)` |
 | Array literal | `#[1, 2, 3]` |
+| Pipe operator | `x \|> f \|> g` (left-associative, passes `x` to unary `f`) |
+| Typed hole | `_?` or `?name` (fails check with `TC_HOLE`: expected type + in-scope locals) |
 | Effect | `! {IO, FS, Net}` after return type |
 
 ## Effects (Side Effects Must Be Declared)
@@ -732,9 +760,9 @@ import std/env (getArgs, getEnv, getEnvOr)
 import std/net (httpGet, httpPost, httpRequest)
 import std/json (encode, decode, get, getString, getNumber, getInt, getBool, getArray, getObject, asString, asNumber, asArray)
 import std/json (filterStrings, filterNumbers, allStrings, allNumbers, getStringArrayOrEmpty, decodeFloatArray)
-import std/list (map, filter, foldl, length, concat, sortBy, take, drop, takeWhile, dropWhile, range, nth, last, any, findIndex, flatMap, zipWith, mapAccumL, mapE, filterE, foldlE, flatMapE, forEachE)
+import std/list (map, filter, filterMap, partition, span, chunk, groupBy, foldl, length, concat, sortBy, take, drop, takeWhile, dropWhile, range, enumerate, nth, last, any, all, find, findIndex, flatMap, zipWith, mapAccumL, mapE, filterE, foldlE, flatMapE, forEachE)
 -- range(start, end): TWO args, end exclusive. range(n) is an arity error.
-import std/map as M    -- M.Map[k, v], O(1) lookup, O(n) insert: see "Cost Model"
+import std/map as M    -- M.Map[k, v], O(1) lookup, O(n) insert/update, bulk mapValues/filter: see "Cost Model"
 import std/set as S    -- S.Set[a] (module-qualified types like S.Set[(int, int)] and M.Map[string, int] work directly): empty, fromList, insert, remove, member, size, toList, union, intersect, difference
 import std/regex as R  -- compile, isMatch, findFirst, findAll, replaceAll, split (qualified: split clashes with std/string)
 -- [float] vector math, native loops (never foldl(zipWith(...)) for a dot product):
@@ -776,7 +804,15 @@ import std/xml (parse, findAll, findFirst, getText, getAttr, getChildren, getTag
 - `nth(xs, idx) -> Option[a]` - Get element at index (0-based), None if out of bounds
 - `last(xs) -> Option[a]` - Get last element, None if empty
 - `any(p, xs) -> bool` - Check if any element satisfies predicate
+- `all(p, xs) -> bool` - Check if every element satisfies predicate (true on empty)
+- `find(p, xs) -> Option[a]` - First element matching predicate, or None
 - `findIndex(p, xs) -> Option[int]` - Find index of first matching element
+- `enumerate(xs) -> [(int, a)]` - Pair each element with its 0-based index
+- `filterMap(f, xs) -> [b]` - Map `a -> Option[b]` and keep `Some` values in order
+- `partition(p, xs) -> ([a], [a])` - Split into `(matching, nonMatching)` in one O(n) pass
+- `span(p, xs) -> ([a], [a])` - Split into `(longest prefix matching p, remainder)` in one O(n) pass
+- `chunk(n, xs) -> [[a]]` - Split into contiguous sublists of size `n` (`[]` if `n <= 0` or empty)
+- `groupBy(keyFn, xs) -> Map[k, [a]]` - Group elements by `keyFn(x)`, preserving order within each group
 - `flatMap(f, xs)` - Apply f to each element, flatten results (pure)
 - `zipWith(f, xs, ys)` - Combine two lists element-wise with function f
 - `range(start, end) -> [int]` - `[start, ..., end-1]`; `range(0, 3) == [0, 1, 2]`
@@ -1067,7 +1103,9 @@ export func main() -> () ! {IO} {
 
 **Result helper functions** (std/result) — note: `std/result.Result` has TWO type parameters (`Result[a, e]`). The simplified `Result[a] = Ok(a) | Err(string)` examples above use a locally-defined ADT. For the stdlib version, import `Result, Ok, Err` from `std/result` and use:
 - `isOk(r) -> bool`, `isErr(r) -> bool` - Discriminators
-- `unwrap(r) -> a` - Extract Ok value (panics on Err — use only after isOk check)
+- `getOrElse(r, default) -> a` - Extract Ok value or return default on Err
+- `toOption(r) -> Option[a]`, `fromOption(opt, err) -> Result[a, e]` - Convert between Result and Option
+- `unwrap(r) -> a` - Extract Ok value (panics on Err — prefer `getOrElse` or `match`)
 - `map(f, r) -> Result[b, e]` - Apply function to Ok value
 - `mapErr(f, r) -> Result[a, e2]` - Apply function to Err value
 - `flatMap(f, r) -> Result[b, e]` - Chain Result-returning functions
@@ -1527,6 +1565,7 @@ pure func getEmail(data: {user: {email: string, id: int}, active: bool}) -> stri
 - a match on `int`, `string` or `float` always needs a final `_ =>` (or variable) arm
 - an arm with an `if` guard does not count: put an unguarded arm after it
 - a case that cannot happen: `unreachable("why")` fits any type and stops the program (RT010) if reached
+- `ailang check --fix` and LSP `textDocument/codeAction` can stub missing `TC_MATCH_002` arms with `<pattern> => _?`
 
 ```ailang
 type Light = Red | Amber | Green
@@ -2267,8 +2306,8 @@ func mapDemo() -> () ! {IO} {
 }
 ```
 
-Builtins: `empty`, `insert`, `lookup`, `member`, `remove`, `size`,
-`keys`, `values`, `fromList`, `toList`. Iteration order is by encoded key, so int keys
+Builtins & combinators: `empty`, `insert`, `lookup`, `member`, `remove`, `size`,
+`keys`, `values`, `fromList`, `toList`, `update(m, k, default, f)`, `mapValues(f, m)`, `filter(p, m)`. Iteration order is by encoded key, so int keys
 come out lexically: `M.keys(M.fromList([(9, "a"), (10, "b"), (2, "c")]))` is `[10, 2, 9]`.
 
 ## JWT Verification (std/jwt, v0.10.0)
